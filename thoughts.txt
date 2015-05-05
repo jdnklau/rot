@@ -1,0 +1,17 @@
+Handling Pokemon
+[Name, $KP,$Moves, $Stats, Item, $additional]
+$KP
+kp(KP_cur, KP_max)
+$Moves
+[[Move1, PP], [Move2, PP], [M3, PP], [M4,PP]]
+$Stats
+[Ability, stats(Atk,Def,Spa,Spd,Ini),  stat_increases(Atk,Def,Spa,Spd,Ini)]
+
+Handling Team
+[Poke1, Poke2, Poke3, Poke4, Poke5]
+
+Handling Field
+[Field_A, Field_B, Field_global]
+
+Move
+move(Name, Type, Strength, acc(Acc), pp(PP),prio(Prio),[effects])

@@ -5,5 +5,3 @@ random_choose_move([[Move,_]|_], 0, Move).
 random_choose_move([_|Rest], R, Move) :-
   NR is R-1,
   random_choose_move(Rest, NR, Move).
-%why hello there
-%are you a boy or a girl?
