@@ -4,7 +4,7 @@
 + Game State structure  
   `state(Team_A, Team_B, Field_data)`
 + Team structure  
-  as list of 1 to 6 Pokemon
+  as list of 1 to 6 Pokemon, active Pokemon is head of list
 + Field_data structure  
   `[Field_A, Field_B, Field_global]`
 + Pokemon structure  
@@ -14,9 +14,9 @@
   + Status_data structure  
     `[Ability, Stats, Stat_increases, EV_and_DV]`
     + Stats structure  
-      `stats(Attack, Defense, Special_attack, Special_defense)`
+      `stats(Attack, Defense, Special_attack, Special_defense, Speed)`
     + Stat_increases structure  
-      `stat_increases(Attack, Defense, Special_attack, Special_defense)`  
+      `stat_increases(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
     + Status_conditions structure  
       [Primary_condition, Secondary_conditions, Additional_conditions]  
