@@ -30,13 +30,18 @@ read_player_move(State, Move_player) :-
   State = state(Team_player, _, _),
   validate_player_move(Team_player, Move_player).
 read_player_move(T, M) :- % prepare for loop
-  write('oops'),nl,
   read_player_move(T,M).
 
 validate_player_move(_, run).
 validate_player_move(_, help) :- !,
   ui_display_help, fail.
-validate_player_move(Team, switch(Team_mate)) :-
+validate_player_move(Team, info(Team_member)) :-
+  member([Team_member|Rest], Team), !,
+  ui_display_info([Team_member|Rest], you), fail.
+validate_player_move(Team, info(Team_member)) :-
+  \+ member([Team_member|_], Team), !,
+  ui_display_error(not_in_team, Team_member), fail.
+validate_player_move(Team, switch(Team_mate)) :- !,
   validate_player_switch(Team, switch(Team_mate)).
 validate_player_move([[_,_,Moves|_]|_], Move_choosen) :-
   member([Move_choosen,_], Moves).

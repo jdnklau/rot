@@ -76,7 +76,7 @@ ui_display_moves([[Move, PP_left]|Rest]) :-
   ui_display_fraction(PP_left, PP_max), write('pp, '),
   write(Type), write(' type, '),
   ui_display_moves_catpow(Catpow),
-  write('accuracy: '), ui_display_percent(Accuracy), nl,
+  ui_display_moves_accuracy(Accuracy), nl,
   ui_display_moves(Rest).
 
 ui_display_moves_catpow(status) :-
@@ -85,12 +85,21 @@ ui_display_moves_catpow(Catpow) :-
   Catpow =.. [Category, Power],
   write(Category), write(', power: '), write(Power), write(', ').
 
+ui_display_moves_accuracy(Accuracy) :-
+  number(Accuracy),
+  write('accuracy: '), ui_display_percent(Accuracy).
+ui_display_moves_accuracy(Accuracy) :-
+  \+ number(Accuracy),
+  write('accuracy: - ').
+
 ui_display_help :-
   nl,
   write('> for a specific move type the move name between a pair of \' (apostrophe)'), nl,
   tab(2), write('example: \'tackle\'.'),nl,
   write('> for switching to a partner type switch(\'partner name here\')'), nl,
   tab(2), write('example: switch(\'pikachu\').'),nl,
+  write('> for information about a specific team partner type info(\'partner name here\')'), nl,
+  tab(2), write('example: info(\'poliwrath\')'), nl,
   write('> you can always end the battle by typing: run.'), nl, nl,
   write('>>> as shown in the examples all choices have to end with a . (full stop)'), nl, nl.
 

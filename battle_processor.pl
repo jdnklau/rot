@@ -15,6 +15,10 @@ process_moves(State, Move_first, Move_second, Who_first, Result_state) :-
   opponent(Who_first, Who_second),
   process_move(New_state, Move_second, Who_second, Result_state).
 
+process_move(State, switch(Team_member), Who, Result_state) :-
+  translate_attacker_state(State, Who, State_attacker),
+  process_switch(State_attacker, Team_member, New_state_attacker),
+  translate_attacker_state(New_state_attacker, Who, Result_state).
 process_move(State, Move, Who, Result_state) :-
   move(Move, _, status, acc(Accuracy), _,_,_,_,_),
   move_hits(Accuracy),
@@ -30,6 +34,9 @@ process_move(State, Move, Who, Result_state) :-
   process_hits(State_attacker, Damage, Contact, Additional, Hits, New_state_attacker),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
 
+process_switch(state(Team_attacker, Team_target, Field), Team_member, state(New_team_attacker, Team_target, Field)) :-
+  calculate_switch(Team_attacker, Team_member, New_team_attacker).
+
 process_hits(State, Damage, Contact, Effects, 1, Result_state) :-
   process_single_hit(State, Damage, Contact, Effects, Result_state).
 process_hits(State, Damage, Contact, Effects, Hits, Result_state) :-
@@ -44,7 +51,6 @@ process_single_hit(State, Damage, Contact, Effects, Result_state) :-
 
 process_damage(state(Team_attacker, [Target|Team_target], Field), Damage,
   state(Team_attacker, [New_target|Team_target], Field)) :-
-  write('damage done: '), write(Damage), nl,
   Target = [Name, kp(Curr, Max)|Rest_data],
   New_curr is max(0, min(Max, Curr - Damage)), % the minimum is required as healing is just negative damage
   New_target = [Name, kp(New_curr, Max)|Rest_data].
