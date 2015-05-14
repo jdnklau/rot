@@ -1,58 +1,91 @@
-print_teams(Team_A, Team_B) :-
-  print_team_enemy(Team_B),
-  print_team_player(Team_A).
+ui_display(state(Player, Rot, _)) :-
+  ui_display_rot(Rot), nl,
+  ui_display_player(Player).
 
-print_team_enemy(Team) :-
-  Team = [Active|_],
-  print_team_pokeballs_enemy(Team),nl,
-  Active = [Name, kp(KP_cur, KP_max), _,_,_,_],
-  Perc is round(KP_cur / KP_max * 100),
-  write(Perc), write('% '), write(Name), write(' (rot)'),nl.
+ui_display_rot([Active|Team]) :-
+  ui_display_rot_team([Active|Team]),
+  ui_display_rot_active(Active).
 
-print_team_pokeballs_enemy([]).
-print_team_pokeballs_enemy([_|Rest]) :-
+ui_display_rot_team([]) :- nl.
+ui_display_rot_team([To_display|Rest]) :-
+  fainted(To_display),
+  write('X'),
+  ui_display_rot_team(Rest).
+ui_display_rot_team([To_display|Rest]) :-
+  primary_status_condition(To_display, nil),
   write('O'),
-  print_team_pokeballs_enemy(Rest).
+  ui_display_rot_team(Rest).
+ui_display_rot_team([To_display|Rest]) :-
+  \+ fainted(To_display),
+  \+ primary_status_condition(To_display, nil),
+  write('@'),
+  ui_display_rot_team(Rest).
 
-print_team_player(Team) :-
-  Team = [Active|Team_rest],
-  print_active_pokemon_player(Active),!,
+ui_display_rot_active(Active) :-
+  ui_display_info_short(Active, rot).
+
+ui_display_player([Active|Team]) :-
+  ui_display_info(Active, you),
   write('team:'), nl,
-  print_team_rest_player(Team_rest).
+  ui_display_player_team(Team).
 
-print_active_pokemon_player([Name, kp(KP_cur, KP_max), Moves,_,_,_]) :-
-  Perc is round(KP_cur/KP_max * 100),
-  write(Perc), write('%'), tab(1), write(Name), write(' (you)'), nl,
-  tab(2),write('at '),write(KP_cur), write('/'), write(KP_max), write(' KP'),nl,nl,
-  print_active_pokemon_moves(Moves).
+ui_display_player_team([]).
+ui_display_player_team([Pokemon|Rest]) :-
+  Pokemon = [Name, kp(Curr, Max)|_],
+  tab(2), write(Name), write(' at '), ui_display_percent(fraction(Curr, Max)),
+  ui_display_primary_condition(Pokemon), nl,
+  ui_display_player_team(Rest).
 
-print_active_pokemon_moves([]).
-print_active_pokemon_moves([[Move,PP_cur]|Rest]) :-
-  tab(2),
-  move(Move, Type, Category, acc(Accuracy), _, _, _),
-  write(Move), write(' - '),
-  write(PP_cur), write('pp, '),
+ui_display_fraction(Numerator, Denominator) :-
+  write(Numerator), write('/'), write(Denominator), tab(1).
+
+ui_display_percent(fraction(Numerator, Denominator)) :-
+  P is Numerator/Denominator * 100,
+  ui_display_percent(P).
+ui_display_percent(P) :-
+  number(P),
+  Perc is round(P),
+  write(Perc), write('% ').
+
+ui_display_owner(Who) :-
+  write('('), write(Who), write(') ').
+
+ui_display_primary_condition(Pokemon) :-
+  primary_status_condition(Pokemon, nil).
+ui_display_primary_condition(Pokemon) :-
+  primary_status_condition(Pokemon, Condition),
+  Condition \= nil,
+  write('<'), write(Condition), write('> ').
+
+ui_display_info_short(Active, Who) :-
+  Active = [Name, kp(KP_curr, KP_max)|_],
+  ui_display_percent(fraction(KP_curr, KP_max)),
+  write(Name), tab(1), ui_display_primary_condition(Active), ui_display_owner(Who).
+
+ui_display_info(Pokemon, Who) :-
+  ui_display_info_short(Pokemon, Who), nl,
+  Pokemon = [_, kp(Curr, Max), Moves|_],
+  tab(2), write('at '), ui_display_fraction(Curr, Max), write('hp'), nl,
+  write('moves:'),nl,
+  ui_display_moves(Moves).
+
+ui_display_moves([]).
+ui_display_moves([[Move, PP_left]|Rest]) :-
+  move(Move, Type, Catpow, acc(Accuracy), pp(PP_max), _, _, _, _),
+  tab(2), write(Move), write(' - '),
+  ui_display_fraction(PP_left, PP_max), write('pp, '),
   write(Type), write(' type, '),
-  ((Category =.. [Cat, Power],
-    write(Cat), write(', '),
-    write('power:'), write(Power), write(', '))
-    ;
-    (Category = status,
-      write(status), write(', '))),
-  write('accuracy:'), write(Accuracy),nl,
-  print_active_pokemon_moves(Rest).
+  ui_display_moves_catpow(Catpow),
+  write('accuracy: '), ui_display_percent(Accuracy), nl,
+  ui_display_moves(Rest).
 
-print_team_rest_player([]).
-print_team_rest_player([Team_mate|Rest]) :-
-  print_team_mate_player(Team_mate),
-  print_team_rest_player(Rest).
+ui_display_moves_catpow(status) :-
+  write(status), write(', ').
+ui_display_moves_catpow(Catpow) :-
+  Catpow =.. [Category, Power],
+  write(Category), write(', power: '), write(Power), write(', ').
 
-print_team_mate_player([Name, kp(KP_cur, KP_max), _, _, _, _]) :-
-  tab(2), write(Name), tab(1), write(at), tab(1),
-  Perc is floor(KP_cur/KP_max * 100),
-  ui_write_percentage(Perc), nl.
-
-print_help_message :-
+ui_display_help :-
   nl,
   write('> for a specific move type the move name between a pair of \' (apostrophe)'), nl,
   tab(2), write('example: \'tackle\'.'),nl,
@@ -61,40 +94,15 @@ print_help_message :-
   write('> you can always end the battle by typing: run.'), nl, nl,
   write('>>> as shown in the examples all choices have to end with a . (full stop)'), nl, nl.
 
-opposite_player(you, rot).
-opposite_player(rot, you).
+ui_display_move_prompt :-
+  write('choose your move:'), nl.
 
-print_effectiveness_message(1).
-print_effectiveness_message(1.0).
-print_effectiveness_message(0) :-
-ui_no_effect, nl.
-print_effectiveness_message(0.0) :-
-ui_no_effect, nl.
-print_effectiveness_message(E) :-
-E > 1,
-ui_very_effective, nl.
-print_effectiveness_message(E) :-
-E < 1,
-ui_not_very_effective, nl.
+ui_display_run :-
+  tab(2), write('you escaped safely').
 
-ui_no_effect :- tab(2),write('it has no effect').
-ui_very_effective :- tab(2),write('it is very effective').
-ui_not_very_effective :- tab(2),write('it is not very effective').
-
-ui_move_misses :- tab(2), write('but it misses').
-ui_uses_move(Pokemon, Who, Move_name) :- write(Pokemon), write(' ('), write(Who), write(') uses '), write(Move_name).
-ui_switching(Out, In, Who) :-
-  write(Out), write(' is called back by '), write(Who),
-  write(' and instead '), write(In), write(' is send in').
-
-ui_write_percentage(P) :- write(P), write('%').
-ui_hp_changed(Pokemon, Who, kp(KP_new, KP_max)) :-
-  tab(2), write(Pokemon), write(' ('), write(Who), write(') is now at '),
-  Perc is floor(KP_new/KP_max*100),
-  ui_write_percentage(Perc).
-
-ui_run_away :- write('you escaped safely').
-ui_choose_move_prompt :- write('choose your move: ').
-ui_already_fighting(Pokemon) :- tab(2),write(Pokemon), write(' is already fighting').
-ui_no_such_team_member(Pokemon) :- tab(2),write('there is no '), write(Pokemon), write(' in the team').
-ui_move_unknown(Pokemon, Move) :- tab(2),write(Pokemon), write(' does not know how to '), write(Move).
+ui_display_error(not_in_team, Pokemon) :-
+  tab(2), write('there is no '), write(Pokemon), write(' in your team'), nl.
+ui_display_error(already_fighting, Pokemon) :-
+  tab(2), write(Pokemon), write(' is already fighting'), nl.
+ui_display_error(wrong_move, Pokemon, Move) :-
+  tab(2), write(Pokemon), write(' does not know how to '), write(Move), nl.

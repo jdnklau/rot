@@ -1,55 +1,56 @@
-:- [test, ui, setup, rot, cpu].
-:- ['database/movedex.pl',
-    'database/natures.pl',
-    'database/pokedex.pl',
-    'database/typechart.pl'].
-
-test :-
-  team_1(T),
-  run_battle(T,T), !.
-
+:- [test, teams, ui, setup, rot, battle_processor, calculations, observing_predicates].
+:- ['database/movedex',
+    'database/natures',
+    'database/pokedex',
+    'database/typechart'].
+:- use_module(library(random)).
 
 %%%
 
+start_battle(Team_player, Team_rot) :-
+  State = state(Team_player, Team_rot, [[],[],[]]),
+  run_battle(State), !.
 
-run_battle(Team_A, Team_B) :-
-  print_teams(Team_A, Team_B),
-  read_player_move(Team_A, Move_player),
-  read_enemy_move(Team_A, Team_B, Move_enemy),nl,
+run_battle(State) :-
+  ui_display(State),
+  ui_display_move_prompt,
+  read_player_move(State, Move_player),
+  read_rot_move(State, Move_rot),nl,
   (
-    Move_player = run, ui_run_away, ! ;
-    process(Team_A, Move_player, Team_B, Move_enemy, [nil,nil,nil], New_A, New_B, _New_Field),
-    run_battle(New_A, New_B)).
+    Move_player = run, ui_display_run, ! ;
+    process_round(State, Move_player, Move_rot, New_state),
+    run_battle(New_state)
+  ).
 
-read_enemy_move(Team_player, Team_rot, Move) :-
-  rot_choose_move(Team_player, Team_rot, Move).
+read_rot_move(State, Move) :-
+  rot_choose_move(State, Move).
 
-read_player_move(Team_A, Move_player) :-
-  ui_choose_move_prompt,
+read_player_move(State, Move_player) :-
   read(Move_player),
-  validate_player_move(Team_A, Move_player).
+  State = state(Team_player, _, _),
+  validate_player_move(Team_player, Move_player).
 read_player_move(T, M) :- % prepare for loop
+  write('oops'),nl,
   read_player_move(T,M).
 
 validate_player_move(_, run).
 validate_player_move(_, help) :- !,
-  print_help_message, fail.
+  ui_display_help, fail.
 validate_player_move(Team, switch(Team_mate)) :-
   validate_player_switch(Team, switch(Team_mate)).
-validate_player_move([[_,_,Moves,_,_,_]|_], Move_choosen) :-
+validate_player_move([[_,_,Moves|_]|_], Move_choosen) :-
   member([Move_choosen,_], Moves).
-validate_player_move([[Active_pokemon,_,Moves,_,_,_]|_], Move_choosen) :-
+validate_player_move([[Active_pokemon,_,Moves|_]|_], Move_choosen) :-
   \+ member([Move_choosen,_], Moves),
   Move_choosen \= switch(_),
-  ui_move_unknown(Active_pokemon, Move_choosen),
-  nl, fail.
+  ui_display_error(wrong_move, Active_pokemon, Move_choosen), fail.
 
-validate_player_switch([[Active_pokemon,_,_,_,_,_]|_], switch(Active_pokemon)) :-
-  ui_already_fighting(Active_pokemon), nl, fail.
+validate_player_switch([[Active_pokemon|_]|_], switch(Active_pokemon)) :-
+  ui_display_error(already_fighting, Active_pokemon), nl, fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   member([Name,_,_,_,_,_], Team_pokemon).
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   \+ member([Name,_,_,_,_,_], Team_pokemon),
-  ui_no_such_team_member(Name), nl, fail.
+  ui_display_error(not_in_team, Name), fail.

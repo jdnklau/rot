@@ -1,4 +1,4 @@
-set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], _EV_split, Item, Result) :-
+set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   set_up_move(M1, Move_1),
   set_up_move(M2, Move_2),
   set_up_move(M3, Move_3),
@@ -14,8 +14,8 @@ set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], _EV_split, Item, Result)
   apply_nature(Nature,Raw_Atk, Raw_Def, Raw_Spa, Raw_Spd, Raw_Ini, Atk, Def, Spa, Spd, Ini),
   Result =
     [Name, kp(KP, KP), Moves,
-      [Ability, stats(Atk, Def, Spa, Spd, Ini), stat_increases(0,0,0,0,0)],
-      Item, []].
+      [Ability, stats(Atk, Def, Spa, Spd, Ini), stat_increases(0,0,0,0,0), EV_DV],
+      Item, [nil, [nil, nil, nil], []]].
 
 set_up_kp(Base_value, Stat_value) :-
   DV_and_EV is 0,
@@ -28,4 +28,4 @@ set_up_stat(Base_value, Stat_value) :-
 apply_nature(_,Atk,Def,Spa,Spd,Ini,Atk,Def,Spa,Spd,Ini). % NYI
 
 set_up_move(Name, [Name,PP]) :-
-  move(Name, _, _, _, pp(PP), _, _).
+  move(Name, _, _, _, pp(PP), _, _, _, _).

@@ -24,7 +24,7 @@
         may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
         `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
       + Secondary_conditions  
-        `[Confusion, Flinch]` (NFI)
+        `[Confusion, Flinch, Focus_energy]` (NFI)
 
 ## Database Handling
 + Saving Pokemon Data  
@@ -36,12 +36,13 @@
   + Abilities format  
     as list of possible abilities
 + Saving Move Data  
-  `move(Name, Type, Category_and_power, acc(Accuracy),pp(Power_points), prio(Priority), Contact, Hits, Effects)`
+  as predicate `move/9`  
+  `move(Name, Type, Category_and_power, acc(Accuracy),pp(Power_points), prio(Priority), Contact, Hits, Additional_effects)`
   + Category_and_power format  
     `physical(Power)` or `special(Power)` or `status`
   + Contact format  
     `contact` or `nocontact`
   + Hits format  
     as number of guaranteed hits or `between(Minimum, Maximum)`
-  + Effects format  
+  + Additional_effects format  
     `noeffect` or as list of possible effects
