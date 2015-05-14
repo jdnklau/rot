@@ -89,8 +89,7 @@ calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, 
 
 calculate_final_damage(Base_damage, Stab, Atk, Def, Critical_multiplier,
   F1, F2, F3, Stab_multiplier, Type_effectiveness, Final_damage) :-
-  Atk_Def_coef is floor(Atk / (50 * Def)),
-  F1_damage is floor(22 * Base_damage * Atk_Def_coef * F1) + 2,
+  F1_damage is floor(floor(22 * Base_damage * Atk / (50 * Def)) * F1) + 2,
   Critical_damage is floor(F1_damage * Critical_multiplier),
   F2_damage is floor(Critical_damage * F2),
   get_randomization_adjustment(RA),
