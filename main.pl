@@ -18,7 +18,9 @@ run_battle(State) :-
   read_rot_move(State, Move_rot),nl,
   (
     Move_player = run, ui_display_run, ! ;
-    process_round(State, Move_player, Move_rot, New_state),
+    process_round(State, Move_player, Move_rot, New_state, [Message_1, Message_2]),
+    ui_display_messages(Message_1),
+    ui_display_messages(Message_2),
     run_battle(New_state)
   ).
 

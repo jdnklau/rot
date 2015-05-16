@@ -24,7 +24,14 @@
         may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
         `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
       + Secondary_conditions  
-        `[Confusion, Flinch, Focus_energy]` (NFI)
+        `[Confusion, Flinch, Focus_energy]` (NFI)  
++ Messages structure  
+  `msg(Who, Messages)`  
+  + Who  
+    is either `you` or `rot`  
+  + Messages  
+    anti chronological list of combat events
+
 
 ## Database Handling
 + Saving Pokemon Data  
