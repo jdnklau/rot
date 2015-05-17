@@ -7,6 +7,7 @@ calculate_priority([Lead|_], switch(_), (6,Speed)) :-
   stats(Lead,_,_,_,_,Speed).
 calculate_priority([Lead|_], Move, (Move_priority_by_prankster, Speed)) :-
   move(Move, _,status,_,_, prio(Move_priority),_,_,_),
+  ability(Lead, prankster),
   Move_priority_by_prankster is Move_priority + 1,
   stats(Lead,_,_,_,_,Speed).
 calculate_priority([Lead|_], Move, (Move_priority, Speed)) :-

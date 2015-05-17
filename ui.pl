@@ -50,6 +50,9 @@ ui_display_percent(P) :-
 ui_display_owner(Who) :-
   write('('), write(Who), write(') ').
 
+ui_display_pokemon_with_owner(Name, Who) :-
+  write(Name), tab(1), ui_display_owner(Who).
+
 ui_display_primary_condition(Pokemon) :-
   primary_status_condition(Pokemon, nil).
 ui_display_primary_condition(Pokemon) :-
@@ -117,8 +120,9 @@ ui_display_error(already_fighting, Pokemon) :-
 ui_display_error(wrong_move, Pokemon, Move) :-
   tab(2), write(Pokemon), write(' does not know how to '), write(Move), nl.
 
-
+ui_display_messages(msg(Who, [])).
 ui_display_messages(msg(Who, Messages)) :-
+  Messages \= [].
   ui_display_messages(Who, Messages), nl.
 ui_display_messages(_, []).
 ui_display_messages(Who, [switch(from(Out), to(In))|Rest]) :-
@@ -131,12 +135,20 @@ ui_display_messages(Who, [move_missed|Rest]) :-
 ui_display_messages(Who, [damaged(target(Name), kp(Curr, Max))|Rest]) :-
   ui_display_messages(Who, Rest),
   opponent(Who, Not_who),
-  tab(2), write(Name), tab(1), ui_display_owner(Not_who),
+  tab(2), ui_display_pokemon_with_owner(Name, Not_who),
   write('is now at '), ui_display_percent(fraction(Curr, Max)), nl.
 ui_display_messages(Who, [uses(attacker(Name), move(Move))|Rest]) :-
   ui_display_messages(Who, Rest),
-  write(Name), tab(1), ui_display_owner(Who),
+  ui_display_pokemon_with_owner(Name, Who),
   write('uses '), write(Move), nl.
+ui_display_messages(Who, [no_effect|Rest]) :-
+  ui_display_messages(Who, Rest),
+  tab(2), write('it has no effect'), nl.
+ui_display_messages(Who, [fainted(target(Name))|Rest]) :-
+  ui_display_messages(Who, Rest),
+  opponent(Who, Not_who),
+  tab(2), ui_display_pokemon_with_owner(Name, Not_who),
+  write('has fainted'), nl.
 ui_display_messages(Who, [Message|Rest]) :-
   ui_display_messages(Who, Rest),
   tab(4), write('unknown message: '), write(Message), nl.

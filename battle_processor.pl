@@ -19,6 +19,9 @@ process_move(State, switch(Team_member), Who, Result_state, msg(Who, Messages)) 
   translate_attacker_state(State, Who, State_attacker),
   process_switch(State_attacker, Team_member, New_state_attacker, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state).
+process_move(State, _, Who, State, msg(Who, [])) :-
+  translate_attacker_state(State, Who, State_attacker),
+  attacker_fainted(State_attacker).
 process_move(State, Move, Who, Result_state, msg(Who, Message)) :-
   move(Move, _, status, acc(Accuracy), _,_,_,_,_),
   move_hits(Accuracy),
@@ -34,7 +37,9 @@ process_move(State, Move, Who, Result_state, msg(Who, Messages)) :-
   successful_hits(Attacker, Possible_hits, Hits),
   calculate_damage(State_attacker, Move, Damage),
   process_hits(State_attacker, Damage, Contact, Additional, Hits, New_state_attacker, Msg_hits),
-  append(Msg_hits, Msg_uses, Messages),
+  fainted_messages(New_state_attacker, Msg_fainted),
+  append(Msg_hits, Msg_uses, Messages1),
+  append(Msg_fainted, Messages1, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
 process_move(State, Move, Who, State, msg(Who, Messages)) :-
   move_use_message(State, Who, Move, Msg_uses),
@@ -55,17 +60,37 @@ process_hits(State, Damage, Contact, Effects, Hits, Result_state, Messages) :-
   append(Messages2, Messages1, Messages).
 
 process_single_hit(State, Damage, Contact, Effects, Result_state, Messages) :-
+  \+ target_fainted(State),
   process_damage(State, Damage, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Contact, Contact_state, Msg_contact),
   append(Msg_contact, Msg_damage, Messages1),
   process_additional_effects(Contact_state, Effects, Result_state, Msg_effects),
   append(Msg_effects, Messages1, Messages).
+process_single_hit(State, _, _, _, State, []) :-
+  target_fainted(State).
 
+process_damage(State, 0, State, [no_effect]).
 process_damage(state(Team_attacker, [Target|Team_target], Field), Damage,
-  state(Team_attacker, [New_target|Team_target], Field), [damaged(target(Name), kp(New_curr, Max))]) :-
+  state(Team_attacker, [Result_target|Team_target], Field), [damaged(target(Name), kp(New_curr, Max))]) :-
   Target = [Name, kp(Curr, Max)|Rest_data],
   New_curr is max(0, min(Max, Curr - Damage)), % the minimum is required as healing is just negative damage
-  New_target = [Name, kp(New_curr, Max)|Rest_data].
+  New_target = [Name, kp(New_curr, Max)|Rest_data],
+  process_fainting(New_target, Result_target).
+
+process_fainting([Name, kp(0,Max), Moves, Status_data, Item, [_|Status_rest]],
+  [Name, kp(0,Max), Moves, Status_data, Item, [fainted|Status_rest]]).
+process_fainting([Name, kp(Curr, Max)|Rest], [Name, kp(Curr, Max)|Rest]) :-
+  Curr > 0.
+
+fainted_messages(state(_, [[Name|Rest]|_], _), [fainted(target(Name))]) :-
+  fainted([Name|Rest]).
+fainted_messages(state(_, [[Name|Rest]|_], _), []) :-
+  \+ fainted([Name|Rest]).
+
+target_fainted(state(_, [Lead|_], _)) :-
+  fainted(Lead).
+attacker_fainted(state([Lead|_], _, _)) :-
+  fainted(Lead).
 
 process_contact(State, nocontact, State, []). % nothing to do here
 process_contact(State, contact, State, []). % NYI
