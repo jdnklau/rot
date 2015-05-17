@@ -1,0 +1,5 @@
+- add defeat mechanics to the game
+    - fainted pokémon need to be switched out
+    - battle needs to end if one team is completely defeated
+- add first iteration of ExShell
+    - heuristic to use shall be remaining hp of a Team in total
