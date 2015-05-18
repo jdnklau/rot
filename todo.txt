@@ -1,7 +1,6 @@
-- add defeat mechanics to the game
-    - battle needs to end if one team is completely defeated
 - add first iteration of ExShell
     - heuristic to use shall be remaining hp of a Team in total
 - tweak message system
     - messages can be encased in either attacker(_) or target(_) predicates
     - makes it easy to distinguish whether rot or player should be displayed as owner
+- add comments to the code :x

@@ -18,14 +18,27 @@ run_battle(State) :-
   read_rot_move(State, Move_rot),nl,
   (
     Move_player = run, ui_display_run, ! ;
-    process_round(State, Move_player, Move_rot, New_state, [Message_1, Message_2]),
-    ui_display_messages(Message_1),
-    ui_display_messages(Message_2),
-    run_battle(New_state)
+    process_round(State, Move_player, Move_rot, New_state),
+    (
+      game_over(New_state) ;
+      run_battle(New_state)
+    )
   ).
+
+
+game_over(state(Player, _, _)) :-
+  team_completely_fainted(Player),
+  ui_display_win(rot).
+game_over(state(_, Rot, _)) :-
+  team_completely_fainted(Rot),
+  ui_display_win(player).
+
 
 read_rot_move(State, Move) :-
   rot_choose_move(State, Move).
+
+read_rot_switch(State, Switch) :-
+  rot_choose_switch(State, Switch).
 
 read_player_move(State, Move_player) :-
   read(Move_player),
@@ -33,6 +46,12 @@ read_player_move(State, Move_player) :-
   validate_player_move(Team_player, Move_player).
 read_player_move(T, M) :- % prepare for loop
   read_player_move(T,M).
+
+read_player_switch(state(Team_player, _, _), Switch) :-
+  read(Switch),
+  validate_player_switch(Team_player, Switch).
+read_player_switch(T, S) :-
+  read_player_switch(T, S).
 
 validate_player_move(_, run).
 validate_player_move(_, help) :- !,
@@ -56,8 +75,18 @@ validate_player_switch([[Active_pokemon|_]|_], switch(Active_pokemon)) :-
   ui_display_error(already_fighting, Active_pokemon), nl, fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
-  member([Name,_,_,_,_,_], Team_pokemon).
+  member([Name|Data], Team_pokemon),
+  \+ fainted([Name|Data]).
+validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
+  Name \= Active_pokemon,
+  member([Name|Data], Team_pokemon),
+  fainted([Name|Data]),
+  ui_display_error(already_fainted, Name), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   \+ member([Name,_,_,_,_,_], Team_pokemon),
   ui_display_error(not_in_team, Name), fail.
+validate_player_switch(_, Command) :-
+  Command \= switch(_),
+  ui_display_error(wrong_command, Command),
+  ui_display_help_switch, fail.

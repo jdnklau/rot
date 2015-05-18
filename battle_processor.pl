@@ -1,27 +1,51 @@
-process_round(Game_state, Move_player, Move_rot, New_state, Messages) :-
+process_round(Game_state, Move_player, Move_rot, Result_state) :-
   calculate_priorities(Game_state, Move_player, Move_rot, Priority_data),
-  process_by_priority(Game_state, Move_player, Move_rot, Priority_data, New_state, Messages).
+  process_by_priority(Game_state, Move_player, Move_rot, Priority_data, Result_state).
 
 
-process_by_priority(State, Move_player, Move_rot, priorities(Prio_player, Prio_rot), Result_state, Messages) :-
+process_by_priority(State, Move_player, Move_rot, priorities(Prio_player, Prio_rot), Result_state) :-
   faster(Prio_player, Prio_rot),
-  process_moves(State, Move_player, Move_rot, player, Result_state, Messages).
-process_by_priority(State, Move_player, Move_rot, _, Result_state, Messages) :-
-  process_moves(State, Move_rot, Move_player, rot, Result_state, Messages).
+  process_moves(State, Move_player, Move_rot, player, New_state),
+  process_ends_of_round(New_state, player, Result_state).
+process_by_priority(State, Move_player, Move_rot, _, Result_state) :-
+  process_moves(State, Move_rot, Move_player, rot, New_state),
+  process_ends_of_round(New_state, rot, Result_state).
 
 
-process_moves(State, Move_first, Move_second, Who_first, Result_state, [Messages_first, Messages_second]) :-
-  process_move(State, Move_first, Who_first, New_state, Messages_first),
+process_ends_of_round(State, Who_first, Result_state) :-
+  process_end_of_round(State, Who_first, New_state, Messages_first),
+  ui_display_messages(Messages_first),
   opponent(Who_first, Who_second),
-  process_move(New_state, Move_second, Who_second, Result_state, Messages_second).
+  process_end_of_round(New_state, Who_second, Result_state, Messages_second),
+  ui_display_messages(Messages_second).
+
+process_end_of_round(State, Who, Result_state, msg(Who, Messages)) :-
+  translate_attacker_state(State, Who, State_attacker),
+  process_fainted_check(State_attacker, Who, New_state_attacker, Messages),
+  translate_attacker_state(New_state_attacker, Who, Result_state).
+
+process_fainted_check(state([Lead|Team], Target, Field), Who, Result_state, Messages) :-
+  fainted(Lead),
+  process_fainted_routine(state([Lead|Team], Target, Field), Who, Result_state, Messages).
+process_fainted_check(State, _, State, []). % NFI
+
+
+process_moves(State, Move_first, Move_second, Who_first, Result_state) :-
+  process_move(State, Move_first, Who_first, New_state, Messages_first),
+  ui_display_messages(Messages_first),
+  opponent(Who_first, Who_second),
+  process_move(New_state, Move_second, Who_second, Result_state, Messages_second),
+  ui_display_messages(Messages_second).
 
 process_move(State, switch(Team_member), Who, Result_state, msg(Who, Messages)) :-
   translate_attacker_state(State, Who, State_attacker),
   process_switch(State_attacker, Team_member, New_state_attacker, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state).
-process_move(State, _, Who, State, msg(Who, [])) :-
+process_move(State, _, Who, Result_state, msg(Who, Messages)) :-
   translate_attacker_state(State, Who, State_attacker),
-  attacker_fainted(State_attacker).
+  attacker_fainted(State_attacker),
+  process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
+  translate_attacker_state(Result_state_attacker, Who, Result_state).
 process_move(State, Move, Who, Result_state, msg(Who, Message)) :-
   move(Move, _, status, acc(Accuracy), _,_,_,_,_),
   move_hits(Accuracy),
@@ -50,6 +74,15 @@ process_switch(state(Team_attacker, Team_target, Field), Team_member,
   Team_attacker = [[Out|_]|_],
   calculate_switch(Team_attacker, Team_member, New_team_attacker),
   Messages = [switch(from(Out), to(Team_member))].
+
+process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
+  ui_display_switch_prompt,
+  read_player_switch(State_attacker, switch(Switch)),
+  process_switch(State_attacker, Switch, Result_state_attacker, Messages).
+process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
+  translate_attacker_state(State_attacker, rot, State),
+  read_rot_switch(State, switch(Switch)),
+  process_switch(State_attacker, Switch, Result_state_attacker, Messages).
 
 process_hits(State, Damage, Contact, Effects, 1, Result_state, Messages) :-
   process_single_hit(State, Damage, Contact, Effects, Result_state, Messages).
@@ -81,6 +114,14 @@ process_fainting([Name, kp(0,Max), Moves, Status_data, Item, [_|Status_rest]],
   [Name, kp(0,Max), Moves, Status_data, Item, [fainted|Status_rest]]).
 process_fainting([Name, kp(Curr, Max)|Rest], [Name, kp(Curr, Max)|Rest]) :-
   Curr > 0.
+
+process_fainted_routine(State, _, State, []) :-
+  State = state(Attacker, _, _),
+  team_completely_fainted(Attacker).
+process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages) :-
+  State_attacker = state(Attacker, _, _),
+  \+ team_completely_fainted(Attacker),
+  process_forced_switch(State_attacker, Who, Result_state_attacker, Messages).
 
 fainted_messages(state(_, [[Name|Rest]|_], _), [fainted(target(Name))]) :-
   fainted([Name|Rest]).
