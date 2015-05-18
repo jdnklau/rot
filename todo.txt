@@ -4,3 +4,4 @@
     - messages can be encased in either attacker(_) or target(_) predicates
     - makes it easy to distinguish whether rot or player should be displayed as owner
 - add comments to the code :x
+- add choice of lead

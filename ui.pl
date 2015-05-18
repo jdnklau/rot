@@ -1,3 +1,15 @@
+ui_display_battle_start(Player, Rot) :-
+  write('rot has challenged you to battle'), nl,nl,
+  write('your team: '), ui_display_team_list(Player), nl,
+  write('rot\'s team: '), ui_display_team_list(Rot), nl,
+  ui_display_help.
+
+ui_display_team_list([[Name|_]]) :-
+  write(Name), tab(1).
+ui_display_team_list([[Name|_]|Rest]) :-
+  write(Name), write(', '),
+  ui_display_team_list(Rest).
+
 ui_display(state(Player, Rot, _)) :-
   ui_display_rot(Rot), nl,
   ui_display_player(Player).
@@ -106,6 +118,7 @@ ui_display_help :-
   ui_display_help_switch,
   write('> for information about a specific team partner type info(\'partner name here\')'), nl,
   tab(2), write('example: info(\'poliwrath\')'), nl,
+  write('> for displaying this help again type: help.'), nl, 
   write('> you can always end the battle by typing: run.'), nl, nl,
   write('>>> as shown in the examples all choices have to end with a . (full stop)'), nl, nl.
 

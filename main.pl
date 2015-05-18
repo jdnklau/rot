@@ -9,6 +9,7 @@
 
 start_battle(Team_player, Team_rot) :-
   State = state(Team_player, Team_rot, [[],[],[]]),
+  ui_display_battle_start(Team_player, Team_rot),
   run_battle(State), !.
 
 run_battle(State) :-
@@ -86,6 +87,8 @@ validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) 
   Name \= Active_pokemon,
   \+ member([Name,_,_,_,_,_], Team_pokemon),
   ui_display_error(not_in_team, Name), fail.
+validate_player_switch(_, help) :-
+  ui_display_help_switch, fail.
 validate_player_switch(_, Command) :-
   Command \= switch(_),
   ui_display_error(wrong_command, Command),
