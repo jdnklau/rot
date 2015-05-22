@@ -118,7 +118,7 @@ ui_display_help :-
   ui_display_help_switch,
   write('> for information about a specific team partner type info(\'partner name here\')'), nl,
   tab(2), write('example: info(\'poliwrath\')'), nl,
-  write('> for displaying this help again type: help.'), nl, 
+  write('> for displaying this help again type: help.'), nl,
   write('> you can always end the battle by typing: run.'), nl, nl,
   write('>>> as shown in the examples all choices have to end with a . (full stop)'), nl, nl.
 
@@ -126,56 +126,5 @@ ui_display_help_switch :-
   write('> for switching to a partner type switch(\'partner name here\')'), nl,
   tab(2), write('example: switch(\'pikachu\').'),nl.
 
-
-ui_display_move_prompt :-
-  write('choose your move:'), nl.
-
-ui_display_switch_prompt :-
-  write('choose a pokemon to switch in:'), nl.
-
 ui_display_run :-
   tab(2), write('you escaped safely').
-
-ui_display_error(not_in_team, Pokemon) :-
-  tab(2), write('there is no '), write(Pokemon), write(' in your team'), nl.
-ui_display_error(already_fighting, Pokemon) :-
-  tab(2), write(Pokemon), write(' is already fighting'), nl.
-ui_display_error(already_fainted, Pokemon) :-
-  tab(2), write(Pokemon), write(' has already fainted'), nl.
-ui_display_error(wrong_command, Command) :-
-  tab(2), write(Command), write(' is not a valid command here'), nl.
-ui_display_error(wrong_move, Pokemon, Move) :-
-  tab(2), write(Pokemon), write(' does not know how to '), write(Move), nl.
-
-ui_display_messages(msg(_, [])).
-ui_display_messages(msg(Who, Messages)) :-
-  Messages \= [],
-  ui_display_messages(Who, Messages), nl.
-ui_display_messages(_, []).
-ui_display_messages(Who, [switch(from(Out), to(In))|Rest]) :-
-  ui_display_messages(Who, Rest),
-  write(Who), write(' withdrew '), write(Out),
-  write(' and send '), write(In), write(' into battle'), nl.
-ui_display_messages(Who, [move_missed|Rest]) :-
-  ui_display_messages(Who, Rest),
-  tab(2), write('but it missed'), nl.
-ui_display_messages(Who, [damaged(target(Name), kp(Curr, Max))|Rest]) :-
-  ui_display_messages(Who, Rest),
-  opponent(Who, Not_who),
-  tab(2), ui_display_pokemon_with_owner(Name, Not_who),
-  write('is now at '), ui_display_percent(fraction(Curr, Max)), nl.
-ui_display_messages(Who, [uses(attacker(Name), move(Move))|Rest]) :-
-  ui_display_messages(Who, Rest),
-  ui_display_pokemon_with_owner(Name, Who),
-  write('uses '), write(Move), nl.
-ui_display_messages(Who, [no_effect|Rest]) :-
-  ui_display_messages(Who, Rest),
-  tab(2), write('it has no effect'), nl.
-ui_display_messages(Who, [fainted(target(Name))|Rest]) :-
-  ui_display_messages(Who, Rest),
-  opponent(Who, Not_who),
-  tab(2), ui_display_pokemon_with_owner(Name, Not_who),
-  write('has fainted'), nl.
-ui_display_messages(Who, [Message|Rest]) :-
-  ui_display_messages(Who, Rest),
-  tab(4), write('unknown message: '), write(Message), nl.

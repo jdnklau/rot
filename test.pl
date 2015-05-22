@@ -1,7 +1,3 @@
-:- [teams, ui, observing_predicates, setup].
-:- ['database/movedex',
-    'database/pokedex'].
-
 test_ui_rot :-
   team_1(T),
   ui_display_rot(T).

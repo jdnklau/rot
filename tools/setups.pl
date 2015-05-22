@@ -1,3 +1,11 @@
+move_use_message(State, Who, Move, [uses(attacker(Name), move(Move))]) :-
+  translate_attacker_state(State, Who, state([[Name|_]|_],_,_)).
+
+fainted_messages(state(_, [[Name|Rest]|_], _), [fainted(target(Name))]) :-
+  fainted([Name|Rest]).
+fainted_messages(state(_, [[Name|Rest]|_], _), []) :-
+  \+ fainted([Name|Rest]).
+
 set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   set_up_move(M1, Move_1),
   set_up_move(M2, Move_2),

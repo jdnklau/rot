@@ -111,6 +111,11 @@ process_damage(state(Team_attacker, [Target|Team_target], Field), Damage,
   New_target = [Name, kp(New_curr, Max)|Rest_data],
   process_fainting(New_target, Result_target).
 
+process_contact(State, nocontact, State, []). % nothing to do here
+process_contact(State, contact, State, []). % NYI
+
+process_additional_effects(State, _, State, []). % NYI
+
 process_fainting([Name, kp(0,Max), Moves, Status_data, Item, [_|Status_rest]],
   [Name, kp(0,Max), Moves, Status_data, Item, [fainted|Status_rest]]).
 process_fainting([Name, kp(Curr, Max)|Rest], [Name, kp(Curr, Max)|Rest]) :-
@@ -123,27 +128,3 @@ process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages) :-
   State_attacker = state(Attacker, _, _),
   \+ team_completely_fainted(Attacker),
   process_forced_switch(State_attacker, Who, Result_state_attacker, Messages).
-
-fainted_messages(state(_, [[Name|Rest]|_], _), [fainted(target(Name))]) :-
-  fainted([Name|Rest]).
-fainted_messages(state(_, [[Name|Rest]|_], _), []) :-
-  \+ fainted([Name|Rest]).
-
-target_fainted(state(_, [Lead|_], _)) :-
-  fainted(Lead).
-attacker_fainted(state([Lead|_], _, _)) :-
-  fainted(Lead).
-
-process_contact(State, nocontact, State, []). % nothing to do here
-process_contact(State, contact, State, []). % NYI
-
-process_additional_effects(State, _, State, []). % NYI
-
-translate_attacker_state(state(A, T, Field), player, state(A, T, Field)).
-translate_attacker_state(state(T, A, [Field_t, Field_a, Field_g]), rot, state(A, T, [Field_a, Field_t, Field_g])).
-
-opponent(player, rot).
-opponent(rot, player).
-
-move_use_message(State, Who, Move, [uses(attacker(Name), move(Move))]) :-
-  translate_attacker_state(State, Who, state([[Name|_]|_],_,_)).
