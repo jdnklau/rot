@@ -8,6 +8,7 @@ create_tree(State, Depth, M1, M2, tree(State, M1, M2, Subtree)) :-
   Depth > 0,
   New_depth is Depth - 1,
   available_move_pairs(State, Pairs),
+  create_subtree(State, Pairs, New_depth, Subtree).
 
 create_subtree(_, [], _, []).
 create_subtree(State, [(M1, M2)|Pairs], Depth, [New_branch|Branches]) :-
@@ -25,4 +26,3 @@ available_move_pairs_acc([_|M1s], [], M2s, Pairs) :-
   available_move_pairs_acc(M1s, M2s, M2s, Pairs).
 available_move_pairs_acc([M1|M1s], [M2|M2s], M2s_safed, [(M1,M2)|Pairs]) :-
   available_move_pairs_acc([M1|M1s], M2s, M2s_safed, Pairs).
-
