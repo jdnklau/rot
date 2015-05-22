@@ -1,5 +1,8 @@
 ui_display_messages(msg(_, [])).
+ui_display_messages(msg(_, _)) :-
+  rot(searching).
 ui_display_messages(msg(Who, Messages)) :-
+  \+ rot(searching),
   Messages \= [],
   ui_display_messages(Who, Messages), nl.
 

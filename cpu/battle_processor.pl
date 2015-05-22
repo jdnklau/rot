@@ -76,10 +76,15 @@ process_switch(state(Team_attacker, Team_target, Field), Team_member,
   Messages = [switch(from(Out), to(Team_member))].
 
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
+  \+ rot(searching),
   ui_display_switch_prompt,
   read_player_switch(State_attacker, Switch),
   Switch = switch(Team_member),
   process_switch(State_attacker, Team_member, Result_state_attacker, Messages).
+process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
+  rot(searching),
+  read_rot_switch(State_attacker, switch(Switch)),
+  process_switch(State_attacker, Switch, Result_state_attacker, Messages).
 process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
   translate_attacker_state(State_attacker, rot, State),
   read_rot_switch(State, switch(Switch)),

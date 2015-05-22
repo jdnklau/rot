@@ -15,7 +15,8 @@
     tools/pokemon_data_access,
     tools/setups].
 :- [rot/interface,
-    rot/ai].
+    rot/ai,
+    rot/search_tree].
 :- use_module(library(random)).
 
 %%%
