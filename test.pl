@@ -17,3 +17,8 @@ test_ui :-
 test_battle :-
   team_1(T),
   start_battle(T,T).
+
+test_available :-
+  team_1(T),
+  available_moves(T, A),
+  write(A).
