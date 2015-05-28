@@ -1,8 +1,9 @@
 ui_display_move_prompt :-
   write('choose your move:'), nl.
 
-ui_display_switch_prompt :-
-  write('choose a pokemon to switch in:'), nl.
+ui_display_switch_prompt(Team) :-
+  write('choose a pokemon to switch in:'), nl,
+  ui_display_player_team(Team).
 
 read_player_move(State, Move_player) :-
   read(Move_player),

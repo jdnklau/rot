@@ -77,7 +77,8 @@ process_switch(state(Team_attacker, Team_target, Field), Team_member,
 
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
   \+ rot(searching),
-  ui_display_switch_prompt,
+  State_attacker = state([_|Player_team],_,_),
+  ui_display_switch_prompt(Player_team),
   read_player_switch(State_attacker, Switch),
   Switch = switch(Team_member),
   process_switch(State_attacker, Team_member, Result_state_attacker, Messages).
