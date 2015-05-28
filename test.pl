@@ -19,16 +19,6 @@ test_available :-
   available_moves(T, A),
   write(A).
 
-test_available_move_pairs :-
-  team_1(T),
-  available_move_pairs(state(T, T, _), Pairs),
-  write_pairs(Pairs).
-
-write_pairs([]).
-write_pairs([Pair|Pairs]) :-
-  write(Pair), nl,
-  write_pairs(Pairs).
-
 test_search_tree :-
   team_1(T),
   write('tree depth: '),
@@ -36,19 +26,27 @@ test_search_tree :-
   asserta(rot(searching)),
   create_tree(state(T,T,[[],[],[]]), D, Tree),
   retract(rot(searching)),
-  write_tree(Tree, Outs),
-  write(different_states_total:Outs), !.
+  %write_tree(Tree, 0), nl,
+  search_tree(Tree, Moves),
+  write(expected:Moves), nl.
 
-write_tree(Tree, Outs) :-
-  write_tree(Tree, 0, 0, Outs).
-
-write_tree(tree(state(T1, T2, _), M1, M2, Subtrees), I, Oin, Oout) :-
-  Oinside is Oin+1,
-  tab(I), write(#), write((M1, M2)), nl,
-  tab(I), write_tree_team(T1), nl,
-  tab(I), write_tree_team(T2), nl,
+write_tree(tree(State, Nodes), I) :-
+  State = state(Player, Rot, _),
+  tab(I),write_tree_team(Player),nl,
+  tab(I),write_tree_team(Rot),nl,
   II is I+4,
-  write_tree_subtrees(Subtrees, II, Oinside, Oout).
+  write_tree_nodes(Nodes, II).
+
+write_tree_nodes([],_).
+write_tree_nodes([Mr:Nodes_by_player|Nodes], I) :-
+  write_tree_nodes_by_player(Mr, Nodes_by_player, I),
+  write_tree_nodes(Nodes, I).
+
+write_tree_nodes_by_player(_,[],_).
+write_tree_nodes_by_player(Mr, [Mp:Tree|Nodes], I) :-
+  tab(I), write((#, Mp, Mr)), nl,
+  write_tree(Tree, I),
+  write_tree_nodes_by_player(Mr, Nodes, I).
 
 write_tree_team([]).
 write_tree_team([Lead|Rest]) :-
@@ -57,8 +55,3 @@ write_tree_team([Lead|Rest]) :-
   write(Name), write(' at '), ui_display_percent(P),
   ui_display_primary_condition(Lead), write('- '),
   write_tree_team(Rest).
-
-write_tree_subtrees([],_, O, O).
-write_tree_subtrees([St|Sts], I, Oin, Oout) :-
-  write_tree(St, I, Oin, Oinside),
-  write_tree_subtrees(Sts, I, Oinside, Oout).

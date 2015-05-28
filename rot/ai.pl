@@ -1,6 +1,10 @@
-rot_choose_move(state(_, Team,_), Move) :-
-  available_moves(Team, Moves),
-  rot_choose_random(Moves, Move).
+rot_choose_move(State, Move) :-
+  write('rot chooses move'),nl,
+  asserta(rot(searching)),
+  create_tree(State,1, Tree),
+  search_tree(Tree, (_,Move)),
+  write('rot has choosen'),nl,
+  retract(rot(searching)).
 
 rot_choose_switch(state(_, Team, _), Switch) :-
   available_switches(Team, Available),

@@ -31,7 +31,20 @@
     is either `you` or `rot`  
   + Messages  
     anti chronological list of combat events
-
++ Search Tree structure  
+  `tree(State, Nodes)`  
+  + State  
+    is the current game state
+  + Nodes  
+    is a list of `Move_rot:Nodes_by_player_move` entries  
+    + Move_rot  
+      a move rot could choose
+    + Nodes_by_player_move  
+      a list of `Move_player:Tree` entries
+      + Move_player  
+        a move the player could choose
+      + Tree  
+        a search tree with the resulting state of player's and rot's move choices as root
 
 ## Database Handling
 + Saving Pokemon Data  
