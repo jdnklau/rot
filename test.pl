@@ -11,7 +11,8 @@ test_ui :-
   ui_display(state(T, T, _)).
 
 test_battle :-
-  team_1(T),
+  team_rot(T),
+  write(team_loaded),nl,
   start_battle(T,T).
 
 test_available :-

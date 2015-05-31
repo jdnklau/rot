@@ -1,7 +1,9 @@
-- add first iteration of ExShell
-    - heuristic to use shall be remaining hp of a Team in total
 - tweak message system
     - messages can be encased in either attacker(_) or target(_) predicates
     - makes it easy to distinguish whether rot or player should be displayed as owner
-- add comments to the code :x
+- add comments to the code % :x
 - add choice of lead
+- add primary status conditions
+- add type information to the pokemon game data structure
+- complete pokedex
+- complete movedex
