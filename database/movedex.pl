@@ -3,7 +3,7 @@ move('air slash', flying, special(75), acc(95), pp(15), prio(0), nocontact, 1, [
 move('aura sphere', fighting, special(80), acc(always), pp(20), prio(0), nocontact, 1, noeffect).
 move(blizzard, ice, special(110), acc(70), pp(5), prio(0), nocontact, 1, [freeze(10)]).
 move('body slam', normal, physical(85), acc(100), pp(15), prio(0), contact, 1, [paralyze(30)]).
-move('brave bird', flying, physical(120), acc(100), pp(15), prio(0), contact, 1, [recoil(33)]).
+move('brave bird', flying, physical(120), acc(100), pp(15), prio(0), contact, 1, [recoil(1/3)]).
 move('brick break', fighting, physical(75), acc(100), pp(15), prio(0), contact, 1, [brickbreak]).
 move(crunch, dark, physical(80), acc(100), pp(15), prio(0), contact, 1, [def(target, 20, -1)]).
 move('dark pulse', dark, special(80), acc(100), pp(15), prio(0), nocontact, 1, [flinch(20)]).
