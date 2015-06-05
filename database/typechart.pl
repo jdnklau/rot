@@ -18,7 +18,7 @@ type(dragon).
 type(dark).
 type(fairy).
 
-% type effectiveness
+% type effects
 typing(normal, rock, 0.5).
 typing(normal, ghost, 0).
 typing(normal, steel, 0.5).
