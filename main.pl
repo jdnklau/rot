@@ -13,7 +13,8 @@
     ui/user_input].
 :- [tools/battle_data_access,
     tools/pokemon_data_access,
-    tools/setups].
+    tools/setups,
+    tools/message_handling].
 :- [rot/interface,
     rot/ai,
     rot/search_tree].

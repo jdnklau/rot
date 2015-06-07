@@ -13,13 +13,15 @@ process_by_priority(State, Move_player, Move_rot, _, Result_state) :-
 
 
 process_ends_of_round(State, Who_first, Result_state) :-
-  process_end_of_round(State, Who_first, New_state, Messages_first),
-  ui_display_messages(Messages_first),
+  process_end_of_round(State, Who_first, New_state, Message_stack_first),
+  message_frame(Who_first, Message_stack_first, Message_frame_first),
+  ui_display_messages(Message_frame_first),
   opponent(Who_first, Who_second),
-  process_end_of_round(New_state, Who_second, Result_state, Messages_second),
-  ui_display_messages(Messages_second).
+  process_end_of_round(New_state, Who_second, Result_state, Message_stack_second),
+  message_frame(Who_second, Message_stack_second, Message_frame_second),
+  ui_display_messages(Message_frame_second).
 
-process_end_of_round(State, Who, Result_state, msg(Who, Messages)) :-
+process_end_of_round(State, Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker),
   process_fainted_check(State_attacker, Who, New_state_attacker, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state).
@@ -31,27 +33,29 @@ process_fainted_check(State, _, State, []). % NFI
 
 
 process_moves(State, Move_first, Move_second, Who_first, Result_state) :-
-  process_move(State, Move_first, Who_first, New_state, Messages_first),
-  ui_display_messages(Messages_first),
+  process_move(State, Move_first, Who_first, New_state, Message_stack_first),
+  message_frame(Who_first, Message_stack_first, Message_frame_first),
+  ui_display_messages(Message_frame_first),
   opponent(Who_first, Who_second),
-  process_move(New_state, Move_second, Who_second, Result_state, Messages_second),
-  ui_display_messages(Messages_second).
+  process_move(New_state, Move_second, Who_second, Result_state, Message_stack_second),
+  message_frame(Who_second, Message_stack_second, Message_frame_second),
+  ui_display_messages(Message_frame_second).
 
-process_move(State, switch(Team_member), Who, Result_state, msg(Who, Messages)) :-
+process_move(State, switch(Team_member), Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker),
   process_switch(State_attacker, Team_member, New_state_attacker, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state).
-process_move(State, _, Who, Result_state, msg(Who, Messages)) :-
+process_move(State, _, Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker),
   attacker_fainted(State_attacker),
   process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
   translate_attacker_state(Result_state_attacker, Who, Result_state).
-process_move(State, Move, Who, Result_state, msg(Who, Message)) :-
+process_move(State, Move, Who, Result_state, Messages) :-
   move(Move, _, status, acc(Accuracy), _,_,_,_,_),
   move_hits(Accuracy),
-  move_use_message(State, Who, Move, Message),
+  move_use_message(State, Who, Move, Messages),
   Result_state = State. % NYI: status moves
-process_move(State, Move, Who, Result_state, msg(Who, Messages)) :-
+process_move(State, Move, Who, Result_state, Messages) :-
   move(Move, _, Category, acc(Accuracy), _,_,Contact,Possible_hits,Additional),
   Category =.. [_,_],
   move_hits(Accuracy),
@@ -61,19 +65,17 @@ process_move(State, Move, Who, Result_state, msg(Who, Messages)) :-
   successful_hits(Attacker, Possible_hits, Hits),
   calculate_damage(State_attacker, Move, Damage),
   process_hits(State_attacker, Damage, Contact, Additional, Hits, New_state_attacker, Msg_hits),
-  fainted_messages(New_state_attacker, Msg_fainted),
-  append(Msg_hits, Msg_uses, Messages1),
-  append(Msg_fainted, Messages1, Messages),
+  push_message_stack(Msg_uses, Msg_hits, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
-process_move(State, Move, Who, State, msg(Who, Messages)) :-
+process_move(State, Move, Who, State, Messages) :-
   move_use_message(State, Who, Move, Msg_uses),
-  Messages = [move_missed | Msg_uses].
+  Messages = [user(move_missed) | Msg_uses].
 
 process_switch(state(Team_attacker, Team_target, Field), Team_member,
   state(New_team_attacker, Team_target, Field), Messages) :-
   Team_attacker = [[Out|_]|_],
   calculate_switch(Team_attacker, Team_member, New_team_attacker),
-  Messages = [switch(from(Out), to(Team_member))].
+  Messages = [user(switch(from(Out), to(Team_member)))].
 
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
   \+ rot(searching),
@@ -97,24 +99,27 @@ process_hits(State, Damage, Contact, Effects, Hits, Result_state, Messages) :-
   process_single_hit(State, Damage, Contact, Effects, New_state, Messages1),
   Remaining_hits is Hits - 1,
   process_hits(New_state, Damage, Contact, Effects, Remaining_hits, Result_state, Messages2),
-  append(Messages2, Messages1, Messages).
+  push_message_stack(Messages2, Messages1, Messages).
 
 process_single_hit(State, Damage, Contact, Effects, Result_state, Messages) :-
   \+ target_fainted(State),
   process_damage(State, Damage, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Contact, Contact_state, Msg_contact),
-  append(Msg_contact, Msg_damage, Messages1),
+  push_message_stack(Msg_contact, Msg_damage, Messages1),
   process_additional_effects(Contact_state, Effects, Result_state, Msg_effects),
-  append(Msg_effects, Messages1, Messages).
+  push_message_stack(Msg_effects, Messages1, Messages).
 process_single_hit(State, _, _, _, State, []) :-
   target_fainted(State).
 
-process_damage(State, 0, State, [no_effect]).
+process_damage(State, 0, State, [user(no_effect)]).
 process_damage(state(Team_attacker, [Target|Team_target], Field), Damage,
-  state(Team_attacker, [Result_target|Team_target], Field), [damaged(target(Name), kp(New_curr, Max))]) :-
+  state(Team_attacker, [Result_target|Team_target], Field), Messages) :-
   Target = [Name, kp(Curr, Max)|Rest_data],
   New_curr is max(0, min(Max, Curr - Damage)), % the minimum is required as healing is just negative damage
+  Msg1 = [target(damaged(pokemon(Name), kp(New_curr, Max)))],
   New_target = [Name, kp(New_curr, Max)|Rest_data],
+  (New_curr is 0 -> Msg2 = [target(fainted(Name))] ; Msg2 = []),
+  push_message_stack(Msg2, Msg1, Messages),
   process_fainting(New_target, Result_target).
 
 process_contact(State, nocontact, State, []). % nothing to do here
