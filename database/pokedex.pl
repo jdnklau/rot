@@ -473,7 +473,7 @@ pokemon(mienfoo, [fighing], stats(45,85,50,55,50,65), ['inner focus', regenerato
 pokemon(mienshao, [fighting], stats(65,125,60,95,60,105), ['inner focus', regenerator, reckless]).
 pokemon(mightyena, [dark], stats(70,90,70,60,60,70), [intimidate, 'quick feet', moxie]).
 pokemon(milotic, [water], stats(95,60,79,100,125,81), [competetive, 'marvel scale', 'cute charm']).
-pokemon(miltank, [normal], stats(95,80,105,40,70,100)), ['sap sipper', 'thick fat', scrappy]).
+pokemon(miltank, [normal], stats(95,80,105,40,70,100), ['sap sipper', 'thick fat', scrappy]).
 pokemon('mime jr.', [fairy, psychic], stats(20,25,45,70,90,60), [filter, technician, soundproof]).
 pokemon(minccino, [normal], stats(55,50,40,40,40,75), ['cute charm', technician, 'skill link']).
 pokemon(minun, [electric], stats(60,40,50,75,85,95), [minus, 'volt absorb']).
@@ -699,7 +699,7 @@ pokemon(suicune, [water], stats(100,75,115,90,115,85), [pressure]).
 pokemon(sunflora, [grass], stats(75,75,55,105,85,30), [chlorophyll, 'solar power', 'early bird']).
 pokemon(sunkern, [grass], stats(30,30,30,30,30,30), [chlorophyll, 'solar power', 'early bird']).
 pokemon(surskit, [bug, water], stats(40,30,32,50,52,65), ['rain dish', 'swift swim']).
-pokemon(swablu, [flying, normal], (stats(45,40,60,40,75,50), ['cloud nine', 'natural cure']).
+pokemon(swablu, [flying, normal], stats(45,40,60,40,75,50), ['cloud nine', 'natural cure']).
 pokemon(swadloon, [bug, grass], stats(55,63,90,50,80,42), [chlorophyll, overcoat, 'leaf guard']).
 pokemon(swalot, [poison], stats(100,73,83,73,83,55), [gluttony, 'sticky hold', 'liquid ooze']).
 pokemon(swampert, [ground, water], stats(100,110,90,85,90,60), [damp, torrent]).
@@ -796,8 +796,8 @@ pokemon(wingull, [flying, water], stats(40,30,30,55,30,85), ['keen eye', 'rain d
 pokemon(wobbuffet, [psychic], stats(190,33,58,33,58,33), ['shadow tag', telepathy]).
 pokemon(woobat, [flying, psychic], stats(55,45,43,55,43,72), [klutz, unaware, simple]).
 pokemon(wooper, [ground, water], stats(55,45,45,25,25,15), [unaware, damp, 'water absorb']).
-pokemon(wormadam, [bug, grass], stats(60,59,85,79,105,36), [anticipation, overcoat]).
-pokemon(sand(wormadam), [bug, ground], stats(60,79,105,59,85,36), [anticipation, overcoat]).
+pokemon(plant(wormadam), [bug, grass], stats(60,59,85,79,105,36), [anticipation, overcoat]).
+pokemon(sandy(wormadam), [bug, ground], stats(60,79,105,59,85,36), [anticipation, overcoat]).
 pokemon(trash(wormadam), [bug, steel], stats(60,69,95,69,95,36), [anticipation, overcoat]).
 pokemon(wurmple, [bug], stats(45,45,35,20,30,20), ['run away', 'shield dust']).
 pokemon(wynaut, [psychic], stats(95,23,48,23,48,23), ['shadow tag', telepathy]).
