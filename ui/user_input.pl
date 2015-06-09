@@ -6,17 +6,15 @@ ui_display_switch_prompt(Team) :-
   ui_display_player_team(Team).
 
 read_player_move(State, Move_player) :-
+  repeat,
   read(Move_player),
   State = state(Team_player, _, _),
   validate_player_move(Team_player, Move_player).
-read_player_move(T, M) :- % prepare for loop
-  read_player_move(T,M).
 
 read_player_switch(state(Team_player, _, _), Switch) :-
+  repeat,
   read(Switch),
   validate_player_switch(Team_player, Switch).
-read_player_switch(T, S) :-
-  read_player_switch(T, S).
 
 validate_player_move(_, run).
 validate_player_move(_, help) :- !,
@@ -37,7 +35,7 @@ validate_player_move([[Active_pokemon,_,Moves|_]|_], Move_choosen) :-
   ui_display_error(wrong_move, Active_pokemon, Move_choosen), fail.
 
 validate_player_switch([[Active_pokemon|_]|_], switch(Active_pokemon)) :-
-  ui_display_error(already_fighting, Active_pokemon), nl, fail.
+  ui_display_error(already_fighting, Active_pokemon), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   member([Name|Data], Team_pokemon),
