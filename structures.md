@@ -1,13 +1,13 @@
 # Quick overview about used data formats
 
 ## Game Handling
-+ Game State structure  
++ Game State  
   `state(Team_A, Team_B, Field_data)`
-+ Team structure  
++ Team  
   as list of 1 to 6 Pokemon, active Pokemon is head of list
 + Field_data structure  
   `[Field_A, Field_B, Field_global]`
-+ Pokemon structure  
++ Pokemon  
   `[Name, kp(Curr, Max), Moves, Status_data, Item, Status_conditions]`
   + Moves structure  
     `[[Move_1, PP_1], [Move_2, PP_2], [Move_3, PP_3], [Move_4, PP_4]]`
@@ -19,19 +19,25 @@
       `stat_increases(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
     + Status_conditions structure  
-      [Primary_condition, Secondary_conditions, Additional_conditions]  
+      `[Primary_condition, Secondary_conditions, Additional_conditions]`
       + Primary_condition  
         may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
         `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
       + Secondary_conditions  
         `[Confusion, Flinch, Focus_energy]` (NFI)  
-+ Messages structure  
-  `msg(Who, Messages)`  
++ Priority Frame  
+  `priorities(Priority_player, Priority_red)`  
+  + Priority
+    tuple `(Move_priority, Speed_stat)`  
+    + Move_priority  
+      is the priority level of the choosen move and ranges form -7 to 7
++ Messages Frame  
+  `msg(Who, Message_stack)`  
   + Who  
-    is either `you` or `rot`  
-  + Messages  
-    anti chronological list of combat events
-+ Search Tree structure  
+    is either `player` or `rot`  
+  + Message_stack  
+    stack of combat events; top of stack is the newest event
++ Search Tree  
   `tree(State, Nodes)`  
   + State  
     is the current game state
