@@ -8,3 +8,4 @@
 - complete damage calculation (calculation of certain factors)
 - add messages for effectiveness of moves
 - add messages for critical hits
+- alter stab/3 predicate
