@@ -1,3 +1,13 @@
+%! move(Name, Type, Category, Accuracy, Power_points, Priority, Contact_information, Hits, Effects)
+% @arg Name Name of the move
+% @arg Type One of the 18 elemental types
+% @arg Category Either `status` or `physical(Base_power)` or `special(Base_power)` where Base_power is an integer
+% @arg Accuracy Accuracy of the move, has the form `acc(Probability)`
+% @arg Power_points Power points of the move, has the form `pp(Integer)`
+% @arg Priority Priority of the move, has the form `prio(P)` where P ranges from -7 to 7
+% @arg Contact_information Information if move causes contact, either `contact` or `nocontact`
+% @arg Hits Number of hits the move causes, either an integer or `between(Minimum, Maximum)`
+% @arg Effects Either a list of effects inflicted by the move or `noeffect`
 move('aerial ace', flying, physical(60), acc(always),pp(20), prio(0), contact, 1, noeffect).
 move('air slash', flying, special(75), acc(95), pp(15), prio(0), nocontact, 1, [flinch(30)]).
 move('aura sphere', fighting, special(80), acc(always), pp(20), prio(0), nocontact, 1, noeffect).

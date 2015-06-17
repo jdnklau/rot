@@ -1,4 +1,7 @@
-% types
+%! type(Type)
+%
+% True if the given type is one of the 18 elemental types used in the game
+% @arg Type One of the 18 elemental types
 type(normal).
 type(fighting).
 type(flying).
@@ -18,7 +21,13 @@ type(dragon).
 type(dark).
 type(fairy).
 
-% type effectiveness
+%! typing(+Offending_type, +Defending_type, -Effectiveness)
+%
+% Gives the type effectiveness of the offending type over the defending type if
+% the type effectiveness is not 1
+% @arg Offending_type One of the 18 elemental types
+% @arg Defending_type One of the 18 elemental types
+% @arg Effectiveness A multiplicator to be considered at the damage calculation
 typing(normal, rock, 0.5).
 typing(normal, ghost, 0).
 typing(normal, steel, 0.5).
@@ -139,4 +148,4 @@ typing(fairy, steel, 0.5).
 typing(fairy, fire, 0.5).
 typing(fairy, dragon, 2).
 typing(fairy, dark, 2).
-typing(_, nil, 1).
+typing(_, nil, 1). % eventually not used, but safety first!

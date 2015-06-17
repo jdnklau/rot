@@ -1,3 +1,8 @@
+%! pokemon(Name, Types, Base_stats, Abilities)
+% @arg Name Name of the pokemon
+% @arg Types List of types of the pokemon
+% @arg Base_stats Has the form `stats(KP,Attack,Defense,Special Attack,Special Defense,Speed)`
+% @arg Abilities List of possible abilities availale to the pokemon
 pokemon(abomasnow, [grass, ice], stats(90,92,75,92,85,60), ['snow warning', soundproof]).
 pokemon(mega(abomasnow), [grass, ice], stats(90,132,405,132,105,30), ['snow warning']).
 pokemon(abra, [psychic], stats(25,20,15,105,55,90), ['inner focus', synchronize, 'magic guard']).
