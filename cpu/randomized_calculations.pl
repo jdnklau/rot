@@ -1,3 +1,10 @@
+rng_succeeds(always).
+rng_succeeds(100).
+rng_succeeds(P) :-
+  random(0, 101, R),
+  R =< P.
+
+
 successful_hits(_, Hits, Hits) :-
   integer(Hits).
 successful_hits(Attacker, between(_,Hits), Hits) :-
@@ -8,11 +15,8 @@ successful_hits(_, between(2,5), Hits) :-
 
 randomization_adjustment(0.85). % NFI
 
-move_hits(always).
-move_hits(100).
 move_hits(Acc) :-
-  random(0, 101, R),
-  R =< Acc.
+  rng_succeeds(Acc).
 
 move_hits_critical(Stage) :-
   Stage >= 3.
