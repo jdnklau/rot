@@ -4,6 +4,12 @@ primary_status_condition([_,_,_,_,_,[toxin(_)|_]], poison).
 primary_status_condition([_,_,_,_,_,[Condition|_]], Condition) :-
   Condition \= toxin(_).
 
+secondary_status_conditions([_,_,_,_,_,[_,Sec_conds,_]], Sec_conds).
+
+secondary_status_condition(Pokemon, Condition) :-
+  secondary_status_conditions(Pokemon, Sec_conds),
+  member(Condition, Sec_conds).
+
 hp_percent([_, kp(Curr, Max)|_], P) :-
   P is Curr / Max * 100.
 
