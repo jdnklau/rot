@@ -9,15 +9,15 @@ rng_succeeds(P) :-
   random(0, 101, R),
   R =< P.
 
-%! successful_hits(+Attacker, +Possible_number_of_hits, -Successfull_number_of_hits)
+%! successful_hits(+Attacker, +Possible_number_of_hits, -Successful_number_of_hits)
 %
 % Calculates eventually by RNG how many hits a move will land.
 % On a fixed number of hits this fixed number will be returned.
-% On a variable number of hits the RNG will decide how many hits actually will be successfull
+% On a variable number of hits the RNG will decide how many hits actually will be successful
 %
 % @arg Attacker The attacking pokemon's pokemon data
 % @arg Possible_number_of_hits Number of hits possible, either an integer or `between(Minimum, Maximum)`
-% @arg Successfull_number_of_hits Number of granted successfull hits
+% @arg Successful_number_of_hits Number of granted successful hits
 successful_hits(_, Hits, Hits) :-
   integer(Hits).
 successful_hits(Attacker, between(_,Hits), Hits) :-
