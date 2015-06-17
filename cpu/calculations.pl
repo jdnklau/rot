@@ -75,8 +75,8 @@ calculate_stab(Pokemon, Type, 2) :-
   ability(Pokemon, adaptability),
   types(Pokemon, Types),
   stab(Type, Types, 1.5).
-calculate_stab([Name|_], Type, Stab) :-
-  pokemon(Name, Types, _, _),
+calculate_stab(Pokemon, Type, Stab) :-
+  types(Pokemon, Types),
   stab(Type, Types, Stab).
 
 %! calculate_increased_stat(+Stat_before, +Stat_stage, -Stat_value)
