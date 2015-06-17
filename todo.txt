@@ -6,3 +6,5 @@
 - rectify handling of fainting pokemon
 - add predicate to extract a moves offensive and defensive categories and it's base power
 - complete damage calculation (calculation of certain factors)
+- add messages for effectiveness of moves
+- add messages for critical hits
