@@ -33,6 +33,9 @@ item([_,_,_,_,Item,_], Item).
 
 ability([_,_,_,[Ability|_],_,_], Ability).
 
+types([Name|_], Types) :-
+  pokemon(Name, Types, _, _).
+
 stats([_,_,_,[_,stats(Atk, Def, Spa, Spd, Spe),_,_],_,_], Atk, Def, Spa, Spd, Spe).
 atk_stat_by_category(Pokemon, physical, Atk) :-
   stats(Pokemon, Atk, _, _, _, _).
