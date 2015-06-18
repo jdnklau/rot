@@ -1,6 +1,6 @@
-%! opponent(+Player_1, +Player_2)
-%! opponent(+Player_1, -Player_2)
-%! opponent(-Player_1, +Player_2)
+%! opponent(+Player_1, +Player_2).
+%! opponent(+Player_1, -Player_2).
+%! opponent(-Player_1, +Player_2).
 %
 % True if the given two players are the opposing players _player_ and _rot_
 %
@@ -87,10 +87,10 @@ type_effectiveness(A, [T1, T2], E) :-
 stab(T, Ts, 1.5) :- member(T, Ts).
 stab(T, Ts, 1) :- \+ member(T, Ts).
 
-%! translate_attacker_state(+Game_state, +Attacker, -Attacker_state)
-%! translate_attacker_state(+Attacker_state, +Attacker, -Game_state)
-%! translate_attacker_state(-Game_state, +Attacker, +Attacker_state)
-%! translate_attacker_state(-Attacker_state, +Attacker, +Game_state)
+%! translate_attacker_state(+Game_state, +Attacker, -Attacker_state).
+%! translate_attacker_state(+Attacker_state, +Attacker, -Game_state).
+%! translate_attacker_state(-Game_state, +Attacker, +Attacker_state).
+%! translate_attacker_state(-Attacker_state, +Attacker, +Game_state).
 %
 % Translates a valid game state to a valid attacker state.
 % In the attacker state the attacking player is guaranteed to be the first player mentioned in
