@@ -1,3 +1,6 @@
+evolves_from(X,Y) :-
+  evolves_to(Y,X).
+
 % Kanto based evolutions
 evolves_to(bulbasaur,ivysaur).
 evolves_to(ivysaur,venusaur).
@@ -17,9 +20,9 @@ evolves_to(ekans,arbok).
 evolves_to(pichu,pikachu).
 evolves_to(pikachu,raichu).
 evolves_to(sandshrew,sandslash).
-evolves_to(nidoran-f,nidorina).
+evolves_to(nidoran-female,nidorina).
 evolves_to(nidorina,nidoqueen).
-evolves_to(nidoran-m,nidorino).
+evolves_to(nidoran-male,nidorino).
 evolves_to(nidorino,nidoking).
 evolves_to(cleffa,clefairy).
 evolves_to(clefairy,clefable).

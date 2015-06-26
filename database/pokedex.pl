@@ -462,7 +462,8 @@ pokemon(meditite, [fighting, psychic], stats(30,40,55,40,55,60), ['pure power', 
 pokemon(meganium, [grass], stats(80,82,100,83,100,80), ['leaf guard', overgrow]).
 pokemon(meloetta, [normal, psychic], stats(100,77,77,128,128,90), ['serene grace']).
 pokemon(pirouette(meloetta), [fighting, normal], stats(100,128,90,77,77,128), ['serene grace']).
-pokemon(meowstic, [psychic], stats(74,48,76,83,81,104), [competetive, 'keen eye', infiltrator, prankster]).
+pokemon(meowstic-female, [psychic], stats(74,48,76,83,81,104), [competetive, 'keen eye', infiltrator]).
+pokemon(meowstic-male, [psychic], stats(74,48,76,83,81,104), ['keen eye', infiltrator, prankster]).
 pokemon(meowth, [normal], stats(40,45,35,40,40,90), [technician, pickup, unnerve]).
 pokemon(mesprit, [psychic], stats(80,105,105,105,105,80), [levitate]).
 pokemon(metagross, [psychic, steel], stats(80,135,130,95,90,70), ['clear body', 'light metal']).
@@ -496,8 +497,8 @@ pokemon(musharna, [psychic], stats(116,55,85,107,95,29), [forewarn, telepathy, s
 pokemon(natu, [flying, psychic], stats(40,50,45,70,45,70), ['early bird', synchronize, 'magic bounce']).
 pokemon(nidoking, [ground, poison], stats(81,102,77,85,75,85), ['poison point', 'sheer force', rivalry]).
 pokemon(nidoqueen, [ground, poison], stats(90,92,87,75,85,76), ['poison point', 'sheer force', rivalry]).
-pokemon(nidoran-f, [poison], stats(55,47,52,40,40,41), [hustle, rivalry, 'poison point']).
-pokemon(nidoran-m, [poison], stats(46,57,40,40,40,50), [hustle, rivalry, 'poison point']).
+pokemon(nidoran-female, [poison], stats(55,47,52,40,40,41), [hustle, rivalry, 'poison point']).
+pokemon(nidoran-male, [poison], stats(46,57,40,40,40,50), [hustle, rivalry, 'poison point']).
 pokemon(nidorina, [poison], stats(70,62,67,55,55,56), [hustle, rivalry, 'poison point']).
 pokemon(nidorino, [poison], stats(61,72,57,55,55,65), [hustle, rivalry, 'poison point']).
 pokemon(nincada, [bug, ground], stats(31,45,90,30,30,40), ['compound eyes', 'run away']).
