@@ -56,3 +56,13 @@ write_tree_team([Lead|Rest]) :-
   write(Name), write(' at '), ui_display_percent(P),
   ui_display_primary_condition(Lead), write('- '),
   write_tree_team(Rest).
+
+test_evolutions :-
+  evolves_to(P1,P2),
+  test_pokemon_name(P1),
+  test_pokemon_name(P2),
+  fail.
+test_evolutions.
+
+test_pokemon_name(Name) :-
+  (pokemon(Name,_,_,_) ; write('unknown '),write(Name),nl),!.

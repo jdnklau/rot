@@ -1,8 +1,9 @@
 :- [test, teams].
-:- ['database/movedex',
-    'database/natures',
-    'database/pokedex',
-    'database/typechart'].
+:- [database/movedex,
+    database/natures,
+    database/pokedex,
+    database/typechart,
+    database/evolutions].
 :- [cpu/battle_processor,
     cpu/calculations,
     cpu/critical_hits,

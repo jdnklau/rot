@@ -10,7 +10,7 @@ pokemon(absol, [dark], stats(65,130,60,75,60,75), [justified, 'super luck', pres
 pokemon(mega(absol), [dark], stats(65,150,60,115,60,115), ['magic bounce']).
 pokemon(accelgor, [bug], stats(80,75,40,100,60,145), [hydration, unburden, 'sticky hold']).
 pokemon(blade(aegislash), [ghost, steel], stats(60,150,50,150,50,60), ['stance change']).
-pokemon(shield(aegislash), [ghost, steel], stats(60,50,150,50,150,60), ['stance change']).
+pokemon(aegislash, [ghost, steel], stats(60,50,150,50,150,60), ['stance change']).
 pokemon(aerodactyl, [flying, rock], stats(80,105,65,60,75,130), [pressure, unnerve, 'rock head']).
 pokemon(mega(aerodactyl), [flying, rock], stats(80,135,85,70,95,150), ['tough claws']).
 pokemon(aggron, [rock, steel], stats(70,110,180,60,60,50), ['heavy metal', sturdy, 'rock head']).
@@ -80,7 +80,7 @@ pokemon(beldum, [psychic, steel], stats(40,55,80,35,60,30), ['clear body', 'ligh
 pokemon(bellossom, [grass], stats(75,80,95,90,100,50), [chlorophyll, healer]).
 pokemon(bellsprout, [grass, poison], stats(50,75,35,70,30,40), [chlorophyll, gluttony]).
 pokemon(bergmite, [ice], stats(56,69,86,32,36,28), ['ice body', sturdy, 'own tempo']).
-pokemon(bibaral, [normal, water], stats(79,85,60,55,60,72), [moody, unaware, simple]).
+pokemon(bibarel, [normal, water], stats(79,85,60,55,60,72), [moody, unaware, simple]).
 pokemon(bidoof, [normal], stats(59,45,40,30,40,31), [moody, unaware, simple]).
 pokemon(binacle, [rock, water], stats(42,52,67,39,56,50), [pickpocket, 'tough claws', sniper]).
 pokemon(bisharp, [dark, steel], stats(65,125,100,60,70,70), [defiant, pressure, 'inner focus']).
@@ -89,7 +89,7 @@ pokemon(mega(blastoise), [water], stats(79, 103, 120, 135, 115, 78),['mega launc
 pokemon(blaziken, [fighting, fire], stats(80,120,70,110,70,80), [blaze, 'speed boost']).
 pokemon(mega(blaziken), [fighting, fire], stats(80,160,80,130,80,100), ['speed boost']).
 pokemon(blissey, [normal], stats(255,10,10,75,135,55), [healer, 'serene grace', 'natural core']).
-pokemon(blizle, [electric], stats(45,60,32,50,32,76), [lightningrod, 'sap sipper', 'motor drive']).
+pokemon(blitzle, [electric], stats(45,60,32,50,32,76), [lightningrod, 'sap sipper', 'motor drive']).
 pokemon(boldore, [rock], stats(70,105,105,50,40,20), ['sand force', sturdy]).
 pokemon(bonsly, [rock], stats(50,80,95,10,45,10), [rattled, sturdy, 'rock head']).
 pokemon(bouffalant, [normal], stats(95,110,95,40,95,55), [reckless, soundproof, 'sap sipper']).
@@ -141,7 +141,7 @@ pokemon(cinccino, [normal], stats(75,95,60,65,60,115), ['cute charm', technican,
 pokemon(clamperl, [water], stats(35,64,85,74,55,32), [rattled, 'shell armor']).
 pokemon(clauncher, [water], stats(50,53,62,58,63,44), ['mega launcher']).
 pokemon(clawitzer, [water], stats(71,73,88,120,89,59), ['mega launcher']).
-pokemon(clydol, [ground, psychic], stats(60,70,105,70,120,75), [levitate]).
+pokemon(claydol, [ground, psychic], stats(60,70,105,70,120,75), [levitate]).
 pokemon(clefable, [fairy], stats(95,70,73,95,90,60), ['cute charm', unaware, 'magic guard']).
 pokemon(clefairy, [fairy], stats(70,45,48,60,65,35), ['cute charm', unaware, 'magic guard']).
 pokemon(cleffa, [fairy], stats(50,25,28,45,55,15), ['cute charm', unaware, 'magic guard']).
@@ -189,7 +189,7 @@ pokemon(diggersby, [ground, normal], stats(85,56,77,50,77,78), ['cheek pouch', p
 pokemon(diglett, [ground], stats(10,55,25,35,45,95), ['arena trap', 'sand veil', 'sand force']).
 pokemon(ditto, [normal], stats(48,48,48,48,48,48), [imposter, limber]).
 pokemon(dodrio, [flying, normal], stats(60,110,70,60,60,100), ['early bird', 'tangled feet', 'run away']).
-pokemon(dodou, [flying, normal], stats(35,85,45,35,35,75), ['early bird', 'tangled feet', 'run away']).
+pokemon(doduo, [flying, normal], stats(35,85,45,35,35,75), ['early bird', 'tangled feet', 'run away']).
 pokemon(donphan, [ground], stats(90,120,120,60,60,50), ['sand veil', sturdy]).
 pokemon(doublade, [ghost, steel], stats(59,110,150,45,49,35), ['no guard']).
 pokemon(dragalge, [dragon, poison], stats(65,75,90,97,123,44), [adaptability, 'poison touch', 'poison point']).
@@ -341,7 +341,7 @@ pokemon(honedge, [ghost, steel], stats(45,80,100,35,37,28), ['no guard']).
 pokemon(hoopa, [ghost, psychic], stats(80,110,60,150,130,70), [magician]).
 pokemon(alt(hoopa), [dark, psychic], stats(80,160,60,170,130,80), [magician]).
 pokemon(hoothoot, [flying, normal], stats(60,30,30,36,56,50), [insomnia, 'tinted lens', 'keen eye']).
-pokemon(hopppip, [flying, grass], stats(35,35,40,35,55,50), [chlorophyll, 'leaf guard', infiltrator]).
+pokemon(hoppip, [flying, grass], stats(35,35,40,35,55,50), [chlorophyll, 'leaf guard', infiltrator]).
 pokemon(horsea, [water], stats(30,40,70,70,25,60), [damp, 'swift swim', sniper]).
 pokemon(houndoom, [dark, fire], stats(75,90,50,110,80,95), ['early bird', unnerve, 'flash fire']).
 pokemon(mega(houndoom), [dark, fire], stats(75,90,90,140,90,115), ['solar power']).
@@ -382,7 +382,7 @@ pokemon(krabby, [water], stats(30,105,90,25,25,50), ['hyper cutter', 'sheer forc
 pokemon(kricketot, [bug], stats(37,25,41,25,41,25), ['run away', 'shed skin']).
 pokemon(kricketune, [bug], stats(77,85,51,55,51,65), [swarm, technician]).
 pokemon(krokorok, [dark, ground], stats(60,82,45,45,45,74), ['anger point', moxie, intimidate]).
-pokemon(krookdile, [dark, ground], stats(95,117,80,65,70,92), ['anger point', moxie, intimidate]).
+pokemon(krookodile, [dark, ground], stats(95,117,80,65,70,92), ['anger point', moxie, intimidate]).
 pokemon(kyogre, [water], stats(100,100,90,150,140,90), [drizzle]).
 pokemon(primal(kyogre), [water], stats(100,150,90,180,160,90), ['primordial sea']).
 pokemon(kyurem, [dragon, ice], stats(125,130,90,130,90,95), [pressure]).
@@ -456,14 +456,13 @@ pokemon(marshtomp, [ground, water], stats(70,85,70,60,70,50), [torrent, damp]).
 pokemon(masquerain, [bug, flying], stats(70,60,62,80,82,60), [intimidate, unnerve]).
 pokemon(mawile, [fairy, steel], stats(50,85,85,55,55,50), ['hyper cutter', 'sheer force', intimidate]).
 pokemon(mega(mawile), [fairy, steel], stats(50,105,125,55,95,50), ['huge power']).
-pokemon(medichanm, [fighting, psychic], stats(60,60,75,60,75,80), ['pure power', telepathy]).
+pokemon(medicham, [fighting, psychic], stats(60,60,75,60,75,80), ['pure power', telepathy]).
 pokemon(mega(medicham), [fighting, psychic], stats(60,100,85,80,85,100), ['pure power']).
 pokemon(meditite, [fighting, psychic], stats(30,40,55,40,55,60), ['pure power', telepathy]).
 pokemon(meganium, [grass], stats(80,82,100,83,100,80), ['leaf guard', overgrow]).
 pokemon(meloetta, [normal, psychic], stats(100,77,77,128,128,90), ['serene grace']).
 pokemon(pirouette(meloetta), [fighting, normal], stats(100,128,90,77,77,128), ['serene grace']).
-pokemon(female(meowstic), [psychic], stats(74,48,76,83,81,104), [competetive, 'keen eye', infiltrator]).
-pokemon(male(meowstic), [psychic], stats(74,48,76,83,81,104), [infiltrator, prankster, 'keen eye']).
+pokemon(meowstic, [psychic], stats(74,48,76,83,81,104), [competetive, 'keen eye', infiltrator, prankster]).
 pokemon(meowth, [normal], stats(40,45,35,40,40,90), [technician, pickup, unnerve]).
 pokemon(mesprit, [psychic], stats(80,105,105,105,105,80), [levitate]).
 pokemon(metagross, [psychic, steel], stats(80,135,130,95,90,70), ['clear body', 'light metal']).
@@ -497,8 +496,8 @@ pokemon(musharna, [psychic], stats(116,55,85,107,95,29), [forewarn, telepathy, s
 pokemon(natu, [flying, psychic], stats(40,50,45,70,45,70), ['early bird', synchronize, 'magic bounce']).
 pokemon(nidoking, [ground, poison], stats(81,102,77,85,75,85), ['poison point', 'sheer force', rivalry]).
 pokemon(nidoqueen, [ground, poison], stats(90,92,87,75,85,76), ['poison point', 'sheer force', rivalry]).
-pokemon(female(nidoran), [poison], stats(55,47,52,40,40,41), [hustle, rivalry, 'poison point']).
-pokemon(male(nidoran), [poison], stats(46,57,40,40,40,50), [hustle, rivalry, 'poison point']).
+pokemon(nidoran-f, [poison], stats(55,47,52,40,40,41), [hustle, rivalry, 'poison point']).
+pokemon(nidoran-m, [poison], stats(46,57,40,40,40,50), [hustle, rivalry, 'poison point']).
 pokemon(nidorina, [poison], stats(70,62,67,55,55,56), [hustle, rivalry, 'poison point']).
 pokemon(nidorino, [poison], stats(61,72,57,55,55,65), [hustle, rivalry, 'poison point']).
 pokemon(nincada, [bug, ground], stats(31,45,90,30,30,40), ['compound eyes', 'run away']).
@@ -556,7 +555,7 @@ pokemon(ponyta, [fire], stats(50,85,55,65,65,90), ['flame body', 'run away', 'fl
 pokemon(poochyena, [dark], stats(35,55,35,30,30,35), ['quick feet', 'run away', rattled]).
 pokemon(porygon, [normal], stats(65,60,70,85,75,40), [analytic, trace, download]).
 pokemon(porygon-z, [normal], stats(85,80,70,135,75,90), [adaptability, download, analytic]).
-pokemon(porygon-2, [normal], stats(85,80,90,105,95,60), [analytic, trace, download]).
+pokemon(porygon2, [normal], stats(85,80,90,105,95,60), [analytic, trace, download]).
 pokemon(primeape, [fighting], stats(65,105,60,60,70,95), ['anger point', 'vital spirit', defiant]).
 pokemon(prinplup, [water], stats(64,66,68,81,76,50), [defiant, torrent]).
 pokemon(probopass, [rock, steel], stats(60,55,145,75,150,40), ['magnet pull', sturdy, ' sand force']).
@@ -732,7 +731,7 @@ pokemon(timburr, [fighting], stats(75,80,55,25,35,35), [guts, 'sheer force', 'ir
 pokemon(tirtouga, [rock, water], stats(54,78,103,53,45,22), ['solid rock', 'swift swim', sturdy]).
 pokemon(togekiss, [fairy, flying], stats(85,50,95,120,115,80), [hustle, 'super luck', 'serene grace']).
 pokemon(togepi, [fairy], stats(35,20,65,40,65,20), [hustle, 'super luck', 'serene grace']).
-pokemon(togekiss, [fairy, flying], stats(55,40,85,80,105,40), [hustle, 'super luck', 'serene grace']).
+pokemon(togetic, [fairy, flying], stats(55,40,85,80,105,40), [hustle, 'super luck', 'serene grace']).
 pokemon(torchic, [fire], stats(45,60,40,70,50,45), [blaze, 'speed boost']).
 pokemon(torkoal, [fire], stats(70,85,140,84,70,20), ['shell armor', 'white smoke']).
 pokemon(tornadus, [flying], stats(79,115,70,125,80,111), [defiant, prankster]).
