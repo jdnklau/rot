@@ -1,8 +1,20 @@
+%! evolves_from(+Successor, +Preevolution).
+%! evolves_from(+Successor, -Preevolution).
+%! evolves_from(-Successor, +Preevolution).
+% True if the successor evolves from the preevolution.
+% Equal to `evolves_to(Preevolution,Successor)`
+% @arg Successor The pokemon evolving from the given preevolution
+% @arg Preevolution The pokemon evolving into the given successor
 evolves_from(X,Y) :-
   evolves_to(Y,X).
 
-% Kanto based evolutions
-evolves_to(bulbasaur,ivysaur).
+%! evolves_to(+Preevolution, +Successor).
+%! evolves_to(+Preevolution, -Successor).
+%! evolves_to(-Preevolution, +Successor).
+% True if the preevolution evolves into the given successor
+% @arg Successor The pokemon evolving from the given preevolution
+% @arg Preevolution The pokemon evolving into the given successor
+evolves_to(bulbasaur,ivysaur). % <- Kanto-based evolutions from here
 evolves_to(ivysaur,venusaur).
 evolves_to(charmander,charmeleon).
 evolves_to(charmeleon,charizard).
@@ -107,8 +119,7 @@ evolves_to(kabuto,kabutops).
 evolves_to(munchlax,snorlax).
 evolves_to(dratini,dragonair).
 evolves_to(dragonair,dragonite).
-% Johto based evolutions
-evolves_to(chikorita,bayleef).
+evolves_to(chikorita,bayleef). % <- Johto-based evolutions from here
 evolves_to(bayleef,meganium).
 evolves_to(cyndaquil,quilava).
 evolves_to(quilava,typhlosion).
@@ -150,8 +161,7 @@ evolves_to(houndour,houndoom).
 evolves_to(phanpy,donphan).
 evolves_to(larvitar,pupitar).
 evolves_to(pupitar,tyranitar).
-% Hoen based evolutions
-evolves_to(treecko,grovyle).
+evolves_to(treecko,grovyle). % <- Hoenn-based evolutions from here
 evolves_to(grovyle,sceptile).
 evolves_to(torchic,combusken).
 evolves_to(combusken,blaziken).
@@ -218,8 +228,7 @@ evolves_to(bagon,shelgon).
 evolves_to(shelgon,salamence).
 evolves_to(beldum,metang).
 evolves_to(metang,metagross).
-% sinnoh bases evolutions
-evolves_to(turtwig,grotle).
+evolves_to(turtwig,grotle). % <- Sinnoh-based evolutions from here
 evolves_to(grotle,torterra).
 evolves_to(chimchar,monferno).
 evolves_to(monferno,infernape).
@@ -251,8 +260,7 @@ evolves_to(skorupi,drapion).
 evolves_to(croagunk,toxicroak).
 evolves_to(finneon,lumineon).
 evolves_to(snover,abomasnow).
-% Unova based evolutions
-evolves_to(snivy,servine).
+evolves_to(snivy,servine). % <- Unova-based evolutions from here
 evolves_to(servine,serperior).
 evolves_to(tepig,pignite).
 evolves_to(pignite,emboar).
@@ -326,8 +334,7 @@ evolves_to(vullaby,mandibuzz).
 evolves_to(deino,zweilous).
 evolves_to(zweilous,hydreigon).
 evolves_to(larvesta,volcarona).
-% Kalos bases evolutions
-evolves_to(chespin,quilladin).
+evolves_to(chespin,quilladin). % <- Kalos-based evolutions from here
 evolves_to(quilladin,chesnaught).
 evolves_to(fennekin,braixen).
 evolves_to(braixen,delphox).
