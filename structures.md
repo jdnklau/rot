@@ -63,11 +63,31 @@
     as list of possible abilities
 + Saving Move Data  
   as predicate `move/9`  
-  `move(Name, Type, Category_and_power, acc(Accuracy),pp(Power_points), prio(Priority), Contact, Hits, Additional_effects)`
+  `move(Name, Type, Category_and_power, acc(Accuracy),pp(Power_points), prio(Priority), Flags, Hits, Additional_effects)`
   + Category_and_power format  
     `physical(Power)` or `special(Power)` or `status`
-  + Contact format  
-    `contact` or `nocontact`
+  + Flags format  
+    a list containing a selection of the following flags (the list may be emtpy):
+    + `high-crit`: the move has a high critical hit ratio
+    + `always-crit`: the move always hits critically but for targets immune to critical hits
+    + `contact`: the move causes contact
+    + `charge`: the move needs to charge up and is executed in the following turn
+    + `recharge`: the user needs to recharge the following turn, thus skipping it doing nothing
+    + `protect` : the move is blocked by the use of _protect_ or similar moves
+    + `reflectable`: the move may be reflected with the ability _magic bounce_ or similar effects
+    + `snatch`: the move may be stolen by the use of _snatch_
+    + `mirror`: the move can by mirrored by the use of mirror move
+    + `punch`: the move is punch-based
+    + `sound`: the move is sound based
+    + `gravity`: the move is unusable during high gravity
+    + `defrost`: the move cures the _frozen_ status condition of the user
+    + `heal`: the move is blocked by _heal block_
+    + `authentic`: the move ignores a possible _substitute_ of the target
+    + `powder`: the move is powder-based
+    + `bite`: the move is jaw-based
+    + `pulse`: the move is pulse-based
+    + `ballistics`: the move is ballistics-based
+    + `mental`: the move has a mental effect on the target
   + Hits format  
     as number of guaranteed hits or `between(Minimum, Maximum)`
   + Additional_effects format  

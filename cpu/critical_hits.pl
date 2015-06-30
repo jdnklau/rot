@@ -33,8 +33,7 @@ critical_hit_multiplier(Attacker, Target, Field_target, Move, Final_critical_mul
 % @arg Move The move in question
 % @arg Stage_increase The critical hit stage increase by the given move
 crit_stage_increase_by_move(Move, 1) :-
-  move(Move,_,_,_,_,_,_,_,Additional),
-  member(high_crit_ratio, Additional).
+  move_has_flag(Move, high-crit).
 crit_stage_increase_by_move(_,0).
 
 %! crit_stage_increase_by_item(+Pokemon, +Item, -Stage_increase)

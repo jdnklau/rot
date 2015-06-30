@@ -138,3 +138,11 @@ rng_to_hits(2,3).
 rng_to_hits(3,3).
 rng_to_hits(4,4).
 rng_to_hits(5,5).
+
+%! move_has_flag(+Move,+Flag).
+% True if the given move has the given flag set in it's data
+% @arg Move The move in question
+% @arg Flag The flag in question
+move_has_flag(Move,Flag) :-
+  move(Move,_,_,_,_,_,Flags,_,_),
+  member(Flag, Flags).

@@ -133,7 +133,7 @@ process_move(State, Move, Who, Result_state, Messages) :-
   Result_state = State. % NYI: status moves
 process_move(State, Move, Who, Result_state, Messages) :-
   % move chosen: damaging move
-  move(Move, _, Category, acc(Accuracy), _,_,Contact,Possible_hits,Additional),
+  move(Move, _, Category, acc(Accuracy), _,_,Flags,Possible_hits,Additional),
   Category =.. [_,_],
   move_hits(Accuracy),
   translate_attacker_state(State, Who, State_attacker), % translate to attacker state
@@ -141,7 +141,7 @@ process_move(State, Move, Who, Result_state, Messages) :-
   move_use_message(State, Who, Move, Msg_uses),
   successful_hits(Attacker, Possible_hits, Hits),
   calculate_damage(State_attacker, Move, Damage),
-  process_hits(State_attacker, Damage, Contact, Additional, Hits, New_state_attacker, Msg_hits),
+  process_hits(State_attacker, Damage, Flags, Additional, Hits, New_state_attacker, Msg_hits),
   push_message_stack(Msg_uses, Msg_hits, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
 process_move(State, Move, Who, State, Messages) :-
@@ -196,45 +196,45 @@ process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
   process_switch(State_attacker, Switch, Result_state_attacker, Messages). % switch
 
 
-%! process_hits(+Attacker_state, +Damage, +Contact, +Effects, +Quantity, -Result_state, -Message_stack).
+%! process_hits(+Attacker_state, +Damage, +Flags, +Effects, +Quantity, -Result_state, -Message_stack).
 %
 % Processes the given damage to the target of the attacker state in given quantity.
 % For each consecutive hit process_single_hit/6 is called.
 %
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Damage The damage to be done by each consecutive hit
-% @arg Contact Whether or not the move causes contact; either `contact` or `nocontact`
+% @arg Flags Flags set for the move
 % @arg Effects Additional effects caused by the move, e.g. status conditions
 % @arg Quantity Number of hits to be done
 % @arg Result_state The resulting attacker state of the game after the hits
 % @arg Message_stack Stack of messages occured whilst processing
 % @see process_single_hit/6
 % @tbd Stop if one side has fainted
-process_hits(State, Damage, Contact, Effects, 1, Result_state, Messages) :-
+process_hits(State, Damage, Flags, Effects, 1, Result_state, Messages) :-
   % one hit left
-  process_single_hit(State, Damage, Contact, Effects, Result_state, Messages).
-process_hits(State, Damage, Contact, Effects, Hits, Result_state, Messages) :-
+  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages).
+process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
   % more than one hit left
-  process_single_hit(State, Damage, Contact, Effects, New_state, Messages1), % process a hit
+  process_single_hit(State, Damage, Flags, Effects, New_state, Messages1), % process a hit
   Remaining_hits is Hits - 1,
-  process_hits(New_state, Damage, Contact, Effects, Remaining_hits, Result_state, Messages2), % process remaining hits
+  process_hits(New_state, Damage, Flags, Effects, Remaining_hits, Result_state, Messages2), % process remaining hits
   push_message_stack(Messages2, Messages1, Messages). % push messages onto the stack
 
-%! process_single_hit(+Attacker_state, +Damage, +Contact, +Effects, -Result_state, -Message_stack).
+%! process_single_hit(+Attacker_state, +Damage, +Flags, +Effects, -Result_state, -Message_stack).
 %
 % Processes the given damage to the target of the attacker state and call routines
 % to handle possible effects caused by contact or the move itself
 %
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Damage The damage to be done
-% @arg Contact Whether or not the move causes contact; either `contact` or `nocontact`
+% @arg Flags Flags set for the move, e.g. contact
 % @arg Effects Additional effects caused by the move, e.g. status conditions
 % @arg Result_state The resulting attacker state of the game after the hit
 % @arg Message_stack Stack of messages occured whilst processing
-process_single_hit(State, Damage, Contact, Effects, Result_state, Messages) :-
+process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   \+ target_fainted(State), % there is a target to be damaged
   process_damage(State, Damage, Damaged_state, Msg_damage),
-  process_contact(Damaged_state, Contact, Contact_state, Msg_contact),
+  process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
   push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
   process_additional_effects(Contact_state, Effects, Result_state, Msg_effects),
   push_message_stack(Msg_effects, Messages1, Messages). % push messages
@@ -260,19 +260,20 @@ process_damage(state(Team_attacker, [Target|Team_target], Field), Damage, state(
   push_message_stack(Msg2, Msg1, Messages), % push push stack to the message stack
   process_fainting(New_target, Result_target).
 
-%! process_contact(+Attacker_state, +Contact, -Result_state, -Message_stack).
+%! process_contact(+Attacker_state, +Flags, -Result_state, -Message_stack).
 %
 % Processes effects on contact
 %
 % @arg Attacker_state The current state of the game from attacker point of view
-% @arg Contact Whether or not the move causes contact; either `contact` or `nocontact`
+% @arg Flags Flags set for the move; e.g. contact
 % @arg Result_state The resulting attacker state of the game after the contact was executed
 % @arg Message_stack Stack of messages occured whilst processing
 % @tbd processing contact
-process_contact(State, nocontact, State, []). % nothing to do here
-process_contact(State, contact, State, []). % NYI
+process_contact(State, Flags, State, []) :-
+  \+ member(contact,Flags). % nothing to do here as contact flag was not set
+process_contact(State, Flags, State, []). % NYI
 
-%! process_contact(+Attacker_state, +Effects, -Result_state, -Message_stack).
+%! process_additional_effects(+Attacker_state, +Effects, -Result_state, -Message_stack).
 %
 % Processes effects of a move
 %
