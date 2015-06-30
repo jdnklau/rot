@@ -13,6 +13,13 @@ critical_hit_multiplier(_, Target, _, _, 1):-
   ability(Target, Ability),
   member(Ability, ['battle armor', 'shell armor']),
   !. % red cut so that the ability has not to be tested again from the 2nd clause onward
+critical_hit_multiplier(Attacker, _, _, Move, Final_critical_multiplier) :-
+  % some moves always hit critically
+  move_has_flag(Move, always-crit),
+  !, % red cut
+  ability(Attacker, Ability),
+  crit_hit_base_multiplier(6, Critical_multiplier), % stage 3+ is a guaranteed crit, but 6 also would suffice for older game versions
+  crit_damage_increase_by_ability(Ability, Critical_multiplier, Final_critical_multiplier).
 critical_hit_multiplier(Attacker, Target, Field_target, Move, Final_critical_multiplier) :-
   % first calculate the critical stage of the attacker (integer from 0 to 4)
   crit_stage_increase_by_move(Move, Crit_attack), % category: move
