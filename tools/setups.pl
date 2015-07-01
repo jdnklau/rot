@@ -26,7 +26,7 @@ set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   set_up_move(M3, Move_3),
   set_up_move(M4, Move_4),
   Moves = [Move_1, Move_2, Move_3, Move_4],
-  pokemon(Name, _, stats(B_KP, B_Atk, B_Def, B_Spa, B_Spd, B_Ini),_), % get base stats
+  pokemon(Name, Types, stats(B_KP, B_Atk, B_Def, B_Spa, B_Spd, B_Ini),_), % get base stats
   set_up_kp(B_KP, KP),
   set_up_stat(B_Atk, Raw_Atk),
   set_up_stat(B_Def, Raw_Def),
@@ -36,8 +36,8 @@ set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   apply_nature(Nature,Raw_Atk, Raw_Def, Raw_Spa, Raw_Spd, Raw_Ini, Atk, Def, Spa, Spd, Ini),
   Result =
     [Name, kp(KP, KP), Moves,
-      [Ability, stats(Atk, Def, Spa, Spd, Ini), stat_increases(0,0,0,0,0), EV_DV],
-      Item, [nil, [nil, nil, nil], []]].
+      [Ability, stats(Atk, Def, Spa, Spd, Ini), Types, stat_increases(0,0,0,0,0), EV_DV],
+      Item, [nil, [], []]].
 
 %! set_up_kp(+Base_value, -Resulting_value)
 % Calculate the correct stat value from the base value

@@ -1,7 +1,5 @@
 %! fainted(+Pokemon).
-%
 % True if te given pokemon has fainted
-%
 % @arg Pokemon The pokemon data of the pokemon in question
 fainted([_,kp(0,_),_,_,_,[fainted|_]]).
 
@@ -12,6 +10,7 @@ fainted([_,kp(0,_),_,_,_,[fainted|_]]).
 % Alternatively can be used to extract the primary status condition of the
 % given pokemon.
 % A primary status condition of `nil` equals no primary status condition
+%
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Condition The primary status condition the given pokemon suffers
 primary_status_condition([_,_,_,_,_,[toxin(_)|_]], poison).
@@ -97,8 +96,15 @@ ability([_,_,_,[Ability|_],_,_], Ability).
 % Gives the type list of the given pokemon.
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Type_list A list containing the types of the given pokemon
-types([Name|_], Types) :-
-  pokemon(Name, Types, _, _).
+types([_,_,_,[_,_,Types|_]|_], Types).
+
+%! has_type(+Pokemon, +Type).
+% True if the given pokemon has (maybe not exclusively) the given type
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Type One of the elementary types used in pokemon
+has_type(Pokemon, Type) :-
+  types(Pokemon, Types),
+  member(Type, Types).
 
 %! stats(+Pokemon, -Attack, -Defense, -Special_attac, -Special_defense, -Speed).
 %
@@ -110,7 +116,7 @@ types([Name|_], Types) :-
 % @arg Special_attack The special attack stat
 % @arg Special_defense The special defense stat
 % @arg Speed The speed stat
-stats([_,_,_,[_,stats(Atk, Def, Spa, Spd, Spe),_,_],_,_], Atk, Def, Spa, Spd, Spe).
+stats([_,_,_,[_,stats(Atk, Def, Spa, Spd, Spe)|_]|_], Atk, Def, Spa, Spd, Spe).
 
 %! atk_stat_by_category(+Pokemon, +Category, -Attack_stat).
 %

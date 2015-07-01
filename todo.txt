@@ -1,7 +1,5 @@
-- add comments to the code % :x
 - add choice of lead
 - add primary status conditions
-- add type information to the pokemon game data structure
 - complete movedex
 - rectify handling of fainting pokemon
 - add predicate to extract a moves offensive and defensive categories and it's base power

@@ -12,9 +12,11 @@
   + Moves structure  
     `[[Move_1, PP_1], [Move_2, PP_2], [Move_3, PP_3], [Move_4, PP_4]]`
   + Status_data structure  
-    `[Ability, Stats, Stat_increases, EV_and_DV]`
+    `[Ability, Stats, Types, Stat_increases, EV_and_DV]`
     + Stats structure  
       `stats(Attack, Defense, Special_attack, Special_defense, Speed)`
+    + Types structure  
+      a list containing one or two of the elementary types used in pokemon
     + Stat_increases structure  
       `stat_increases(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
@@ -24,7 +26,12 @@
         may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
         `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
       + Secondary_conditions  
-        `[Confusion, Flinch, Focus_energy]` (NFI)  
+        a list of currently active secondary status conditions (may be empty)  
+        possible conditions are:  
+        + confused
+        + flinched
+        + energy-focus
+        + (NFI)  
 + Priority Frame  
   `priorities(Priority_player, Priority_red)`  
   + Priority
