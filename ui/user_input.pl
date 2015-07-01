@@ -24,7 +24,7 @@ validate_player_move(Team, info(Team_member)) :-
   ui_display_info([Team_member|Rest], you), fail.
 validate_player_move(Team, info(Team_member)) :-
   \+ member([Team_member|_], Team), !,
-  ui_display_error(not_in_team, Team_member), fail.
+  ui_display_input_error(not_in_team, Team_member, info(Team_member)), fail.
 validate_player_move(Team, switch(Team_mate)) :- !,
   validate_player_switch(Team, switch(Team_mate)).
 validate_player_move([[_,_,Moves|_]|_], Move_choosen) :-
@@ -32,10 +32,10 @@ validate_player_move([[_,_,Moves|_]|_], Move_choosen) :-
 validate_player_move([[Active_pokemon,_,Moves|_]|_], Move_choosen) :-
   \+ member([Move_choosen,_], Moves),
   Move_choosen \= switch(_),
-  ui_display_error(wrong_move, Active_pokemon, Move_choosen), fail.
+  ui_display_input_error(wrong_move, Active_pokemon, Move_choosen), fail.
 
 validate_player_switch([[Active_pokemon|_]|_], switch(Active_pokemon)) :-
-  ui_display_error(already_fighting, Active_pokemon), fail.
+  ui_display_input_error(already_fighting, Active_pokemon, switch(Active_pokemon)), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   member([Name|Data], Team_pokemon),
@@ -44,14 +44,14 @@ validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) 
   Name \= Active_pokemon,
   member([Name|Data], Team_pokemon),
   fainted([Name|Data]),
-  ui_display_error(already_fainted, Name), fail.
+  ui_display_input_error(already_fainted, Name, switch(Name)), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   \+ member([Name,_,_,_,_,_], Team_pokemon),
-  ui_display_error(not_in_team, Name), fail.
+  ui_display_input_error(not_in_team, Name, switch(Name)), fail.
 validate_player_switch(_, help) :-
   ui_display_help_switch, fail.
 validate_player_switch(_, Command) :-
   Command \= switch(_),
-  ui_display_error(wrong_command, Command),
+  ui_display_input_error(wrong_command, nil, Command),
   ui_display_help_switch, fail.
