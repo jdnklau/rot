@@ -30,7 +30,6 @@ start_battle(Team_player, Team_rot) :-
 
 run_battle(State) :-
   ui_display(State),
-  ui_display_move_prompt,
   read_player_move(State, Move_player),
   (
     Move_player = run, ui_display_run, ! ;

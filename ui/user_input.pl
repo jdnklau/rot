@@ -6,12 +6,14 @@ ui_display_switch_prompt(Team) :-
   ui_display_player_team(Team).
 
 read_player_move(State, Move_player) :-
+  ui_display_move_prompt,
   repeat,
   read(Move_player),
   State = state(Team_player, _, _),
   validate_player_move(Team_player, Move_player).
 
 read_player_switch(state(Team_player, _, _), Switch) :-
+  ui_display_switch_prompt(Team_player),
   repeat,
   read(Switch),
   validate_player_switch(Team_player, Switch).
