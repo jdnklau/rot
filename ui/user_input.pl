@@ -36,6 +36,12 @@ validate_player_move([[Active_pokemon,_,Moves|_]|_], Move_choosen) :-
   Move_choosen \= switch(_),
   ui_display_input_error(wrong_move, Active_pokemon, Move_choosen), fail.
 
+validate_player_switch(Team, info(Pokemon)) :- !, % red cut
+  % display information
+  validate_player_move(Team, info(Pokemon)).
+validate_player_switch(_, help) :-
+  % display help
+  !, ui_display_help_switch, fail.
 validate_player_switch([[Active_pokemon|_]|_], switch(Active_pokemon)) :-
   ui_display_input_error(already_fighting, Active_pokemon, switch(Active_pokemon)), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
@@ -45,7 +51,7 @@ validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) 
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
   member([Name|Data], Team_pokemon),
-  fainted([Name|Data]),
+  fainted([Name|Data]),!, % red cut
   ui_display_input_error(already_fainted, Name, switch(Name)), fail.
 validate_player_switch([[Active_pokemon,_,_,_,_,_]|Team_pokemon], switch(Name)) :-
   Name \= Active_pokemon,
