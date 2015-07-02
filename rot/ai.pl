@@ -1,11 +1,23 @@
+%! rot_choose_action(+State, -Action).
+% Let's Rot start his heuristics to choose an action for the next turn.
+% Called by read_rot_action/2 as that is the ment API predicate, so use that instead.
+% @arg Game_state The current state of the game
+% @arg Action The action rot has choosen
+% @see read_rot_action/2
 rot_choose_action(State, Move) :-
   write('rot chooses action'),nl,
-  asserta(rot(searching)),
-  create_tree(State,1, Tree),
+  asserta(rot(searching)), % rot(searching) allows usage of the game cpu as it allows different behaviour where it is needed
+  create_tree(State,1, Tree), % the integer is giving the depth of the search tree
   search_tree(Tree, (_,Move)),
   write('rot has choosen'),nl,
   retractall(rot(searching)).
 
+%! rot_choose_switch(+State, -Switch).
+% Let's Rot start his heuristics to choose a switch for the next turn.
+% Called by read_rot_switch/2 as that is the ment API predicate, so use that instead.
+% @arg Game_state The current state of the game
+% @arg Action The action rot has choosen
+% @see read_rot_search/2
 rot_choose_switch(state(_, Team, _), Switch) :-
   available_switches(Team, Available),
   rot_choose_random(Available, Switch).
