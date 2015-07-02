@@ -5,20 +5,20 @@ create_tree(State, Depth, tree(State, Nodes)) :-
 
 create_nodes(State, Depth, Nodes) :-
   State = state(Player, Rot, _),
-  available_moves(Player, Moves_player),
-  available_moves(Rot, Moves_rot),
-  create_nodes_acc(State, Depth, Nodes, Moves_player, Moves_rot, []).
+  available_actions(Player, Actions_player),
+  available_actions(Rot, Actions_rot),
+  create_nodes_acc(State, Depth, Nodes, Actions_player, Actions_rot, []).
 
 create_nodes_acc(State, Depth, Nodes, Mps, [Mr|Mrs], Curr_nodes) :-
-  create_nodes_by_rot_move(State, Depth, Mr, Mps, New_nodes),
+  create_nodes_by_rot_action(State, Depth, Mr, Mps, New_nodes),
   create_nodes_acc(State, Depth, Nodes, Mps, Mrs, [Mr:New_nodes|Curr_nodes]).
 create_nodes_acc(_,_,Nodes, _, [], Nodes).
 
-create_nodes_by_rot_move(_,_,_,[],[]).
-create_nodes_by_rot_move(State, Depth, Mr, [Mp|Mps], [Mp:Tree|Nodes]) :-
+create_nodes_by_rot_action(_,_,_,[],[]).
+create_nodes_by_rot_action(State, Depth, Mr, [Mp|Mps], [Mp:Tree|Nodes]) :-
   process_turn(State, Mp, Mr, New_state),
   create_tree(New_state, Depth, Tree),
-  create_nodes_by_rot_move(State, Depth, Mr, Mps, Nodes).
+  create_nodes_by_rot_action(State, Depth, Mr, Mps, Nodes).
 
 
 rate(state(Player, Rot, _), (Rating_p, Rating_r)) :-
@@ -36,51 +36,51 @@ rate_team_acc([], Rating, Num, P) :-
   Rating is P / Num.
 
 
-search_tree(tree(_, Nodes), Moves) :-
-  search_nodes(Nodes, Moves, _).
+search_tree(tree(_, Nodes), Actions) :-
+  search_nodes(Nodes, Actions, _).
 
-search_nodes(Nodes, Moves, Rating) :-
-  search_nodes_acc(Nodes, Moves, Rating, []).
+search_nodes(Nodes, Actions, Rating) :-
+  search_nodes_acc(Nodes, Actions, Rating, []).
 
-search_nodes_acc([Mr:Player_states|Nodes], Moves, Rating, All_outcomes) :-
-  search_player_states(Player_states, Move_player, Rating_player),
-  search_nodes_acc(Nodes, Moves, Rating, [(Mr, Move_player, Rating_player)|All_outcomes]).
-search_nodes_acc([], Moves, Rating, All_outcomes) :-
-  maximize_rot(All_outcomes, Moves, Rating).
+search_nodes_acc([Mr:Player_states|Nodes], Actions, Rating, All_outcomes) :-
+  search_player_states(Player_states, Action_player, Rating_player),
+  search_nodes_acc(Nodes, Actions, Rating, [(Mr, Action_player, Rating_player)|All_outcomes]).
+search_nodes_acc([], Actions, Rating, All_outcomes) :-
+  maximize_rot(All_outcomes, Actions, Rating).
 
-search_player_states(Player_states, Move_player, Rating) :-
-  search_player_states_acc(Player_states, Move_player, Rating, []).
+search_player_states(Player_states, Action_player, Rating) :-
+  search_player_states_acc(Player_states, Action_player, Rating, []).
 
-search_player_states_acc([Mp:Tree|States], Move, Rating, All_outcomes) :-
+search_player_states_acc([Mp:Tree|States], Action, Rating, All_outcomes) :-
   rate_tree(Tree, Tree_rating),
-  search_player_states_acc(States, Move, Rating, [(Mp, Tree_rating)|All_outcomes]).
-search_player_states_acc([], Move, Rating, All_outcomes) :-
-  maximize_player(All_outcomes, Move, Rating).
+  search_player_states_acc(States, Action, Rating, [(Mp, Tree_rating)|All_outcomes]).
+search_player_states_acc([], Action, Rating, All_outcomes) :-
+  maximize_player(All_outcomes, Action, Rating).
 
 rate_tree(tree(State, []), Rating) :-
   rate(State, Rating).
 rate_tree(tree(_, Nodes), Rating) :-
   search_nodes(Nodes, _, Rating).
 
-maximize_player([First|Data], Move, Rating) :-
-  maximize_player_acc(Data, Move, Rating, First).
-maximize_player_acc([(Top_move, Top_rating)|Data], Move, Rating, (_, Best_rating)) :-
+maximize_player([First|Data], Action, Rating) :-
+  maximize_player_acc(Data, Action, Rating, First).
+maximize_player_acc([(Top_action, Top_rating)|Data], Action, Rating, (_, Best_rating)) :-
   better_rating(Top_rating, Best_rating, player),
-  maximize_player_acc(Data, Move, Rating, (Top_move, Top_rating)).
-maximize_player_acc([(_, Top_rating)|Data], Move, Rating, (Best_move, Best_rating)) :-
+  maximize_player_acc(Data, Action, Rating, (Top_action, Top_rating)).
+maximize_player_acc([(_, Top_rating)|Data], Action, Rating, (Best_action, Best_rating)) :-
   \+ better_rating(Top_rating, Best_rating, player),
-  maximize_player_acc(Data, Move, Rating, (Best_move, Best_rating)).
-maximize_player_acc([], Move, Rating, (Move, Rating)).
+  maximize_player_acc(Data, Action, Rating, (Best_action, Best_rating)).
+maximize_player_acc([], Action, Rating, (Action, Rating)).
 
-maximize_rot([First|Data], Moves, Rating) :-
-  maximize_rot_acc(Data, Moves, Rating, First).
-maximize_rot_acc([(Top_mr, Top_mp, Top_ra)|Data], Moves, Rating, (_, _, Best_ra)) :-
+maximize_rot([First|Data], Actions, Rating) :-
+  maximize_rot_acc(Data, Actions, Rating, First).
+maximize_rot_acc([(Top_mr, Top_mp, Top_ra)|Data], Actions, Rating, (_, _, Best_ra)) :-
   better_rating(Top_ra, Best_ra, rot),
-  maximize_rot_acc(Data, Moves, Rating, (Top_mr, Top_mp, Top_ra)).
-maximize_rot_acc([(_, _, Top_ra)|Data], Moves, Rating, (Best_mr, Best_mp, Best_ra)) :-
+  maximize_rot_acc(Data, Actions, Rating, (Top_mr, Top_mp, Top_ra)).
+maximize_rot_acc([(_, _, Top_ra)|Data], Actions, Rating, (Best_mr, Best_mp, Best_ra)) :-
   \+ better_rating(Top_ra, Best_ra, rot),
-  maximize_rot_acc(Data, Moves, Rating, (Best_mr, Best_mp, Best_ra)).
-maximize_rot_acc([], (Move_player, Move_rot), Rating, (Move_rot, Move_player, Rating)).
+  maximize_rot_acc(Data, Actions, Rating, (Best_mr, Best_mp, Best_ra)).
+maximize_rot_acc([], (Action_player, Action_rot), Rating, (Action_rot, Action_player, Rating)).
 
 
 better_rating((R11, R12), (R21, R22), player) :-

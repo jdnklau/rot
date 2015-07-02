@@ -1,37 +1,37 @@
-%! process_turn(+Game_state, +Move_player, +Move_rot, -Result_state).
+%! process_turn(+Game_state, +Action_player, +Action_rot, -Result_state).
 %
-% Processes a single turn of the game by executing the given moves choosen by
+% Processes a single turn of the game by executing the given actions choosen by
 % the player and Rot, and thus altering the current state of the game.
 %
 % @arg Game_state The current state of the game
-% @arg Move_player The move the player has choosen to be executed this turn
-% @arg Move_rot The move Rot has choosen to be executed this turn
-% @arg Result_state The resulting state of the game after executing both moves
-process_turn(Game_state, Move_player, Move_rot, Result_state) :-
-  calculate_priorities(Game_state, Move_player, Move_rot, Priority_data),
-  process_by_priority(Game_state, Move_player, Move_rot, Priority_data, Result_state).
+% @arg Action_player The action the player has choosen to be executed this turn
+% @arg Action_rot The action Rot has choosen to be executed this turn
+% @arg Result_state The resulting state of the game after executing both actions
+process_turn(Game_state, Action_player, Action_rot, Result_state) :-
+  calculate_priorities(Game_state, Action_player, Action_rot, Priority_data),
+  process_by_priority(Game_state, Action_player, Action_rot, Priority_data, Result_state).
 
-%! process_by_priority(+Game_state, +Move_player, +Move_rot, +Priority_frame, -Result_state).
+%! process_by_priority(+Game_state, +Action_player, +Action_rot, +Priority_frame, -Result_state).
 %
-% Processes a single turn of the game by executing the given moves choosen by
-% the player and Rot depending on the priority of those moves. The move with
+% Processes a single turn of the game by executing the given actions choosen by
+% the player and Rot depending on the priority of those actions. The action with
 % the higher priority is obviously executed first.
 % The priority frame is given by a call of calculate_priorities/4
 %
 % @arg Game_state The current state of the game
-% @arg Move_player The move the player has choosen to be executed this turn
-% @arg Move_rot The move Rot has choosen to be executed this turn
+% @arg Action_player The action the player has choosen to be executed this turn
+% @arg Action_rot The action Rot has choosen to be executed this turn
 % @arg Priority_frame A frame containing the priorities of both players given by a call of calculate_priorities/4
-% @arg Result_state The resulting state of the game after executing both moves
+% @arg Result_state The resulting state of the game after executing both actions
 % @see calculate_priorities/4
-process_by_priority(State, Move_player, Move_rot, priorities(Prio_player, Prio_rot), Result_state) :-
+process_by_priority(State, Action_player, Action_rot, priorities(Prio_player, Prio_rot), Result_state) :-
   faster(Prio_player, Prio_rot), % succeds if player is faster
   !, % red cut to suppress useage of 2nd clause where Rot would be faster
-  process_moves(State, Move_player, Move_rot, player, New_state),
+  process_actions(State, Action_player, Action_rot, player, New_state),
   process_ends_of_turn(New_state, player, Result_state).
-process_by_priority(State, Move_player, Move_rot, _, Result_state) :-
-  % as faster/2 in 1st clause has failed, Rot's move has higher priority
-  process_moves(State, Move_rot, Move_player, rot, New_state),
+process_by_priority(State, Action_player, Action_rot, _, Result_state) :-
+  % as faster/2 in 1st clause has failed, Rot's action has higher priority
+  process_actions(State, Action_rot, Action_player, rot, New_state),
   process_ends_of_turn(New_state, rot, Result_state).
 
 %! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
@@ -82,57 +82,57 @@ process_fainted_check(state([Lead|Team], Target, Field), Who, Result_state, Mess
   process_fainted_routine(state([Lead|Team], Target, Field), Who, Result_state, Messages).
 process_fainted_check(State, _, State, []). % Lead has not fainted, so the game state does not change
 
-%! process_moves(+Game_state, +Move_first, +Move_second, +Who_first, -Result_state).
+%! process_actions(+Game_state, +Action_first, +Action_second, +Who_first, -Result_state).
 %
-% Calls process_move/5 for both players in order of their priorities.
+% Calls process_action/5 for both players in order of their priorities.
 % Also prints out the corresponding message frames.
 %
 % @arg Game_state The current state of the game
-% @arg Move_first The move to be executed first
-% @arg Move_second The move to be executed second
+% @arg Action_first The action to be executed first
+% @arg Action_second The action to be executed second
 % @arg Who_first Either `player` or `rot` to show who has higher priority this turn
 % @arg Result_state The resulting state of the game after executing the end of this turn for both players
-% @see process_move/5
-process_moves(State, Move_first, Move_second, Who_first, Result_state) :-
-  process_move(State, Move_first, Who_first, New_state, Message_stack_first),
+% @see process_action/5
+process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
+  process_action(State, Action_first, Who_first, New_state, Message_stack_first),
   message_frame(Who_first, Message_stack_first, Message_frame_first),
   ui_display_messages(Message_frame_first), % print message stack of faster player
   opponent(Who_first, Who_second), % get the slower player by name
-  process_move(New_state, Move_second, Who_second, Result_state, Message_stack_second),
+  process_action(New_state, Action_second, Who_second, Result_state, Message_stack_second),
   message_frame(Who_second, Message_stack_second, Message_frame_second),
   ui_display_messages(Message_frame_second). % print message stack of slower player
 
-%! process_move(+Game_state, +Move, +Attacking_player, -Result_state, -Message_stack).
+%! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_stack).
 %
-% Processes a given move depending of the given attacking player
+% Processes a given action depending of the given attacking player
 %
 % @arg Game_state The current state of the game
-% @arg Move The move to be executed
-% @arg Attacking_player The player who executes the given move; either `player` or `rot`.
-% @arg Result_state The resulting state of the game after executing the given move
+% @arg Action The action to be executed
+% @arg Attacking_player The player who executes the given action; either `player` or `rot`.
+% @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_stack Stack of messages occured whilst processing
-% @tbd alter the handling of status and damagng moves so they can handled together
+% @tbd alter the handling of status and damaging moves so they can be handled together
 % @tbd add check if a move has any effect in the first place
-process_move(State, switch(Team_member), Who, Result_state, Messages) :-
-  % move chosen: a switch
+process_action(State, switch(Team_member), Who, Result_state, Messages) :-
+  % action chosen: a switch
   translate_attacker_state(State, Who, State_attacker), % translate state to attacker state
   process_switch(State_attacker, Team_member, New_state_attacker, Messages), % process the switch
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-process_move(State, _, Who, Result_state, Messages) :-
+process_action(State, _, Who, Result_state, Messages) :-
   % attacking pokemon has fainted before it could attack
   translate_attacker_state(State, Who, State_attacker), % translate to attacker state
   attacker_fainted(State_attacker), % active pokemon of attacker has fainted
   process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
   translate_attacker_state(Result_state_attacker, Who, Result_state). % translate result back
-process_move(State, Move, Who, Result_state, Messages) :-
-  % move chosen: status move
+process_action(State, Move, Who, Result_state, Messages) :-
+  % action chosen: status move
   % NYI
   move(Move, _, status, acc(Accuracy), _,_,_,_,_),
   move_hits(Accuracy),
   move_use_message(State, Who, Move, Messages),
   Result_state = State. % NYI: status moves
-process_move(State, Move, Who, Result_state, Messages) :-
-  % move chosen: damaging move
+process_action(State, Move, Who, Result_state, Messages) :-
+  % action chosen: damaging move
   move(Move, _, Category, acc(Accuracy), _,_,Flags,Possible_hits,Additional),
   Category =.. [_,_],
   move_hits(Accuracy),
@@ -144,7 +144,7 @@ process_move(State, Move, Who, Result_state, Messages) :-
   process_hits(State_attacker, Damage, Flags, Additional, Hits, New_state_attacker, Msg_hits),
   push_message_stack(Msg_uses, Msg_hits, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-process_move(State, Move, Who, State, Messages) :-
+process_action(State, Move, Who, State, Messages) :-
   % move has missed
   move_use_message(State, Who, Move, Msg_uses),
   Messages = [user(move_missed) | Msg_uses].

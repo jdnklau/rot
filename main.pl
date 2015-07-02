@@ -30,11 +30,11 @@ start_battle(Team_player, Team_rot) :-
 
 run_battle(State) :-
   ui_display(State),
-  read_player_move(State, Move_player),
+  read_player_action(State, Action_player),
   (
-    Move_player = run, ui_display_run, ! ;
-    read_rot_move(State, Move_rot),nl,
-    process_turn(State, Move_player, Move_rot, New_state),
+    Action_player = run, ui_display_run, ! ;
+    read_rot_action(State, Action_rot),nl,
+    process_turn(State, Action_player, Action_rot, New_state),
     (
       game_over(New_state) ;
       run_battle(New_state)

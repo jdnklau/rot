@@ -1,25 +1,24 @@
-%! calculate_priorities(+Game_state, +Move_player, +Move_rot, -Priority_frame)
+%! calculate_priorities(+Game_state, +Action_player, +Action_rot, -Priority_frame)
 %
-% Calculates the priority frame based on the move priorities and th active pokemons
+% Calculates the priority frame based on the actions priorities and th active pokemons
 % speed. Called by process_by_priority/5
 %
 % @arg Game_state Current state of the game
-% @arg Move_player The move choosen by the player
-% @arg Move_player The move choosen by rot
-% @arg Priority_frame The priority frame containing information about whoms move shall be executed first
+% @arg Action_player The action choosen by the player
+% @arg Action_player The action choosen by rot
+% @arg Priority_frame The priority frame containing information about whoms action shall be executed first
 % @see process_by_priority/5
-calculate_priorities(state(Team_player, Team_rot, _), Move_player, Move_rot,
-  priorities(Priority_player, Priority_rot)) :-
-  calculate_priority(Team_player, Move_player, Priority_player),
-  calculate_priority(Team_rot, Move_rot, Priority_rot).
+calculate_priorities(state(Team_player, Team_rot, _), Action_player, Action_rot, priorities(Priority_player, Priority_rot)) :-
+  calculate_priority(Team_player, Action_player, Priority_player),
+  calculate_priority(Team_rot, Action_rot, Priority_rot).
 
-%! calculate_priority(+Team, +Move, -Priority_tuple)
+%! calculate_priority(+Team, +Action, -Priority_tuple)
 %
-% Calculates the tuple (priority of move, speed stat of active pokemon).
+% Calculates the tuple (priority of action, speed stat of active pokemon).
 %
-% @arg Team The team of the pokemon using the given move
-% @arg Move The move used by the active pokemon of the given team
-% @arg Priority_tuple A tuple containing information about the move priority and the user's speed
+% @arg Team The team of the player using the given action
+% @arg Action Either the action used by the active pokemon of the given team or a switch
+% @arg Priority_tuple A tuple containing information about the action priority and the user's speed
 calculate_priority([Lead|_], switch(_), (6,Speed)) :-
   % a switch ha a fixed priority of 6
   stats(Lead,_,_,_,_,Speed).
@@ -30,6 +29,7 @@ calculate_priority([Lead|_], Move, (Move_priority_by_prankster, Speed)) :-
   Move_priority_by_prankster is Move_priority + 1,
   stats(Lead,_,_,_,_,Speed).
 calculate_priority([Lead|_], Move, (Move_priority, Speed)) :-
+  % base case: a damaging move
   move(Move, _,_,_,_, prio(Move_priority),_,_,_),
   stats(Lead,_,_,_,_,Speed).
 

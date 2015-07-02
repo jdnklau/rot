@@ -1,4 +1,3 @@
-
 %! ui_display_battle_start(+Team_player, +Team_rot)
 % Displays both teams and the help dialog
 % @arg Team_player The player's team

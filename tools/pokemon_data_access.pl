@@ -45,12 +45,23 @@ secondary_status_condition(Pokemon, Condition) :-
 hp_percent([_, kp(Curr, Max)|_], P) :-
   P is Curr / Max * 100.
 
+%! available_actions(+Team, -Available_actions).
+%
+% Gives a list of available actions (moves switches) the owner of the team can use.
+%
+% @arg Team The team in question
+% @arg Available_actionss A list of actions available to the team
+available_actions(Team, Available) :-
+  available_moves(Team, Available_moves), % moves
+  available_switches(Team, Available_switches), % switches
+  append(Available_moves, Available_switches, Available). % moves and switches together
+
 %! available_switches(+Team, -Available_switches).
 %
 % Gives a list of availale pokemon the active pokemon can be switched out with
 %
 % @arg Team The team in question
-% @arg Available_switches List of switch(_) moves available to the given team
+% @arg Available_switches List of switch(_) actions available to the given team
 available_switches([_|Team], Available) :-
   available_switches_acc(Team, [], Available). % call accumulator
 available_switches_acc([Pokemon|Rest], List, Available) :-
@@ -64,17 +75,16 @@ available_switches_acc([], Available, Available).
 
 %! available_moves(+Team, -Available_moves)
 %
-% Gives a list of moves (including switches) available to the given team.
+% Gives a list of moves available to the given team.
 %
 % @arg Team The team in question
 % @arg Available_moves A list of moves available to the team
 % @tbd Check for remaining power points
 % @tbd Check for blocked moves
 % @tbd Check for moves the active pokemon could be locked to
-available_moves([Lead|Team], [M1, M2, M3, M4|Available_switches]) :-
+available_moves([Lead|Team], [M1, M2, M3, M4]) :-
   Lead = [_, _, Moves|_],
-  Moves = [[M1,_], [M2,_], [M3,_], [M4,_]],
-  available_switches([Lead|Team], Available_switches).
+  Moves = [[M1,_], [M2,_], [M3,_], [M4,_]].
 
 %! item(+Pokemon, +Item).
 %! item(+Pokemon, -Item).

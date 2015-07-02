@@ -1,7 +1,7 @@
-%! ui_display_move_prompt.
-% Prompts the player to enter a move for this turn.
-ui_display_move_prompt :-
-  write('choose your move:'), nl.
+%! ui_display_action_prompt.
+% Prompts the player to enter a action for this turn.
+ui_display_action_prompt :-
+  write('choose your action:'), nl.
 
 %! ui_display_switch_prompt(+Team).
 % Prompts the player to choose a pokemon to switch to and lists the players team.
@@ -10,39 +10,39 @@ ui_display_switch_prompt(Team) :-
   write('choose a pokemon to switch in:'), nl,
   ui_display_player_team(Team).
 
-%! read_player_move(+Game_state, -Move).
-% Prompts the player to enter a move, reads player input and validates it.
-% The input/validate process is repeated until the player entered a valid move.
+%! read_player_action(+Game_state, -Action).
+% Prompts the player to enter an action, reads player input and validates it.
+% The input/validate process is repeated until the player entered a valid action.
 % @arg Game_state The current state of the game
-% @arg Move A valid move the player entered.
-read_player_move(State, Move_player) :-
-  ui_display_move_prompt, %prompt player
+% @arg Action A valid action the player entered.
+read_player_action(State, Action_player) :-
+  ui_display_action_prompt, %prompt player
   repeat, % we need to loop as long as the validation fails
-  read(Move_player),
+  read(Action_player),
   State = state(Team_player, _, _),
-  validate_player_move(Team_player, Move_player).
+  validate_player_action(Team_player, Action_player).
 
 %! read_player_switch(+Game_state, -Switch).
 % Prompts the player to enter a switch, reads player input and validates it.
 % The input/validate process is repeated until the player entered a valid switch.
 % @arg Game_state The current state of the game
-% @arg Move A valid move the player entered.
+% @arg Action A valid action the player entered.
 read_player_switch(state(Team_player, _, _), Switch) :-
   ui_display_switch_prompt(Team_player), % prompt player
   repeat, % we need to loop as long as the validation fails
   read(Switch),
   validate_player_switch(Team_player, Switch).
 
-%! validate_player_move(+Team, +Move).
-% True if the given move can be executed by the player.
-% Valid moves are:
+%! validate_player_action(+Team, +Action).
+% True if the given action can be executed by the player.
+% Valid actions are:
 % - run
 % - switch(Pokemon) as long
 %   - Pokemon is in the team
 %   - Pokemon is not the active pokemon
 %   - Pokemon has not yet fainted
 % - one of the four moves of the pokemon as long as the move has pp left
-% Alternatively one can enter the following moves:
+% Alternatively one can enter the following actions:
 % - help, this displays the command overview
 % - info(Pokemon), this displays the information of a specific team pokemon
 %   - Pokemon has to be in the team
@@ -50,28 +50,28 @@ read_player_switch(state(Team_player, _, _), Switch) :-
 % this predicate failing with a proper error message.
 %
 % @arg Team The player's team
-% @arg Move The player's choosen move
+% @arg Action The player's choosen action
 % @see validate_player_switch/2
-validate_player_move(_, run). % ends the battle
-validate_player_move(_, help) :- !, % red cut
+validate_player_action(_, run). % ends the battle
+validate_player_action(_, help) :- !, % red cut
   % display help
   ui_display_help, fail.
-validate_player_move(Team, info(Team_member)) :-
+validate_player_action(Team, info(Team_member)) :-
   % display team member information
   member([Team_member|Rest], Team), !, % red cut
   ui_display_info([Team_member|Rest], you), fail.
-validate_player_move(_Team, info(Team_member)) :- !, % red cut
+validate_player_action(_Team, info(Team_member)) :- !, % red cut
   % information about a non-existent team member
   %\+ member([Team_member|_], Team), !, % member/2 check already in the clause above
   ui_display_input_error(not_in_team, Team_member, info(Team_member)), fail.
-validate_player_move(Team, switch(Team_mate)) :- !,
+validate_player_action(Team, switch(Team_mate)) :- !,
   % switch team mate (has it's own predicate)
   validate_player_switch(Team, switch(Team_mate)).
-validate_player_move([[_,_,Moves|_]|_], Move_choosen) :-
+validate_player_action([[_,_,Moves|_]|_], Move_choosen) :-
   % pokemon move
   member([Move_choosen,_], Moves), !.
-validate_player_move([[Active_pokemon,_,_Moves|_]|_], Move_choosen) :-
-  % to the active pokemon unknown move
+validate_player_action([[Active_pokemon,_,_Moves|_]|_], Move_choosen) :-
+  % a to the active pokemon unknown move
   %\+ member([Move_choosen,_], Moves), % member/2 check already in the clause above
   Move_choosen \= switch(_),
   ui_display_input_error(wrong_move, Active_pokemon, Move_choosen), fail.
@@ -93,7 +93,7 @@ validate_player_move([[Active_pokemon,_,_Moves|_]|_], Move_choosen) :-
 % @arg Switch The pokemon name of the pokemon the player wants to switch to
 validate_player_switch(Team, info(Pokemon)) :- !, % red cut
   % display information
-  validate_player_move(Team, info(Pokemon)).
+  validate_player_action(Team, info(Pokemon)).
 validate_player_switch(_, help) :-
   % display help
   !, ui_display_help_switch, fail.
