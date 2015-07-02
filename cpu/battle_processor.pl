@@ -1,26 +1,26 @@
-%! process_round(+Game_state, +Move_player, +Move_rot, -Result_state).
+%! process_turn(+Game_state, +Move_player, +Move_rot, -Result_state).
 %
-% Processes a single round of the game by executing the given moves choosen by
+% Processes a single turn of the game by executing the given moves choosen by
 % the player and Rot, and thus altering the current state of the game.
 %
 % @arg Game_state The current state of the game
-% @arg Move_player The move the player has choosen to be executed this round
-% @arg Move_rot The move Rot has choosen to be executed this round
+% @arg Move_player The move the player has choosen to be executed this turn
+% @arg Move_rot The move Rot has choosen to be executed this turn
 % @arg Result_state The resulting state of the game after executing both moves
-process_round(Game_state, Move_player, Move_rot, Result_state) :-
+process_turn(Game_state, Move_player, Move_rot, Result_state) :-
   calculate_priorities(Game_state, Move_player, Move_rot, Priority_data),
   process_by_priority(Game_state, Move_player, Move_rot, Priority_data, Result_state).
 
 %! process_by_priority(+Game_state, +Move_player, +Move_rot, +Priority_frame, -Result_state).
 %
-% Processes a single round of the game by executing the given moves choosen by
+% Processes a single turn of the game by executing the given moves choosen by
 % the player and Rot depending on the priority of those moves. The move with
 % the higher priority is obviously executed first.
 % The priority frame is given by a call of calculate_priorities/4
 %
 % @arg Game_state The current state of the game
-% @arg Move_player The move the player has choosen to be executed this round
-% @arg Move_rot The move Rot has choosen to be executed this round
+% @arg Move_player The move the player has choosen to be executed this turn
+% @arg Move_rot The move Rot has choosen to be executed this turn
 % @arg Priority_frame A frame containing the priorities of both players given by a call of calculate_priorities/4
 % @arg Result_state The resulting state of the game after executing both moves
 % @see calculate_priorities/4
@@ -28,41 +28,41 @@ process_by_priority(State, Move_player, Move_rot, priorities(Prio_player, Prio_r
   faster(Prio_player, Prio_rot), % succeds if player is faster
   !, % red cut to suppress useage of 2nd clause where Rot would be faster
   process_moves(State, Move_player, Move_rot, player, New_state),
-  process_ends_of_round(New_state, player, Result_state).
+  process_ends_of_turn(New_state, player, Result_state).
 process_by_priority(State, Move_player, Move_rot, _, Result_state) :-
   % as faster/2 in 1st clause has failed, Rot's move has higher priority
   process_moves(State, Move_rot, Move_player, rot, New_state),
-  process_ends_of_round(New_state, rot, Result_state).
+  process_ends_of_turn(New_state, rot, Result_state).
 
-%! process_ends_of_round(+Game_state, +Who_first, -Result_state).
+%! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
 %
-% Calls process_end_of_round/4 for both players in order of their priorities.
+% Calls process_end_of_turn/4 for both players in order of their priorities.
 % Also prints out the corresponding message frames.
 %
 % @arg Game_state The current state of the game
-% @arg Who_first Either `player` or `rot` to show who has higher priority this round
-% @arg Result_state The resulting state of the game after executing the end of this round for both players
-% @see process_end_of_round/4
-process_ends_of_round(State, Who_first, Result_state) :-
-  process_end_of_round(State, Who_first, New_state, Message_stack_first), % end of round for faster player
+% @arg Who_first Either `player` or `rot` to show who has higher priority this turn
+% @arg Result_state The resulting state of the game after executing the end of this turn for both players
+% @see process_end_of_turn/4
+process_ends_of_turn(State, Who_first, Result_state) :-
+  process_end_of_turn(State, Who_first, New_state, Message_stack_first), % end of turn for faster player
   message_frame(Who_first, Message_stack_first, Message_frame_first), % create the message frame of the faster player
   ui_display_messages(Message_frame_first), % print message frame
   opponent(Who_first, Who_second), % get the slower player by name
-  process_end_of_round(New_state, Who_second, Result_state, Message_stack_second), % end of round for slower player
+  process_end_of_turn(New_state, Who_second, Result_state, Message_stack_second), % end of turn for slower player
   message_frame(Who_second, Message_stack_second, Message_frame_second), % create the message frame of the slower player
   ui_display_messages(Message_frame_second). % print message frame
 
-%! process_end_of_round(+Game_state, +Who, -Result_state, -Message_stack).
+%! process_end_of_turn(+Game_state, +Who, -Result_state, -Message_stack).
 %
-% Processes the end of the current round for the given player and calculates regular
+% Processes the end of the current turn for the given player and calculates regular
 % damage and healing from hold items and status conditions
 %
 % @arg Game_state The current state of the game
 % @arg Who Either `player` or `rot`
-% @arg Result_state The resulting state of the game after executing the end of this round for the given player
+% @arg Result_state The resulting state of the game after executing the end of this turn for the given player
 % @arg Message_stack Stack of messages occured whilst processing
 % @tbd Everything
-process_end_of_round(State, Who, Result_state, Messages) :-
+process_end_of_turn(State, Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker),
   process_fainted_check(State_attacker, Who, New_state_attacker, Messages),
   translate_attacker_state(New_state_attacker, Who, Result_state).
@@ -90,8 +90,8 @@ process_fainted_check(State, _, State, []). % Lead has not fainted, so the game 
 % @arg Game_state The current state of the game
 % @arg Move_first The move to be executed first
 % @arg Move_second The move to be executed second
-% @arg Who_first Either `player` or `rot` to show who has higher priority this round
-% @arg Result_state The resulting state of the game after executing the end of this round for both players
+% @arg Who_first Either `player` or `rot` to show who has higher priority this turn
+% @arg Result_state The resulting state of the game after executing the end of this turn for both players
 % @see process_move/5
 process_moves(State, Move_first, Move_second, Who_first, Result_state) :-
   process_move(State, Move_first, Who_first, New_state, Message_stack_first),

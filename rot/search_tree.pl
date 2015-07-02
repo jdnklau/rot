@@ -16,7 +16,7 @@ create_nodes_acc(_,_,Nodes, _, [], Nodes).
 
 create_nodes_by_rot_move(_,_,_,[],[]).
 create_nodes_by_rot_move(State, Depth, Mr, [Mp|Mps], [Mp:Tree|Nodes]) :-
-  process_round(State, Mp, Mr, New_state),
+  process_turn(State, Mp, Mr, New_state),
   create_tree(New_state, Depth, Tree),
   create_nodes_by_rot_move(State, Depth, Mr, Mps, Nodes).
 

@@ -34,7 +34,7 @@ run_battle(State) :-
   (
     Move_player = run, ui_display_run, ! ;
     read_rot_move(State, Move_rot),nl,
-    process_round(State, Move_player, Move_rot, New_state),
+    process_turn(State, Move_player, Move_rot, New_state),
     (
       game_over(New_state) ;
       run_battle(New_state)
