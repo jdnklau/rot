@@ -18,6 +18,55 @@ primary_status_condition([_,_,_,_,_,[toxin(_)|_]], poison).
 primary_status_condition([_,_,_,_,_,[Condition|_]], Condition) :-
   Condition \= toxin(_).
 
+%! inflict_primary_status_condition(+Attacker_state, +Condition, -Result_state).
+%
+% Attempts to inflict a given primary status condition to the target pokemon.
+% - Pokemon already suffering a primary status condition can not be inflicted, neither do fainted ones.
+% - Fire pokemon can not be burned.
+% - Electro pokemon can not be paralyzed
+% - Ice pokemon can not be frozen
+%
+% @arg Attacker_state The game state from the attackers point of view
+% @arg Condition One of the primary status conditions
+% @arg Result_state The resulting attacker state
+inflict_primary_status_condition(State, _, State) :-
+  % already has a primary status condition
+  State = state(_,[Pokemon|_],_),
+  primary_status_condition(Pokemon, Curr_cond),
+  Curr_cond \= nil.
+inflict_primary_status_condition(State, burn, State) :-
+  % fire pokemon can not be burned
+  State = state(_,[Pokemon|_],_),
+  has_type(Pokemon, fire).
+inflict_primary_status_condition(State, paralyze, State) :-
+  % electro pokemon can not be paralyzed
+  State = state(_,[Pokemon|_],_),
+  has_type(Pokemon, electro).
+inflict_primary_status_condition(State, freeze, State) :-
+  % ice pokemon can not be frozen
+  State = state(_,[Pokemon|_],_),
+  has_type(Pokemon, ice).
+inflict_primary_status_condition(State, Cond, Result) :-
+  % base case
+  State = state(Attacker,[Pokemon|Team],Field),
+  primary_status_condition(Pokemon, nil),
+  set_primary_status_condition(Pokemon, Cond, Result_pokemon),
+  Result = state(Attacker,[Result_pokemon|Team],Field).
+
+%! set_primary_status_condition(+Pokemon, +Condition, -Result_pokemon).
+%
+% Sets the pokemons primary status condition to the given status condition.
+% This predicate does not check whether the condition can be inflicted to the
+% pokemon or not.
+% For a battle use inflict_primary_status_condition/3 instead.
+%
+% @arg Pokemon The pokemon data of the pokemon to get the status condition
+% @arg Condition One of the primary status conditions
+% @arg Result_pokemon The resulting pokemon data
+% @see inflict_primary_status_condition/3
+set_primary_status_condition([Name,Health,Moves,Stats,Item,[_|Sec_conds]], Condition,
+  [Name,Health,Moves,Stats,Item,[Condition|Sec_conds]]).
+
 %! secondary_status_conditions(+Pokemon, -Conditions).
 %
 % Gives a list of the secondary status conditions the given pokemon is affected with
@@ -82,7 +131,7 @@ available_switches_acc([], Available, Available).
 % @tbd Check for remaining power points
 % @tbd Check for blocked moves
 % @tbd Check for moves the active pokemon could be locked to
-available_moves([Lead|Team], [M1, M2, M3, M4]) :-
+available_moves([Lead|_], [M1, M2, M3, M4]) :-
   Lead = [_, _, Moves|_],
   Moves = [[M1,_], [M2,_], [M3,_], [M4,_]].
 
