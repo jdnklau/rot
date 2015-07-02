@@ -24,13 +24,13 @@ empty_message_frame(Who, msg(Who, [])).
 % Pushes the given messages onto the stack.
 %
 % @arg Stack The stack the messages are to be pushed onto
-% @arg Messages The messages in chronological order to be pushed onto the stack
+% @arg Messages The messages in anti-chronological order to be pushed onto the stack
 % @arg Resulting_stack The resulting stack containing the pushed messages
 push_message_stack(Stack, [], Stack).
 push_message_stack(Stack, [Push], [Push|Stack]).
 push_message_stack(Stack, [Push|Pushs], Result_stack) :-
-  push_message_stack(Stack, [Push], New_stack),
-  push_message_stack(New_stack, Pushs, Result_stack).
+  push_message_stack(New_stack, Pushs, Result_stack),
+  push_message_stack(Stack, [Push], New_stack).
 
 %! push_message_frame(+Message_frame, +Messages, -Resulting_message_frame).
 %
