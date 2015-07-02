@@ -104,15 +104,13 @@ process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
 
 %! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_stack).
 %
-% Processes a given action depending of the given attacking player
+% Processes a given action depending on the given attacking player
 %
 % @arg Game_state The current state of the game
 % @arg Action The action to be executed
 % @arg Attacking_player The player who executes the given action; either `player` or `rot`.
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_stack Stack of messages occured whilst processing
-% @tbd alter the handling of status and damaging moves so they can be handled together
-% @tbd add check if a move has any effect in the first place
 process_action(State, switch(Team_member), Who, Result_state, Messages) :-
   % action chosen: a switch
   translate_attacker_state(State, Who, State_attacker), % translate state to attacker state
@@ -125,29 +123,43 @@ process_action(State, _, Who, Result_state, Messages) :-
   process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
   translate_attacker_state(Result_state_attacker, Who, Result_state). % translate result back
 process_action(State, Move, Who, Result_state, Messages) :-
-  % action chosen: status move
-  % NYI
-  move(Move, _, status, acc(Accuracy), _,_,_,_,_),
-  move_hits(Accuracy),
-  move_use_message(State, Who, Move, Messages),
-  Result_state = State. % NYI: status moves
-process_action(State, Move, Who, Result_state, Messages) :-
-  % action chosen: damaging move
-  move(Move, _, Category, acc(Accuracy), _,_,Flags,Possible_hits,Additional),
-  Category =.. [_,_],
-  move_hits(Accuracy),
+  % action chosen: a move
+  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
   translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  State_attacker = state(Attacker, _, _),
-  move_use_message(State, Who, Move, Msg_uses),
-  successful_hits(Attacker, Possible_hits, Hits),
-  calculate_damage(State_attacker, Move, Damage),
-  process_hits(State_attacker, Damage, Flags, Additional, Hits, New_state_attacker, Msg_hits),
-  push_message_stack(Msg_uses, Msg_hits, Messages),
+  move_use_message(State_attacker, Move, Msg_uses), % message that this move is used
+  ( % test whether the move hits or not
+    move_hits(Accuracy),
+    process_move(State_attacker, Move, New_state_attacker, Msg_move),
+    push_message_stack(Msg_uses, Msg_move, Messages)
+    ; % case the move does not hit
+    push_message_stack(Msg_uses, [user(move_missed)], Messages),
+    State_attacker = New_state_attacker % the state does not change
+  ),
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-process_action(State, Move, Who, State, Messages) :-
-  % move has missed
-  move_use_message(State, Who, Move, Msg_uses),
-  Messages = [user(move_missed) | Msg_uses].
+
+%! process_move(+Attacker_state, +Move, -Result_state, -Message_stack).
+%
+% Processes a given move depending on the given attacking player
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Move The move to be executed
+% @arg Result_state The resulting state of the game after executing the given action
+% @arg Message_stack Stack of messages occured whilst processing
+process_move(State, Move, Result_state, Messages) :-
+  % status move
+  move(Move, _, status, _, _,_,_,_,_),
+  Result_state = State, % NYI: status moves
+  Messages = [].
+process_move(State, Move, Result_state, Messages) :-
+  % base case: damaging move
+  move(Move, _, Category, _, _,_,Flags,Possible_hits,Effects),
+  Category =.. [_,_],
+  State = state([Attacker|_],_,_),
+  successful_hits(Attacker, Possible_hits, Hits),
+  calculate_damage(State, Move, Damage),
+  process_hits(State, Damage, Flags, Effects, Hits, New_state_attacker, Msg_hits),
+  push_message_stack(Msg_hits, [], Messages), % more to come
+  Result_state = New_state_attacker.
 
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_stack).
 %

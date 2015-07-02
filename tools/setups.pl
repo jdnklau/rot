@@ -1,11 +1,9 @@
-%! move_use_message(+Game_state, +Player, +Move, -Message_stack)
+%! move_use_message(+Attacker_state, +Move, -Message_stack)
 % Gives a message stack containing messages that the attacking pokemon uses the given move.
-% @arg Game_state The current state of the game
-% @arg Player The attacking player; either `player` or `rot`
+% @arg Attacker_state The current state of the game from the attackers point of view
 % @arg Move The move to be used
 % @arg Message_stack The message stack containing the messages about the move useage
-move_use_message(State, Who, Move, [user(uses(pokemon(Name), move(Move)))]) :-
-  translate_attacker_state(State, Who, state([[Name|_]|_],_,_)).
+move_use_message(state([[Name|_]|_],_,_), Move, [user(uses(pokemon(Name), move(Move)))]).
 
 %! set_up_pokemon(+Name, +Nature, +Ability, +Move_list, +EV_DV_data, +Item, -Result)
 %
