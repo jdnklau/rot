@@ -18,7 +18,7 @@ primary_status_condition([_,_,_,_,_,[toxin(_)|_]], poison).
 primary_status_condition([_,_,_,_,_,[Condition|_]], Condition) :-
   Condition \= toxin(_).
 
-%! inflict_primary_status_condition(+Attacker_state, +Condition, -Result_state).
+%! inflict_primary_status_condition(+Attacker_state, +Condition, +Probability, -Result_state).
 %
 % Attempts to inflict a given primary status condition to the target pokemon.
 % - Pokemon already suffering a primary status condition can not be inflicted, neither do fainted ones.
@@ -28,27 +28,43 @@ primary_status_condition([_,_,_,_,_,[Condition|_]], Condition) :-
 %
 % @arg Attacker_state The game state from the attackers point of view
 % @arg Condition One of the primary status conditions
+% @arg Probability The probability the given condition will be applied
 % @arg Result_state The resulting attacker state
-inflict_primary_status_condition(State, _, State) :-
+inflict_primary_status_condition(State, _, Probability, State, []) :-
+  % case: ailment is not inflicted due to rng saying so
+  % this predicate is designed to fail if the rng succeeds as the clauses below
+  % are ment to handle a situation the rng already has passed.
+  % (this design choice is due to how the code was designed before)
+  \+ rng_succeeds(Probability).
+inflict_primary_status_condition(State, _, _, State, []) :-
   % already has a primary status condition
   State = state(_,[Pokemon|_],_),
   primary_status_condition(Pokemon, Curr_cond),
   Curr_cond \= nil.
-inflict_primary_status_condition(State, burn, State) :-
+inflict_primary_status_condition(State, burn, _, State, []) :-
   % fire pokemon can not be burned
   State = state(_,[Pokemon|_],_),
   has_type(Pokemon, fire).
-inflict_primary_status_condition(State, paralyze, State) :-
+inflict_primary_status_condition(State, paralyze, _, State, []) :-
   % electro pokemon can not be paralyzed
   State = state(_,[Pokemon|_],_),
   has_type(Pokemon, electro).
-inflict_primary_status_condition(State, freeze, State) :-
+inflict_primary_status_condition(State, freeze, _, State, []) :-
   % ice pokemon can not be frozen
   State = state(_,[Pokemon|_],_),
   has_type(Pokemon, ice).
-inflict_primary_status_condition(State, Cond, Result) :-
+inflict_primary_status_condition(State, Poison, _, State, []) :-
+  % poison type pokemon can not be poisoned
+  member(Poison, [poison, toxin]),
+  State = state(_,[Pokemon|_],_),
+  has_type(Pokemon, poison).
+inflict_primary_status_condition(State, toxin, _, Result, Messages) :-
+  % toxin needs to carry information about the number of turns the pokemon suffers it already as it grows stronger
+  inflict_primary_status_condition(State, toxin(1), 0, Result, Messages). % base case can handle this
+inflict_primary_status_condition(State, Cond, _, Result, [target(ailment(pokemon(Name), suffers(Cond)))]) :-
   % base case
   State = state(Attacker,[Pokemon|Team],Field),
+  Pokemon = [Name|_],
   primary_status_condition(Pokemon, nil),
   set_primary_status_condition(Pokemon, Cond, Result_pokemon),
   Result = state(Attacker,[Result_pokemon|Team],Field).

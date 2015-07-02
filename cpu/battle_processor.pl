@@ -247,7 +247,7 @@ process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   process_damage(State, Damage, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
   push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
-  process_additional_effects(Contact_state, Effects, Result_state, Msg_effects),
+  process_move_effects(Contact_state, Effects, Result_state, Msg_effects),
   push_message_stack(Msg_effects, Messages1, Messages). % push messages
 process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
@@ -284,7 +284,7 @@ process_contact(State, Flags, State, []) :-
   \+ member(contact,Flags). % nothing to do here as contact flag was not set
 process_contact(State, Flags, State, []). % NYI
 
-%! process_additional_effects(+Attacker_state, +Effects, -Result_state, -Message_stack).
+%! process_move_effects(+Attacker_state, +Effects, -Result_state, -Message_stack).
 %
 % Processes effects of a move
 %
@@ -293,7 +293,36 @@ process_contact(State, Flags, State, []). % NYI
 % @arg Result_state The resulting attacker state of the game after the effects were executed
 % @arg Message_stack Stack of messages occured whilst processing
 % @tbd processing effects
-process_additional_effects(State, _, State, []). % NYI
+process_move_effects(State, [], State, []). % base case
+process_move_effects(State, [Eff|Effs], Result_state, Messages) :-
+  % status ailments
+  Eff =.. [ailment|Ailment_data], !,
+  process_ailment_infliction(State, Ailment_data, New_state, Msg_ailment),
+  process_move_effects(New_state, Effs, Result_state, Msg_effects),
+  push_message_stack(Msg_ailment, Msg_effects, Messages). % no tail recursion, but there mostly are only a few effects either way
+process_move_effects(State, [Eff|Effs], Result_state, Messages) :-
+  % NFI
+  process_move_effects(State, Effs, Result_state, Msg_eff),
+  push_message_stack([system(type(unsupported), category(effect), data(Eff))], Msg_eff, Messages).
+
+%! process_ailment_infliction(+Attacker_state, +Ailment_data, -Result_state, -Message_stack).
+%
+% Tries to inflict a given ailment to the target pokemon.
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg Ailment_data Data about the ailment containing the ailment itself, a probability for it an maybe a limit in turns
+% @arg Result_state The resulting attacker state of the game after the ailment was executed
+% @arg Message_stack Stack of messages occured whilst processing
+process_ailment_infliction(State, [Ailment, Prob], Result, Messages) :-
+  member(Ailment, [burn, freeze, paralysis, poison, toxin]), % the only ailments without a turn limit
+  inflict_primary_status_condition(State, Ailment, Prob, Result, Messages).
+process_ailment_infliction(State, [sleep, Prob, Turn_limit], Result, Messages) :-
+  % sleep is the only primary status condition having a limit in turns
+  rng_range(Turn_limit, R), % sleep gets a counter to be counted down. On reaching 0 the pokemon wakes up again
+  inflict_primary_status_condition(State, sleep(R,R), Prob, Result, Messages).
+process_ailment_infliction(State, Data, State, Messages) :-
+  % NFI
+  push_message_stack([system(type(unsupported), category(ailment), data(Data))], [], Messages).
 
 %! process_fainting(+Pokemon, -Pokemon_fainted).
 %

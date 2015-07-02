@@ -66,6 +66,13 @@ ui_display_single_message(Who, fainted(Name)) :-
   % pokemon fainted
   tab(2), ui_display_pokemon_with_owner(Name, Who),
   write('has fainted').
+ui_display_single_message(Who, ailment(pokemon(Name), suffers(Ailment))) :-
+  % suffering a new status condition
+  tab(2), ui_display_pokemon_with_owner(Name, Who),
+  write('now suffers '), write(Ailment).
+ui_display_single_message(_, system(type(T), category(C), data(D))) :-
+  % system message
+  tab(2), write('>>> '), write(T-C:D).
 ui_display_single_message(_, Message) :-
   % for unknown messages
   tab(4), write(('>>> unknown message occured: ', Message, '<<<')).

@@ -10,6 +10,11 @@ test_ui :-
   team_1(T),
   ui_display(state(T, T, _)).
 
+test_battle_small :-
+  team_1(T),
+  write(team_loaded),nl,
+  start_battle(T,T).
+
 test_battle :-
   team_rot(T),
   write(team_loaded),nl,
