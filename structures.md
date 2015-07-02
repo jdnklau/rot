@@ -98,4 +98,4 @@
   + Hits format  
     as number of guaranteed hits or `between(Minimum, Maximum)`
   + Additional_effects format  
-    `noeffect` or as list of possible effects
+    a list of possible effects (may be empty)
