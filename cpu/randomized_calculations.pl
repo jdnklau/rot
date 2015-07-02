@@ -9,6 +9,17 @@ rng_succeeds(P) :-
   random(0, 101, R),
   R =< P.
 
+%! rng_range(+Integer_range, -Number).
+% Returns an integer from the interval [Lower_bound, Upper_bound].
+% The given range has to be from the form between(L,U) where
+% L (lower bound) is the lowest possible and U (upper bound) is the highest possible outcome
+% @arg Number_range A frame specifying the range to be considered
+% @arg Number An integer from the interval [Lower_bound, Upper_bound]
+rng_range(between(X,X),X) :- !. % highest value = lowest value, so there is only one possible outcome
+rng_range(between(L,U), N) :-
+  UU is U+1, % increase so U is included in the range by the random/3 call below
+  random(L,UU,N).
+
 %! successful_hits(+Attacker, +Possible_number_of_hits, -Successful_number_of_hits)
 %
 % Calculates eventually by RNG how many hits a move will land.
@@ -23,7 +34,7 @@ successful_hits(_, Hits, Hits) :-
 successful_hits(Attacker, between(_,Hits), Hits) :-
   ability(Attacker, 'skill link'). % skill link always lets the user hit the maximal amount of possible hits
 successful_hits(_, between(2,5), Hits) :-
-  random(0,6,R),
+  rng_range(between(2,5),R),
   rng_to_hits(R, Hits).
 
 %! randomization_adjustment(-Random_factor)
@@ -32,7 +43,7 @@ successful_hits(_, between(2,5), Hits) :-
 %
 % @arg Random_factor The resulting randomization adjustement to be multiplicated with the damage to be done
 randomization_adjustment(RA) :-
-  random(85, 101, R), % an integer from 85 to 100
+  rng_range(between(85,100), R), % an integer from 85 to 100
   RA is R/100. % a float from 0.85 to 1
 
 %! move_hits(+Accuracy)
