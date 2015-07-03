@@ -3,6 +3,12 @@
 % @arg Pokemon The pokemon data of the pokemon in question
 fainted([_,kp(0,_),_,_,_,[fainted|_]]).
 
+%! pokemon_name(+Pokemon, -Name).
+% Reads and returns the pokemon's name from its pokemon data
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Name The pokemon's name
+pokemon_name([Name|_],Name).
+
 %! primary_status_condition(+Pokemon, +Condition).
 %! primary_status_condition(+Pokemon, -Condition).
 %
