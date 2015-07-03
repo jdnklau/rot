@@ -123,19 +123,68 @@ process_action(State, _, Who, Result_state, Messages) :-
   process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
   translate_attacker_state(Result_state_attacker, Who, Result_state). % translate result back
 process_action(State, Move, Who, Result_state, Messages) :-
-  % action chosen: a move
-  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
+  % (base case) action chosen: a move
+  move(Move, _,_,_,_,_,_,_,_),
   translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  move_use_message(State_attacker, Move, Msg_uses), % message that this move is used
+  process_move_routine(State_attacker, Move, New_state_attacker, Messages),
+  translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
+
+%! process_move_routine(+Attacker_state, +Move, -Result_state, -Message_stack)
+process_move_routine(State, _, State, Messages) :-
+  % case: pokemon suffers paralysis
+  attacking_pokemon(State,Pokemon),
+  primary_status_condition(Pokemon, paralysis),
+  rng_succeeds(75),  % 25 % the pokemon can not attack this turn
+  pokemon_name(Pokemon, Name),
+  Messages = [paralyzed(Name)].
+process_move_routine(State, Move, Result_state, Messages) :-
+  % case: pokemon suffers sleep
+  State = state([Pokemon|Team],Target,Field),
+  primary_status_condition(Pokemon, sleep(Remaining,Max)),
+  New_remaining = Remaining-1,
+  pokemon_name(Pokemon, Name),
+  (
+    % counter of remaining sleep turns reaches 0 -> pokemon wakes up
+    New_remaining = 0,
+    % clear sleep state of pokemon
+    set_primary_status_condition(Pokemon, nil, New_pokemon),
+    process_move_routine(state([New_pokemon|Team],Target,Field), Move, Result_state, Msg_move), % base case executes move
+    push_message_stack([woke_up(Name)], Msg_move, Messages)
+    ;
+    % pokemon does not wake up yet
+    set_primary_status_condition(Pokemon, sleep(New_remaining, Max), New_pokemon),
+    Result_state = state([New_pokemon|Team], Target, Field), % alter state
+    Messages = [sleeps(Name)]
+  ).
+process_move_routine(State, Move, Result_state, Messages) :-
+  % case: pokemon suffers freeze
+  State = state([Pokemon|Team],Target,Field),
+  primary_status_condition(Pokemon, freeze),
+  pokemon_name(Pokemon, Name),
+  (
+    % frozen pokemon have a 20% chance per turn to defrost
+    rng_succeeds(20), % pokemon defrosts
+    % clear freeze state of pokemon
+    set_primary_status_condition(Pokemon, nil, New_pokemon),
+    process_move_routine(state([New_pokemon|Team],Target,Field), Move, Result_state, Msg_move), % base case executes move
+    push_message_stack([defrosted(Name)], Msg_move, Messages)
+    ;
+    % pokemon does not wake up yet
+    Result_state = State,
+    Messages = [frozen(Name)]
+  ).
+process_move_routine(State, Move, Result_state, Messages) :-
+  % base case
+  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
+  move_use_message(State, Move, Msg_uses), % message that this move is used
   ( % test whether the move hits or not
     move_hits(Accuracy),
-    process_move(State_attacker, Move, New_state_attacker, Msg_move),
+    process_move(State, Move, Result_state, Msg_move),
     push_message_stack(Msg_uses, Msg_move, Messages)
     ; % case the move does not hit
     push_message_stack(Msg_uses, [user(move_missed)], Messages),
-    State_attacker = New_state_attacker % the state does not change
-  ),
-  translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
+    State = Result_state % the state does not change
+  ).
 
 %! process_move(+Attacker_state, +Move, -Result_state, -Message_stack).
 %

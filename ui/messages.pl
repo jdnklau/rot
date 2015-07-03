@@ -70,6 +70,21 @@ ui_display_single_message(Who, ailment(pokemon(Name), suffers(Ailment))) :-
   % suffering a new status condition
   tab(2), ui_display_pokemon_with_owner(Name, Who),
   write('now suffers '), write(Ailment).
+ui_display_single_message(Who, paralyzed(Pokemon)) :-
+  % pokemon can not attack due to paralysis
+  ui_display_pokemon_with_owner(Pokemon, Who), write('is paralyzed').
+ui_display_single_message(Who, sleeps(Pokemon)) :-
+  % pokemon can not attack due to sleep
+  ui_display_pokemon_with_owner(Pokemon, Who), write('sleeps zzzZZZ').
+ui_display_single_message(Who, woke_up(Pokemon)) :-
+  % pokemon woke up from sleep
+  ui_display_pokemon_with_owner(Pokemon, Who), write('woke up').
+ui_display_single_message(Who, frozen(Pokemon)) :-
+  % pokemon can not attack due to freeze
+  ui_display_pokemon_with_owner(Pokemon, Who), write('is frozen').
+ui_display_single_message(Who, woke_up(Pokemon)) :-
+  % pokemon defrostet from freeze
+  ui_display_pokemon_with_owner(Pokemon, Who), write('defrosted').
 ui_display_single_message(_, system(type(T), category(C), data(D))) :-
   % system message
   tab(2), write('>>> '), write(T-C:D).
