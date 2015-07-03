@@ -85,6 +85,12 @@ ui_display_single_message(Who, frozen(Pokemon)) :-
 ui_display_single_message(Who, woke_up(Pokemon)) :-
   % pokemon defrostet from freeze
   ui_display_pokemon_with_owner(Pokemon, Who), write('defrosted').
+ui_display_single_message(Who, drain(Pokemon)) :-
+  % pokemon drains life from the target
+  tab(2), ui_display_pokemon_with_owner(Pokemon, Who), write('drained some life').
+ui_display_single_message(Who, recoil(Pokemon)) :-
+  % pokemon suffers recoil damage
+  tab(2), ui_display_pokemon_with_owner(Pokemon, Who), write('suffers recoil damage').
 ui_display_single_message(_, system(type(T), category(C), data(D))) :-
   % system message
   tab(2), write('>>> '), write(T-C:D).
