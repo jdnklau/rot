@@ -21,17 +21,17 @@ calculate_priorities(state(Team_player, Team_rot, _), Action_player, Action_rot,
 % @arg Priority_tuple A tuple containing information about the action priority and the user's speed
 calculate_priority([Lead|_], switch(_), (6,Speed)) :-
   % a switch ha a fixed priority of 6
-  stats(Lead,_,_,_,_,Speed).
+  attacking_speed_stat(Lead, Speed).
 calculate_priority([Lead|_], Move, (Move_priority_by_prankster, Speed)) :-
   % the prankster ability increases the priority of status moves by 1
   move(Move, _,status,_,_, prio(Move_priority),_,_,_),
   ability(Lead, prankster),
   Move_priority_by_prankster is Move_priority + 1,
-  stats(Lead,_,_,_,_,Speed).
+  attacking_speed_stat(Lead, Speed).
 calculate_priority([Lead|_], Move, (Move_priority, Speed)) :-
   % base case: a damaging move
   move(Move, _,_,_,_, prio(Move_priority),_,_,_),
-  stats(Lead,_,_,_,_,Speed).
+  attacking_speed_stat(Lead, Speed).
 
 %! calculate_switch(+Team, +Team_mate, -Resulting_team)
 %

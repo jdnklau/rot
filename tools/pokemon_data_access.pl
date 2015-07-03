@@ -222,3 +222,25 @@ def_stat_by_category(Pokemon, physical, Def) :-
   stats(Pokemon, _, Def, _, _, _).
 def_stat_by_category(Pokemon, special, Def) :-
   stats(Pokemon, _, _, _, Def, _).
+
+%! attacking_speed_stat(+Pokemon, -Speed_stat).
+%
+% Gives the pokemon's attacking speed based on it's speed stat and his primary status condition.
+%
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Speed_stat The resulting speed
+attacking_speed_stat(Pokemon, AS) :-
+  % is the pokemon paralyzed and has the quick feet ability its speed is increased
+  primary_status_condition(Pokemon, paralysis),
+  ability(Pokemon, 'quick feet'),
+  stats(Pokemon,_,_,_,_,Speed),
+  AS is floor(Speed * 1.5).
+attacking_speed_stat(Pokemon, AS) :-
+  % paralysis reduces speed by 75% if the user has not the ability quick feet
+  primary_status_condition(Pokemon, paralisis),
+  not ability(Pokemon, 'quick feet'),
+  stats(Pokemon,_,_,_,_,Speed),
+  AS is floor(Speed * 0.25).
+attacking_speed_stat(Pokemon, AS) :-
+  % base case
+  stats(Pokemon,_,_,_,_,AS).
