@@ -16,7 +16,7 @@
     tools/pokemon_data_access,
     tools/setups,
     tools/message_handling].
-:- [rot/interface,
+:- [rot/api,
     rot/ai,
     rot/search_tree].
 :- use_module(library(random)).
