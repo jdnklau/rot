@@ -157,4 +157,4 @@ attacking_pokemon(state([Pokemon|_],_,_), Pokemon).
 % Returns the active pokemon of the defending player.
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Defending_pokemon The active pokemon of the target's team.
-attacking_pokemon(state(_,[Pokemon|_],_), Pokemon).
+defending_pokemon(state(_,[Pokemon|_],_), Pokemon).
