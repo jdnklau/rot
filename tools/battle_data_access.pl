@@ -105,6 +105,15 @@ stab(T, Ts, 1) :- \+ member(T, Ts).
 translate_attacker_state(state(A, T, Field), player, state(A, T, Field)).
 translate_attacker_state(state(T, A, [Field_t, Field_a, Field_g]), rot, state(A, T, [Field_a, Field_t, Field_g])).
 
+%! swap_attacker_state(+Attacker_state, -Swapped_state).
+% Swaps attacker and target teams in the attacker game state.
+% Same as `translate_attacker_state(Attacker_state, rot, Swapped_state)`.
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Swapped_state The current state of the game from the defender's point of view
+% @see translate_attacker_state/3
+swap_attacker_state(State, Swap) :-
+  translate_attacker_state(State, rot, Swap).
+
 %! stat_stage_factor(Stat_stage, Factor)
 %
 % Gives the multiplier corresponding to the given stat stage
