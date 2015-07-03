@@ -146,3 +146,15 @@ rng_to_hits(5,5).
 move_has_flag(Move,Flag) :-
   move(Move,_,_,_,_,_,Flags,_,_),
   member(Flag, Flags).
+
+%! attacking_pokemon(+Attacker_state, -Attacking_pokemon).
+% Returns the active pokemon of the attacking player.
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Attacking_pokemon The active pokemon of the attacker's team.
+attacking_pokemon(state([Pokemon|_],_,_), Pokemon).
+
+%! defending_pokemon(+Attacker_state, -Defending_pokemon).
+% Returns the active pokemon of the defending player.
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Defending_pokemon The active pokemon of the target's team.
+attacking_pokemon(state(_,[Pokemon|_],_), Pokemon).
