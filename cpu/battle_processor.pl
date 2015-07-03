@@ -240,7 +240,6 @@ process_switch(state(Team_attacker, Team_target, Field), Team_mate, state(New_te
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
   % forced to switch: player
   \+ rot(searching), % predicate was not called by rot's heuristic, so the player gets prompted
-  State_attacker = state([_|Player_team],_,_),
   read_player_switch(State_attacker, Switch),
   Switch = switch(Team_member),
   process_switch(State_attacker, Team_member, Result_state_attacker, Messages).
@@ -293,7 +292,7 @@ process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
 % @arg Message_stack Stack of messages occured whilst processing
 process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   \+ target_fainted(State), % there is a target to be damaged
-  process_damage(State, Damage, Damaged_state, Msg_damage),
+  process_damage(State, Damage, Damage_done, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
   push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
   process_move_effects(Contact_state, Effects, Result_state, Msg_effects),
@@ -301,19 +300,21 @@ process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
 process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
 
-%! process_damage(+Attacker_state, +Damage, -Result_state, -Message_stack).
+%! process_damage(+Attacker_state, +Damage, -Damage_done, -Result_state, -Message_stack).
 %
 % Processes the given damage to the target of the attacker state
 %
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Damage The damage to be done
+% @arg Damage_done The actual damage inflicted (may be lower than the initial damage to be done)
 % @arg Result_state The resulting attacker state of the game after the damage was executed
 % @arg Message_stack Stack of messages occured whilst processing
 % @tbd Moves having no effect shall be treated differently in the future
-process_damage(State, 0, State, [user(no_effect)]).
-process_damage(state(Team_attacker, [Target|Team_target], Field), Damage, state(Team_attacker, [Result_target|Team_target], Field), Messages) :-
+process_damage(State, 0, 0, State, [user(no_effect)]).
+process_damage(state(Team_attacker, [Target|Team_target], Field), Damage, Damage_done, state(Team_attacker, [Result_target|Team_target], Field), Messages) :-
   Target = [Name, kp(Curr, Max)|Rest_data], % get target name, current and maximal hp
   New_curr is max(0, min(Max, Curr - Damage)), % the minimum is required as healing is just negative damage
+  Damage_done is Curr-New_curr, % the damage amount dealt
   Msg1 = [target(damaged(pokemon(Name), kp(New_curr, Max)))], % create message stack
   New_target = [Name, kp(New_curr, Max)|Rest_data], % alter target
   (New_curr is 0 -> Msg2 = [target(fainted(Name))] ; Msg2 = []), % create push stack
@@ -349,6 +350,10 @@ process_move_effects(State, [Eff|Effs], Result_state, Messages) :-
   process_ailment_infliction(State, Ailment_data, New_state, Msg_ailment),
   process_move_effects(New_state, Effs, Result_state, Msg_effects),
   push_message_stack(Msg_ailment, Msg_effects, Messages). % no tail recursion, but there mostly are only a few effects either way
+process_move_effects(State, [drain(Value)|Effs], Result_state, Messages) :-
+  %
+  process_move_effects(New_state, Effs, Result_state, Msg_effects),
+  push_message_stack(Msg_ailment, Msg_effects, Messages). % no tail recursion
 process_move_effects(State, [Eff|Effs], Result_state, Messages) :-
   % NFI
   process_move_effects(State, Effs, Result_state, Msg_eff),
