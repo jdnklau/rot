@@ -43,13 +43,13 @@ primary_status_condition([_,_,_,_,_,[Condition|_]], Condition).
 % @arg Condition The primary status condition category the given pokemon suffers
 primary_status_condition_category(Pokemon, poison) :-
   % toxin has to be treated differently internally but has to be displayed as poisoning
-  primary_status_condition(Pokemon, toxin(_))
+  primary_status_condition(Pokemon, toxin(_)).
 primary_status_condition_category(Pokemon, sleep) :-
   % sleep comes along with a counter to be get rid of in the category display
-  primary_status_condition(Pokemon, sleep(_,_))
+  primary_status_condition(Pokemon, sleep(_,_)).
 primary_status_condition_category(Pokemon, Condition) :-
   % base case
-  primary_status_condition(Pokemon, Condition)
+  primary_status_condition(Pokemon, Condition),
   Condition \= toxin(_),
   Condition \= sleep(_,_).
 
@@ -275,7 +275,7 @@ attacking_speed_stat(Pokemon, AS) :-
 attacking_speed_stat(Pokemon, AS) :-
   % paralysis reduces speed by 75% if the user has not the ability quick feet
   primary_status_condition(Pokemon, paralisis),
-  not ability(Pokemon, 'quick feet'),
+  \+ ability(Pokemon, 'quick feet'),
   stats(Pokemon,_,_,_,_,Speed),
   AS is floor(Speed * 0.25).
 attacking_speed_stat(Pokemon, AS) :-
