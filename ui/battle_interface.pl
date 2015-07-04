@@ -112,9 +112,9 @@ ui_display_pokemon_with_owner(Name, Who) :-
 % Does nothing if the condition is `nil`
 % @arg Pokemon The pokemon data of the pokemon in question
 ui_display_primary_condition(Pokemon) :-
-  primary_status_condition(Pokemon, nil). % no condition
+  primary_status_condition_category(Pokemon, nil). % no condition
 ui_display_primary_condition(Pokemon) :-
-  primary_status_condition(Pokemon, Condition),
+  primary_status_condition_category(Pokemon, Condition),
   Condition \= nil,
   write('<'), write(Condition), write('> ').
 

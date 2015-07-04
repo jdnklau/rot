@@ -19,10 +19,36 @@ pokemon_name([Name|_],Name).
 %
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Condition The primary status condition the given pokemon suffers
-primary_status_condition([_,_,_,_,_,[toxin(_)|_]], poison).
+primary_status_condition([_,_,_,_,_,[Condition|_]], Condition).
+
+%! primary_status_condition_category(+Pokemon, +Condition).
+%! primary_status_condition_category(+Pokemon, -Condition).
+%
+% True if the given pokemon has the given primary status condition by category.
+% Alternatively can be used to extract the primary status condition category of the
+% given pokemon.
+%
+% The possible categories are:
+%   * burn
+%   * freeze
+%   * paralysis
+%   * poison (includes toxin)
+%   * sleep
+%   * nil (no ailment)
+%
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Condition The primary status condition category the given pokemon suffers
+primary_status_condition_category(Pokemon, poison) :-
   % toxin has to be treated differently internally but has to be displayed as poisoning
-primary_status_condition([_,_,_,_,_,[Condition|_]], Condition) :-
-  Condition \= toxin(_).
+  primary_status_condition(Pokemon, toxin(_))
+primary_status_condition_category(Pokemon, sleep) :-
+  % sleep comes along with a counter to be get rid of in the category display
+  primary_status_condition(Pokemon, sleep(_,_))
+primary_status_condition_category(Pokemon, Condition) :-
+  % base case
+  primary_status_condition(Pokemon, Condition)
+  Condition \= toxin(_),
+  Condition \= sleep(_,_).
 
 %! inflict_primary_status_condition(+Attacker_state, +Condition, +Probability, -Result_state).
 %
