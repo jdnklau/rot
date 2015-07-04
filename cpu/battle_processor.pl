@@ -61,11 +61,71 @@ process_ends_of_turn(State, Who_first, Result_state) :-
 % @arg Who Either `player` or `rot`
 % @arg Result_state The resulting state of the game after executing the end of this turn for the given player
 % @arg Message_stack Stack of messages occured whilst processing
-% @tbd Everything
 process_end_of_turn(State, Who, Result_state, Messages) :-
-  translate_attacker_state(State, Who, State_attacker),
-  process_fainted_check(State_attacker, Who, New_state_attacker, Messages),
-  translate_attacker_state(New_state_attacker, Who, Result_state).
+  translate_attacker_state(State, Who, State_attacker), % translate state
+  process_end_of_turn_damage(State_attacker, Damaged_state_attacker, Msg_dmg), % do damage to be dealt at the end of every turn
+  process_fainted_check(Damaged_state_attacker, Who, New_state_attacker, Msg_faint), % any active pokemon fainted last turn needs to be switched out
+  push_message_stack(Msg_dmg, Msg_faint, Messages), % push new messages
+  translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
+
+%! process_end_of_turn_damage(+Attacker_state, -Result_state, -Message_stack).
+%
+% Processes the damage occuring at the end of a turn, e.g. primary status conditons like burn
+% or field conditions like sand storm.
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Result_state The resulting state of the game after executing the end turn damage for the given player
+% @arg Message_stack Stack of messages occured whilst processing
+process_end_of_turn_damage(State, New_state, Messages) :-
+  process_end_of_turn_primary_status_damage(State, New_state, Messages).
+
+%! process_end_of_turn_primary_status_damage(+Attacker_state, -Result_state, -Message_stack).
+%
+% Processes the damage occuring at the end of a turn caused by primary status conditons like burn.
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Result_state The resulting state of the game after executing the end turn damage for the given player
+% @arg Message_stack Stack of messages occured whilst processing
+process_end_of_turn_primary_status_damage(State, New_state, Messages) :-
+  % pokemon burns or is poisoned
+  attacking_pokemon(State, Pokemon, Name),
+  primary_status_condition(Pokemon, Cond),
+  member(Cond, [burn, poison]),
+  swap_attacker_state(State, Swap_state), % swap state to inflict the damage
+  process_damage_by_percent_max(Swap_state, 12.5, _, New_swap_state, Msg_dmg_opp), % 1/8 of total hp
+  swap_attacker_state(New_swap_state, New_state), % swap back
+  messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
+  % set up final message stack
+  (
+    % pokemon burns
+    Cond = burn,
+    push_message_stack([burns(Name)], Msg_dmg, Messages)
+    ;
+    % pokemon is poisoned
+    Cond = poison,
+    push_message_stack([poisoned(Name)], Msg_dmg, Messages)
+  ).
+process_end_of_turn_primary_status_damage(State, New_state, Messages) :-
+  % pokemon suffers toxin
+  attacking_pokemon(State, Pokemon, Name),
+  primary_status_condition(Pokemon, toxin(Turn)),
+  swap_attacker_state(State, Swap_state), % swap state to inflict the damage
+  Damage is Turn * 6.25, % damage raises each turn
+  process_damage_by_percent_max(Swap_state, Damage, _, New_swap_state, Msg_dmg_opp), % 1/8 of total hp
+  swap_attacker_state(New_swap_state, New_state), % swap back
+  messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
+  % set up final message stack
+  push_message_stack([poisoned(Name)], Msg_dmg, Messages),
+  % increase the turn counter
+  New_turn is Turn+1,
+  attacking_pokemon(New_state, Damaged_pokemon),
+  set_primary_status_condition(Damaged_pokemon, toxin(New_turn), New_pokemon),
+  set_attacking_pokemon(New_state, New_pokemon, Result_state).
+process_end_of_turn_primary_status_damage(State, State, []) :-
+  % base case
+  attacking_pokemon(State, Pokemon),
+  primary_status_condition_category(Pokemon, Cond),
+  \+ member(Cond,[burn,poison]).
 
 %! process_fainted_check(+Game_state, +Who, -Result_state, -Message_stack).
 %
@@ -388,7 +448,6 @@ process_move_effects(State, [Eff|Effs], DD, Result_state, Messages) :-
 process_move_effects(State, [drain(Percent)|Effs], DD, Result_state, Messages) :-
   % heals for a percentage of the damage done
   Reversed_heal is 0 - floor(DD * (Percent/100)), % heal is expressed as negative damage
-  write(dmg_done:DD-heal:Reversed_heal-perc:Percent),nl,
   swap_attacker_state(State, Swapped_state), % swap attacker/target to use process_damage/5 properly
   process_damage(Swapped_state, Reversed_heal, _, New_swapped_state, Msg_heal), % negative damage is healing
   swap_attacker_state(New_swapped_state, New_state), % swap back

@@ -82,9 +82,15 @@ ui_display_single_message(Who, woke_up(Pokemon)) :-
 ui_display_single_message(Who, frozen(Pokemon)) :-
   % pokemon can not attack due to freeze
   ui_display_pokemon_with_owner(Pokemon, Who), write('is frozen').
-ui_display_single_message(Who, woke_up(Pokemon)) :-
+ui_display_single_message(Who, defrosted(Pokemon)) :-
   % pokemon defrostet from freeze
   ui_display_pokemon_with_owner(Pokemon, Who), write('defrosted').
+ui_display_single_message(Who, burns(Pokemon)) :-
+  % pokemon suffers from burn
+  ui_display_pokemon_with_owner(Pokemon, Who), write('burns').
+ui_display_single_message(Who, poisoned(Pokemon)) :-
+  % pokemon suffers from poison
+  ui_display_pokemon_with_owner(Pokemon, Who), write('is poisoned').
 ui_display_single_message(Who, drain(Pokemon)) :-
   % pokemon drains life from the target
   tab(2), ui_display_pokemon_with_owner(Pokemon, Who), write('drained some life').

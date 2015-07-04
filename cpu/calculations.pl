@@ -221,14 +221,33 @@ calculate_targets_def(Target, Field_global, Move_category, Critical_multiplier, 
 % @see calculate_damage/3
 % @see calculate_final_damage/10
 calculate_F1(Attacker, Field_target, Field_global, Move_type, Move_category, Critical_multiplier, Final_F1) :-
-% needs burn state of attacker (information by attacker)
+  % needs burn state of attacker (information by attacker)
+  calculate_F1_burn(Attacker, Move_category, F1_burn),
 % needs Reflect and Light Screen states (information by target's field conditions)
   % needs category of move to distinguish whether Reflect or Light Screen shall be used for calculation (defined by move)
   % needs Critical multiplier as a critical hit ignores both Reflect and Light Screen
 % needs Sunny Day and Rain Dance states (information by global field conditions)
   % needs move type as the effect of Sunny Day and Rain Dance depend on the move type (defined by move)
 % needs Flash Fire state (information by attacker)
-  Final_F1 is 1. % NFI
+  Final_F1 is F1_burn. % NFI
+
+%! calculate_F1_burn(+Attacker, +Move_category, -Factor).
+%
+% Calculates the burn factor for the damage factor F1.
+% A pokemon suffering _burn_ as primary status condition has a factor of 1/2 to his
+% attack stat if the move used is a physical move.
+% A burned pokemon with the ability adrenalin does not suffer this penalty.
+%
+% @arg Attacker Pokemon data of the attacking pokemon
+% @arg Move_category The category of the damaging move
+% @arg Factor The resulting factor
+% @see calculate_F1/7
+calculate_F1_burn(Attacker, physical, 0.5) :-
+  % user burns and does not have the adrenalin ability
+  primary_status_condition(Attacker, burn), % suffers burn
+  not ability(Attacker, adrenalin), % adrenalin behaves differently
+  !. % red cut preventing to double check the above conditions
+calculate_F1_burn(Attacker, _, 1). % base case
 
 %! calculate_F2(+Attacker, -F2)
 %
