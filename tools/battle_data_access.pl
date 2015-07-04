@@ -160,10 +160,47 @@ move_has_flag(Move,Flag) :-
 % Returns the active pokemon of the attacking player.
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Attacking_pokemon The active pokemon of the attacker's team.
+% @see attacking_pokemon/2
 attacking_pokemon(state([Pokemon|_],_,_), Pokemon).
+
+%! attacking_pokemon(+Attacker_state, -Attacking_pokemon, -Attacking_name).
+% The same as attacking_pokemon/2 but additionally gives back the attacking pokemons name
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Attacking_pokemon The active pokemon of the attacker's team.
+% @arg Attacking_name The active pokemon's name.
+% @see attacking_pokemon/2
+% @see pokemon_name/2
+attacking_pokemon(state([Pokemon|_],_,_), Pokemon, Name) :-
+  pokemon_name(Pokemon, Name).
+
+%! set_attacking_pokemon(+Attacker_state, +New_pokemon, -Result_state).
+% Alters the active pokemon of the attacking player.
+% Be cautions as this completely overrides the currently active pokemon.
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg New_pokemon The new active pokemon's data
+% @arg Result_state The resulting state of the game
+set_attacking_pokemon(state([_|Team],Target,Field), Pokemon, state([Pokemon|Team],Target,Field)).
 
 %! defending_pokemon(+Attacker_state, -Defending_pokemon).
 % Returns the active pokemon of the defending player.
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Defending_pokemon The active pokemon of the target's team.
 defending_pokemon(state(_,[Pokemon|_],_), Pokemon).
+
+%! defending_pokemon(+Attacker_state, -Defending_pokemon, -Defending_name).
+% The same as defending_pokemon/2 but additionally gives back the defending pokemons name
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Defending_pokemon The active pokemon of the attacker's team.
+% @arg Defending_name The active pokemon's name.
+% @see defending_pokemon/2
+% @see pokemon_name/2
+defending_pokemon(state(_,[Pokemon|_],_), Pokemon, Name) :-
+  pokemon_name(Pokemon, Name).
+
+%! set_defending_pokemon(+Attacker_state, +New_pokemon, -Result_state).
+% Alters the active pokemon of the defending player.
+% Be cautions as this completely overrides the currently active pokemon.
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg New_pokemon The new active pokemon's data
+% @arg Result_state The resulting state of the game
+set_attacking_pokemon(state(Target,[_|Team],Field), Pokemon, state(Target,[Pokemon|Team],Field)).
