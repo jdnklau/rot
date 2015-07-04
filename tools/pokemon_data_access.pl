@@ -145,6 +145,14 @@ secondary_status_condition(Pokemon, Condition) :-
 hp_percent([_, kp(Curr, Max)|_], P) :-
   P is Curr / Max * 100.
 
+%! hp_frame(+Pokemon, -HP_frame).
+%
+% Returns the hp frame of the given pokemon.
+% The frame is of the form `kp(Current_hp, Max_hp)`
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg HP_frame The HP frame
+hp_frame([_,HP|_], HP).
+
 %! available_actions(+Team, -Available_actions).
 %
 % Gives a list of available actions (moves switches) the owner of the team can use.

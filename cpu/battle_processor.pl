@@ -321,6 +321,40 @@ process_damage(state(Team_attacker, [Target|Team_target], Field), Damage, Damage
   push_message_stack(Msg2, Msg1, Messages), % push push stack to the message stack
   process_fainting(New_target, Result_target).
 
+%! process_damage_by_percent_max(+Attacker_state, +Percent, -Damage_done, -Result_state, -Message_stack).
+%
+% Processes the given percentage as damage to the target, using target's maximum hit points as 100%
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg Percent The percentage of damage to be done
+% @arg Damage_done The actual damage inflicted (may be lower than the initial damage to be done)
+% @arg Result_state The resulting attacker state of the game after the damage was executed
+% @arg Message_stack Stack of messages occured whilst processing
+process_damage_by_percent_max(State, 0, 0, State, []).
+process_damage_by_percent_max(State, Percent, Damage_done, Result_state, Messages) :-
+  P is Percent/100, % break to decimal representation
+  defending_pokemon(State, Pokemon),
+  hp_frame(Pokemon, kp(_,Max)),
+  Damage is max(1,floor(Max*P)), % do at least 1 damage
+  process_damage(State, Damage, Damage_done, Result_state, Messages).
+
+%! process_damage_by_percent_current(+Attacker_state, +Percent, -Damage_done, -Result_state, -Message_stack).
+%
+% Processes the given percentage as damage to the target, using target's current hit points as 100%
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg Percent The percentage of damage to be done
+% @arg Damage_done The actual damage inflicted (may be lower than the initial damage to be done)
+% @arg Result_state The resulting attacker state of the game after the damage was executed
+% @arg Message_stack Stack of messages occured whilst processing
+process_damage_by_percent_max(State, 0, 0, State, []).
+process_damage_by_percent_max(State, Percent, Damage_done, Result_state, Messages) :-
+  P is Percent/100, % break to decimal representation
+  defending_pokemon(State, Pokemon),
+  hp_frame(Pokemon, kp(Curr,_)),
+  Damage is max(1,floor(Curr*P)), % do at least 1 damage
+  process_damage(State, Damage, Damage_done, Result_state, Messages).
+
 %! process_contact(+Attacker_state, +Flags, -Result_state, -Message_stack).
 %
 % Processes effects on contact
