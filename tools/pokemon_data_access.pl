@@ -36,6 +36,9 @@ primary_status_condition([_,_,_,_,_,[Condition|_]], Condition).
 %   * sleep
 %   * nil (no ailment)
 %
+% This is ment to be a quick reference to the pokemon's primary status condition
+% in situations where it is of no interest what internal data comes along with the ailment.
+%
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Condition The primary status condition category the given pokemon suffers
 primary_status_condition_category(Pokemon, poison) :-
