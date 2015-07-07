@@ -245,7 +245,7 @@ calculate_F1(Attacker, Field_target, Field_global, Move_type, Move_category, Cri
 calculate_F1_burn(Attacker, physical, 0.5) :-
   % user burns and does not have the adrenalin ability
   primary_status_condition(Attacker, burn), % suffers burn
-  not ability(Attacker, adrenalin), % adrenalin behaves differently
+  \+ ability(Attacker, adrenalin), % adrenalin behaves differently
   !. % red cut preventing to double check the above conditions
 calculate_F1_burn(Attacker, _, 1). % base case
 
