@@ -34,8 +34,23 @@ successful_hits(_, Hits, Hits) :-
 successful_hits(Attacker, between(_,Hits), Hits) :-
   ability(Attacker, 'skill link'). % skill link always lets the user hit the maximal amount of possible hits
 successful_hits(_, between(2,5), Hits) :-
-  rng_range(between(2,5),R),
+  rng_range(between(0,5),R),
   rng_to_hits(R, Hits).
+
+%! rng_to_hits(Random_number, Hits)
+%
+% Used to determine how often a move with 2 to 5 hits hits.
+% Necessary as the probability for either 2 or 3 hits is higher as for 4 or 5 hits
+%
+% @arg Random_number An integer from 0 to 6
+% @arg Hits An integer from 2 to 5 indicating how many successful hits are to be calculated
+% @see successful_hits
+rng_to_hits(0,2).
+rng_to_hits(1,2).
+rng_to_hits(2,3).
+rng_to_hits(3,3).
+rng_to_hits(4,4).
+rng_to_hits(5,5).
 
 %! randomization_adjustment(-Random_factor)
 %

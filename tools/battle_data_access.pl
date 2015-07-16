@@ -134,20 +134,6 @@ stat_stage_factor(-4, (1/3)).
 stat_stage_factor(-5, (2/7)).
 stat_stage_factor(-6, 0.25).
 
-%! rng_to_hits(Random_number, Hits)
-%
-% Used to determine how often a move with 2 to 5 hits hits.
-%
-% @arg Random_number An integer from 0 to 6
-% @arg Hits An integer from 2 to 5 indicating how many successful hits are to be calculated
-% @see successful_hits
-rng_to_hits(0,2).
-rng_to_hits(1,2).
-rng_to_hits(2,3).
-rng_to_hits(3,3).
-rng_to_hits(4,4).
-rng_to_hits(5,5).
-
 %! move_has_flag(+Move,+Flag).
 % True if the given move has the given flag set in it's data
 % @arg Move The move in question
