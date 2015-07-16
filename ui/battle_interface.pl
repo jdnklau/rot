@@ -48,7 +48,7 @@ ui_display_rot_team([To_display|Rest]) :-
   !, % red cut #2
   write('O'),
   ui_display_rot_team(Rest).
-ui_display_rot_team([To_display|Rest]) :-
+ui_display_rot_team([_|Rest]) :-
   %\+ fainted(To_display), % red cut #1 prevents this line
   %\+ primary_status_condition(To_display, nil), % red cut #2 prevents this line
   write('@'),
