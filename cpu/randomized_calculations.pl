@@ -6,6 +6,12 @@
 rng_succeeds(always).
 rng_succeeds(100).
 rng_succeeds(P) :-
+  % in rot's heuristic - probabilities above a certain threshold shall always succeed
+  rot(searching),
+  P > 50.
+rng_succeeds(P) :-
+  % base case: normal battle probability check
+  \+ rot(searching),
   random(0, 101, R),
   R =< P.
 
@@ -16,7 +22,12 @@ rng_succeeds(P) :-
 % @arg Number_range A frame specifying the range to be considered
 % @arg Number An integer from the interval [Lower_bound, Upper_bound]
 rng_range(between(X,X),X) :- !. % highest value = lowest value, so there is only one possible outcome
+rng_range(between(L,U),X) :-
+  % in rot's heuristic: take the average
+  rot(searching),
+  X is (U+L)//2.
 rng_range(between(L,U), N) :-
+  \+ rot(searching),
   UU is U+1, % increase so U is included in the range by the random/3 call below
   random(L,UU,N).
 
