@@ -304,9 +304,12 @@ process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :
   Switch = switch(Team_member),
   process_switch(State_attacker, Team_member, Result_state_attacker, Messages).
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
-  % forced to switch: player
+  % forced to switch: player, called by rot's heuristic
   rot(searching), % predicate was called by rot's heuristic, so rot uses his heuristic for the player instead
-  read_rot_switch(State_attacker, switch(Switch)), % call heuristic
+  % as we will use rot's heuristic to choose the player's switch we need to
+  % put rot's team in 2nd place in so read_rot_switch/2 thinks it is rot's team.
+  swap_attacker_state(State_attacker, State), % swap player team to 2nd place in state
+  read_rot_switch(State, switch(Switch)), % call heuristic
   process_switch(State_attacker, Switch, Result_state_attacker, Messages). % switch
 process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
   % forced to switch: rot

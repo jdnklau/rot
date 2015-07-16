@@ -25,6 +25,29 @@ test_available :-
   available_moves(T, A),
   write(A).
 
+test_tree :-
+  write('tree depth: '),
+  read(D),
+  test_tree(D).
+test_tree(D) :-
+  team_rot(T),
+  asserta(rot(searching)),
+  create_tree(state(T,T,[[],[],[]]), D, Tree),
+  retract(rot(searching)),
+  write('tree created'),nl.
+
+test_repeatedly :-
+  write('predicate to test: '),
+  read(P),
+  write('times to repeat: '),
+  read(R),
+  test_repeatedly(P,R).
+test_repeatedly(_,0).
+test_repeatedly(P,R) :-
+  call(P),
+  RR is R-1,
+  test_repeatedly(P,RR).
+
 test_search_tree :-
   team_1(T),
   write('tree depth: '),
@@ -32,7 +55,8 @@ test_search_tree :-
   asserta(rot(searching)),
   create_tree(state(T,T,[[],[],[]]), D, Tree),
   retract(rot(searching)),
-  %write_tree(Tree, 0), nl,
+  write('tree created'),nl,
+  write_tree(Tree, 0), nl,
   search_tree(Tree, Moves),
   write(expected:Moves), nl.
 
