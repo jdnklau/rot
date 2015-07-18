@@ -189,4 +189,4 @@ defending_pokemon(state(_,[Pokemon|_],_), Pokemon, Name) :-
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg New_pokemon The new active pokemon's data
 % @arg Result_state The resulting state of the game
-set_attacking_pokemon(state(Target,[_|Team],Field), Pokemon, state(Target,[Pokemon|Team],Field)).
+set_defending_pokemon(state(Target,[_|Team],Field), Pokemon, state(Target,[Pokemon|Team],Field)).
