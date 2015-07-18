@@ -62,6 +62,15 @@ ui_display_single_message(Who, uses(pokemon(Name), move(Move))) :-
 ui_display_single_message(_, no_effect) :-
   % moves having no effect
   tab(2), write('it has no effect').
+ui_display_single_message(_, effectiveness(not)) :-
+  % moves having little effect
+  tab(2), write('it was not very effective').
+ui_display_single_message(_, effectiveness(very)) :-
+  % moves having greater effect
+  tab(2), write('it was very effective').
+ui_display_single_message(_, critical) :-
+  % moves lands a crittical hit
+  tab(2), write('critical hit!').
 ui_display_single_message(Who, fainted(Name)) :-
   % pokemon fainted
   tab(2), ui_display_pokemon_with_owner(Name, Who),

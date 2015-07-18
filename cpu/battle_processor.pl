@@ -265,9 +265,12 @@ process_move(State, Move, Result_state, Messages) :-
   State = state([Attacker|_],_,_),
   successful_hits(Attacker, Possible_hits, Hits),
   calculate_damage(State, Move, Damage, E_tag, C_tag),
-  process_hits(State, Damage, Flags, Effects, Hits, New_state_attacker, Msg_hits),
-  push_message_stack(Msg_hits, [], Messages), % more to come
-  Result_state = New_state_attacker.
+  process_hits(State, Damage, Flags, Effects, Hits, Result_state, Msg_hits),
+  % set up message stack
+  move_critical_message(C_tag, Msg_crit),
+  move_effectiveness_message(E_tag, Msg_effective),
+  push_message_stack(Msg_crit, Msg_hits, Msg_p1),
+  push_message_stack(Msg_p1, Msg_effective, Messages).
 
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_stack).
 %
@@ -356,9 +359,9 @@ process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   \+ target_fainted(State), % there is a target to be damaged
   process_damage(State, Damage, Damage_done, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
-  push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
+  push_message_stack(Msg_damage, Msg_contact, Messages1), % push messages
   process_move_effects(Contact_state, Flags, Effects, Damage_done, Result_state, Msg_effects),
-  push_message_stack(Msg_effects, Messages1, Messages). % push messages
+  push_message_stack(Messages1, Msg_effects, Messages). % push messages
 process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
 
@@ -380,7 +383,7 @@ process_damage(state(Team_attacker, [Target|Team_target], Field), Damage, Damage
   Msg1 = [target(damaged(pokemon(Name), kp(New_curr, Max)))], % create message stack
   New_target = [Name, kp(New_curr, Max)|Rest_data], % alter target
   (New_curr is 0 -> Msg2 = [target(fainted(Name))] ; Msg2 = []), % create push stack
-  push_message_stack(Msg2, Msg1, Messages), % push push stack to the message stack
+  push_message_stack(Msg1, Msg2, Messages), % push push stack to the message stack
   process_fainting(New_target, Result_target).
 
 %! process_damage_by_percent_max(+Attacker_state, +Percent, -Damage_done, -Result_state, -Message_stack).

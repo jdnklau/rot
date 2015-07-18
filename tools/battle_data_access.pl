@@ -9,10 +9,10 @@
 opponent(player, rot).
 opponent(rot, player).
 
-%! game_over(+Game_state)
+%! game_over(+Game_state).
 %
-% True if the game is over and either rot or the player has won
-% Favours rot if both teams as fainted completely
+% True if the game is over and either rot or the player has won.
+% Favours rot if both teams have fainted completely
 %
 % @arg Game_state The current state of the game
 game_over(state(Player, _, _)) :-

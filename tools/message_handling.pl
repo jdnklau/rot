@@ -28,9 +28,8 @@ empty_message_frame(Who, msg(Who, [])).
 % @arg Resulting_stack The resulting stack containing the pushed messages
 push_message_stack(Stack, [], Stack).
 push_message_stack(Stack, [Push], [Push|Stack]).
-push_message_stack(Stack, [Push|Pushs], Result_stack) :-
-  push_message_stack(New_stack, Pushs, Result_stack),
-  push_message_stack(Stack, [Push], New_stack).
+push_message_stack(Stack, Pushs, Result_stack) :-
+  append(Pushs, Stack, Result_stack).
 
 %! push_message_frame(+Message_frame, +Messages, -Resulting_message_frame).
 %

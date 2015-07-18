@@ -5,6 +5,22 @@
 % @arg Message_stack The message stack containing the messages about the move useage
 move_use_message(state([[Name|_]|_],_,_), Move, [user(uses(pokemon(Name), move(Move)))]).
 
+%! move_effectiveness_message(+Effectiveness_tag, -Message_stack).
+% Gives a message stack containing messages indicating a given effectiveness.
+% @arg Effectiveness_tag One of the following: `normal`, `effective`, `noneffective`
+% @arg Message_stack The message stack containing the message about the effectiveness
+move_effectiveness_message(normal,[]).
+move_effectiveness_message(noneffective, [user(effectiveness(not))]).
+move_effectiveness_message(effective,[user(effectiveness(very))]).
+
+%! move_critical_message(+Critical_tag, -Message_stack).
+% Gives a message stack containing messages indicating whether the previous executed move
+% was a critical hit or not.
+% @arg Critical_tag One of the following: `normal`, `critical`
+% @arg Message_stack The message stack containing the message about an eventually critical hit
+move_critical_message(normal,[]).
+move_critical_message(critical,[user(critical)]).
+
 %! set_up_pokemon(+Name, +Nature, +Ability, +Move_list, +EV_DV_data, +Item, -Result)
 %
 % Sets up a pokemon by its wished attributes an translates it to the pokemon data structure
@@ -35,7 +51,7 @@ set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   Result =
     [Name, kp(KP, KP), Moves,
       [Ability, stats(Atk, Def, Spa, Spd, Ini), Types, stat_increases(0,0,0,0,0), EV_DV],
-      Item, [nil, [], []]].
+      Item, [nil, [], []]], !.
 
 %! set_up_kp(+Base_value, -Resulting_value)
 % Calculate the correct stat value from the base value
