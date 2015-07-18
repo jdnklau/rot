@@ -358,7 +358,7 @@ process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   process_damage(State, Damage, Damage_done, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
   push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
-  process_move_effects(Contact_state, Effects, Damage_done, Result_state, Msg_effects),
+  process_move_effects(Flags, Effects, Damage_done, Result_state, Msg_effects),
   push_message_stack(Msg_effects, Messages1, Messages). % push messages
 process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
@@ -410,8 +410,8 @@ process_damage_by_percent_max(State, Percent, Damage_done, Result_state, Message
 % @arg Damage_done The actual damage inflicted (may be lower than the initial damage to be done)
 % @arg Result_state The resulting attacker state of the game after the damage was executed
 % @arg Message_stack Stack of messages occured whilst processing
-process_damage_by_percent_max(State, 0, 0, State, []).
-process_damage_by_percent_max(State, Percent, Damage_done, Result_state, Messages) :-
+process_damage_by_percent_current(State, 0, 0, State, []).
+process_damage_by_percent_current(State, Percent, Damage_done, Result_state, Messages) :-
   P is Percent/100, % break to decimal representation
   defending_pokemon(State, Pokemon),
   hp_frame(Pokemon, kp(Curr,_)),
