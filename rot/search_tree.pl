@@ -18,6 +18,9 @@ create_nodes_by_rot_action(_,_,_,[],[]).
 create_nodes_by_rot_action(State, Depth, Mr, [Mp|Mps], [Mp:Tree|Nodes]) :-
   process_turn(State, Mp, Mr, New_state),
   create_tree(New_state, Depth, Tree),
+  !, % cut to eventually keep call stack clean
+  % ^ as only the Tree from the create_tree/3 call is relevant we cut away all
+  % choice points occured by the tree creation
   create_nodes_by_rot_action(State, Depth, Mr, Mps, Nodes).
 
 
