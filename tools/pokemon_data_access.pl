@@ -96,12 +96,13 @@ inflict_primary_status_condition(State, Poison, _, State, []) :-
 inflict_primary_status_condition(State, toxin, _, Result, Messages) :-
   % toxin needs to carry information about the number of turns the pokemon suffers it already as it grows stronger
   inflict_primary_status_condition(State, toxin(1), 0, Result, Messages). % base case can handle this
-inflict_primary_status_condition(State, Cond, _, Result, [target(ailment(pokemon(Name), suffers(Cond)))]) :-
+inflict_primary_status_condition(State, Cond, _, Result, [target(ailment(pokemon(Name), suffers(Cond_cat)))]) :-
   % base case
   State = state(Attacker,[Pokemon|Team],Field),
   Pokemon = [Name|_],
   primary_status_condition(Pokemon, nil),
   set_primary_status_condition(Pokemon, Cond, Result_pokemon),
+  primary_status_condition_category(Result_pokemon, Cond_cat),
   Result = state(Attacker,[Result_pokemon|Team],Field).
 
 %! set_primary_status_condition(+Pokemon, +Condition, -Result_pokemon).

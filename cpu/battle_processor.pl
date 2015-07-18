@@ -201,7 +201,7 @@ process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
   State = state([Pokemon|Team],Target,Field),
   primary_status_condition(Pokemon, sleep(Remaining,Max)),
-  New_remaining = Remaining-1,
+  New_remaining is Remaining-1,
   pokemon_name(Pokemon, Name),
   (
     % counter of remaining sleep turns reaches 0 -> pokemon wakes up

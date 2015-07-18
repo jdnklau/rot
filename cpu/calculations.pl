@@ -117,7 +117,7 @@ calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, 
     TE < 1,
     Eff_tag = noneffective
     ;
-    TE = 1,
+    TE =:= 1,
     Eff_tag = normal
   ),
   % set up critical atom to return
@@ -125,7 +125,7 @@ calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, 
     CM > 1,
     Crit_tag = critical
     ;
-    CM = 1,
+    CM =:= 1,
     Crit_tag = normal
   ).
 

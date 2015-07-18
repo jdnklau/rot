@@ -1,11 +1,13 @@
+# To Do List
+
+## Game Engine
 - add choice of lead
-- add primary status conditions
-- complete movedex
 - rectify handling of fainting pokemon
 - add predicate to extract a moves offensive and defensive categories and it's base power
 - complete damage calculation (calculation of certain factors)
-- add messages for effectiveness of moves
-- add messages for critical hits
 - alter stab/3 predicate
-- implement move effects
-- increase rot's difficulty (actually tree depth 2 causes Out Of Stack errors)
+- implement missing move effects
+- implement status increases
+
+## Rot's AI
+- add basic pruning (no moves without effect)
