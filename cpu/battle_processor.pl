@@ -358,7 +358,7 @@ process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
   process_damage(State, Damage, Damage_done, Damaged_state, Msg_damage),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
   push_message_stack(Msg_contact, Msg_damage, Messages1), % push messages
-  process_move_effects(Flags, Effects, Damage_done, Result_state, Msg_effects),
+  process_move_effects(Contact_state, Flags, Effects, Damage_done, Result_state, Msg_effects),
   push_message_stack(Msg_effects, Messages1, Messages). % push messages
 process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
@@ -431,32 +431,47 @@ process_contact(State, Flags, State, []) :-
   \+ member(contact,Flags). % nothing to do here as contact flag was not set
 process_contact(State, Flags, State, []). % NYI
 
-%! process_move_effects(+Attacker_state, +Effects, +Damage_done, -Result_state, -Message_stack).
+%! process_move_effects(+Attacker_state, +Flags, +Effects, +Damage_done, -Result_state, -Message_stack).
 %
-% Processes effects of a move
+% Processes effects of a move.
+% Calls process_single_move_effect/5 for every individual effect
 %
 % @arg Attacker_state The current state of the game from attacker point of view
+% @arg Flags The moves flags
 % @arg Effects Additional effects caused by the move, e.g. status conditions
-% @arg Effects The damage the move has done in its last hit
+% @arg Damage_done The damage the move has done in its last hit
 % @arg Result_state The resulting attacker state of the game after the effects were executed
 % @arg Message_stack Stack of messages occured whilst processing
-% @tbd processing effects
-process_move_effects(State, [], _, State, []). % base case
-process_move_effects(State, [Eff|Effs], DD, Result_state, Messages) :-
+% @see process_single_move_effect/5
+process_move_effects(State, _, [], _, State, []). % base case
+process_move_effects(State, Flags, [E|Es], DD, Result_state, Messages) :-
+  process_single_move_effect(State, E, DD, New_state, Msg_eff), % process a certain effect
+  process_move_effects(New_state, Flags, Es, DD, Result_state, Msg_effs), % remaining effects
+  push_message_stack(Msg_eff, Msg_effs, Messages). % no tail recursion
+
+%! process_single_move_effect(+Attacker_state, +Effect, +Damage_done, -Result_state, -Message_stack).
+%
+% Processes a certain effect caused by a move.
+% This predicate is called by process_move_effects/6.
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg Effect The effect to be processed, e.g. a primary status ailment
+% @arg Damage_done The damage the move has done in its last hit
+% @arg Result_state The resulting attacker state of the game after the effects were executed
+% @arg Message_stack Stack of messages occured whilst processing
+% @see process_move_effects/6
+process_single_move_effect(State, Ailment, _, Result_state, Messages) :-
   % status ailments
-  Eff =.. [ailment|Ailment_data], !,
-  process_ailment_infliction(State, Ailment_data, New_state, Msg_ailment),
-  process_move_effects(New_state, Effs, DD, Result_state, Msg_effects),
-  push_message_stack(Msg_ailment, Msg_effects, Messages). % no tail recursion, but there mostly are only a few effects either way
-process_move_effects(State, [drain(Percent)|Effs], DD, Result_state, Messages) :-
+  Ailment =.. [ailment|Ailment_data], !,
+  process_ailment_infliction(State, Ailment_data, Result_state, Messages).
+process_single_move_effect(State, drain(Percent), DD, Result_state, Messages) :-
   % heals for a percentage of the damage done
   Reversed_heal is 0 - floor(DD * (Percent/100)), % heal is expressed as negative damage
   swap_attacker_state(State, Swapped_state), % swap attacker/target to use process_damage/5 properly
   process_damage(Swapped_state, Reversed_heal, _, New_swapped_state, Msg_heal), % negative damage is healing
-  swap_attacker_state(New_swapped_state, New_state), % swap back
+  swap_attacker_state(New_swapped_state, Result_state), % swap back
   % decide on drain message
-  attacking_pokemon(New_state, Pokemon),
-  pokemon_name(Pokemon,Name),
+  attacking_pokemon(Result_state, _, Name),
   (
     Reversed_heal =< 0, % Heal >= 0
     Msg_drain = [drain(Name)]
@@ -464,13 +479,10 @@ process_move_effects(State, [drain(Percent)|Effs], DD, Result_state, Messages) :
     % Heal < 0, so actually it did damage
     Msg_drain = [recoil(Name)] % recoil is negative drain
   ),
-  push_message_stack(Msg_drain, Msg_heal, Msg_eff),
-  process_move_effects(New_state, Effs, DD, Result_state, Msg_effects),
-  push_message_stack(Msg_eff, Msg_effects, Messages). % no tail recursion
-process_move_effects(State, [Eff|Effs], DD, Result_state, Messages) :-
+  push_message_stack(Msg_drain, Msg_heal, Messages).
+process_single_move_effect(State, E, _, State, Messages) :-
   % NFI
-  process_move_effects(State, Effs, DD, Result_state, Msg_eff),
-  push_message_stack([system(type(unsupported), category(effect), data(Eff))], Msg_eff, Messages).
+  Messages = [system(type(unsupported), category(effect), data(E))].
 
 %! process_ailment_infliction(+Attacker_state, +Ailment_data, -Result_state, -Message_stack).
 %
