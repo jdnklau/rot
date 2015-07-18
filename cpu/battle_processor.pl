@@ -256,9 +256,8 @@ process_move_routine(State, Move, Result_state, Messages) :-
 % @arg Message_stack Stack of messages occured whilst processing
 process_move(State, Move, Result_state, Messages) :-
   % status move
-  move(Move, _, status, _, _,_,_,_,_),
-  Result_state = State, % NYI: status moves
-  Messages = [].
+  move(Move, _, status, _, _,_,Flags,_,Effects),
+  process_move_effects(State,Flags,Effects,0,Result_state,Messages).
 process_move(State, Move, Result_state, Messages) :-
   % base case: damaging move
   move(Move, _, Category, _, _,_,Flags,Possible_hits,Effects),
