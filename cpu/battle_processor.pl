@@ -264,7 +264,7 @@ process_move(State, Move, Result_state, Messages) :-
   Category =.. [_,_],
   State = state([Attacker|_],_,_),
   successful_hits(Attacker, Possible_hits, Hits),
-  calculate_damage(State, Move, Damage),
+  calculate_damage(State, Move, Damage, E_tag, C_tag),
   process_hits(State, Damage, Flags, Effects, Hits, New_state_attacker, Msg_hits),
   push_message_stack(Msg_hits, [], Messages), % more to come
   Result_state = New_state_attacker.

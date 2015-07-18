@@ -86,15 +86,17 @@ calculate_increased_stat(Stat_before, Stat_stage, Stat_value) :-
   stat_stage_factor(Stat_stage, F),
   Stat_value is floor(Stat_before * F).
 
-%! calculate_damage(+Attacker_state, +Move, -Damage)
+%! calculate_damage(+Attacker_state, +Move, -Damage, -Effectiveness_tag, -Critical_tag).
 %
 % Calculates the damage to be dealed by the given offensive move used by the attacker to
-% the targed
+% the target
 %
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Move The move used by the attacker - can not be a status move
 % @arg Damage the resulting damage
-calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, Field_global]), Move, Damage) :-
+% @arg Effectiveness_tag Atom representing how effective the move is - either `effective`, `noneffective` or `normal`
+% @arg Critical_tag Atome representing whether the move lands a critical hit or not - either `critical` or `normal`
+calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, Field_global]), Move, Damage, Eff_tag, Crit_tag) :-
   move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed taht the move is not a status move
   Move_catpow =.. [Move_category, Move_base_power], % get move category and base power
   calculate_stab(Attacker, Move_type, Stab),
@@ -106,7 +108,26 @@ calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, 
   calculate_F1(Attacker, Field_target, Field_global, Move_type, Move_category, CM, F1), % special factor F1
   calculate_F2(Attacker, F2), % special factor F2
   calculate_F3(Attacker, Target, TE, F3), % special factor F3
-  calculate_final_damage(Base_damage, Stab, Atk, Def, CM, F1, F2, F3, TE, Damage). % mix it all together
+  calculate_final_damage(Base_damage, Stab, Atk, Def, CM, F1, F2, F3, TE, Damage), % mix it all together
+  % set up effectiveness atom to return
+  (
+    TE > 1,
+    Eff_tag = effective
+    ;
+    TE < 1,
+    Eff_tag = noneffective
+    ;
+    TE = 1,
+    Eff_tag = normal
+  ),
+  % set up critical atom to return
+  (
+    CM > 1,
+    Crit_tag = critical
+    ;
+    CM = 1,
+    Crit_tag = normal
+  ).
 
 %! calculate_final_damage(+Base_damage, +Stab, +Attack_stat, +Defense_stat, +Critical_multiplier, +F1, +F2, +F3, +Type_effectiveness, -Final_damage)
 %
