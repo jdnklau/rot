@@ -20,18 +20,18 @@
     + Stat_stages structure  
       `stat_stages(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
-    + Status_conditions structure  
-      `[Primary_condition, Secondary_conditions, Additional_conditions]`
-      + Primary_condition  
-        may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
-        `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
-      + Secondary_conditions  
-        a list of currently active secondary status conditions (may be empty)  
-        possible conditions are:  
-        + confused
-        + flinched
-        + energy-focus
-        + (NFI)  
+  + Status_conditions structure  
+    `[Primary_condition, Secondary_conditions, Additional_conditions]`
+    + Primary_condition  
+      may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
+      `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
+    + Secondary_conditions  
+      a list of currently active secondary status conditions (may be empty)  
+      possible conditions are:  
+      + confused
+      + flinched
+      + energy-focus
+      + (NFI)  
 + Priority Frame  
   `priorities(Priority_player, Priority_red)`  
   + Priority
