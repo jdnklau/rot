@@ -7,7 +7,6 @@
 - complete damage calculation (calculation of certain factors)
 - alter stab/3 predicate
 - implement missing move effects
-- implement status increases
 
 ## Rot's AI
 - add basic pruning (no moves without effect)

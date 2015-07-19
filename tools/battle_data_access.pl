@@ -134,6 +134,17 @@ stat_stage_factor(-4, (1/3)).
 stat_stage_factor(-5, (2/7)).
 stat_stage_factor(-6, 0.25).
 
+%! increased_stat(+Raw_stat, +Stat_stage, -Result_stat).
+%
+% Calculates the value of a battle stat by it's raw value and status stage increase.
+%
+% @arg Raw_stat The basic stat value
+% @arg Stat_stage The stat stage increase - an integer within range from -6 to 6
+% @arg Result_stat The resulting status value
+increased_stat(Raw, Stage, Stat) :-
+  stat_stage_factor(Stage, Factor),
+  Stat is floor(Raw*Factor).
+
 %! move_has_flag(+Move,+Flag).
 % True if the given move has the given flag set in it's data
 % @arg Move The move in question
@@ -189,4 +200,4 @@ defending_pokemon(state(_,[Pokemon|_],_), Pokemon, Name) :-
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg New_pokemon The new active pokemon's data
 % @arg Result_state The resulting state of the game
-set_defending_pokemon(state(Target,[_|Team],Field), Pokemon, state(Target,[Pokemon|Team],Field)).
+set_defending_pokemon(state(Attacker,[_|Team],Field), Pokemon, state(Attacker,[Pokemon|Team],Field)).

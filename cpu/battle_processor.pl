@@ -86,14 +86,14 @@ process_end_of_turn_damage(State, New_state, Messages) :-
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Result_state The resulting state of the game after executing the end turn damage for the given player
 % @arg Message_stack Stack of messages occured whilst processing
-process_end_of_turn_primary_status_damage(State, New_state, Messages) :-
+process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon burns or is poisoned
   attacking_pokemon(State, Pokemon, Name),
   primary_status_condition(Pokemon, Cond),
   member(Cond, [burn, poison]),
   swap_attacker_state(State, Swap_state), % swap state to inflict the damage
   process_damage_by_percent_max(Swap_state, 12.5, _, New_swap_state, Msg_dmg_opp), % 1/8 of total hp
-  swap_attacker_state(New_swap_state, New_state), % swap back
+  swap_attacker_state(New_swap_state, Result_state), % swap back
   messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
   % set up final message stack
   (
@@ -105,7 +105,7 @@ process_end_of_turn_primary_status_damage(State, New_state, Messages) :-
     Cond = poison,
     push_message_stack([poisoned(Name)], Msg_dmg, Messages)
   ).
-process_end_of_turn_primary_status_damage(State, New_state, Messages) :-
+process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon suffers toxin
   attacking_pokemon(State, Pokemon, Name),
   primary_status_condition(Pokemon, toxin(Turn)),
@@ -275,6 +275,9 @@ process_move(State, Move, Result_state, Messages) :-
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_stack).
 %
 % Switches the active pokemon for a given team mate.
+% As a pokemon is switched out the following actions take place:
+%   * status value stages are set back to 0
+%   * more to come
 %
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Team_mate A non active team pokemon to be switched with the active one
@@ -282,9 +285,10 @@ process_move(State, Move, Result_state, Messages) :-
 % @arg Message_stack Stack of messages occured whilst processing
 % @tbd entry hazards
 % @tbd mark pokemon whom just came into battle
-process_switch(state(Team_attacker, Team_target, Field), Team_mate, state(New_team_attacker, Team_target, Field), Messages) :-
-  calculate_switch(Team_attacker, Team_mate, New_team_attacker),
-  Team_attacker = [[Out|_]|_], % extract name of active pokemon
+process_switch(state([Attacker|Team_attacker], Team_target, Field), Team_mate, state(New_team_attacker, Team_target, Field), Messages) :-
+  clear_stat_stages(Attacker, New_attacker), % clear status value stages
+  calculate_switch([New_attacker|Team_attacker], Team_mate, New_team_attacker),
+  pokemon_name(New_attacker, Out), %extract name of active pokemon
   Messages = [user(switch(from(Out), to(Team_mate)))]. % only message on the message stack
 
 %! process_forced_switch(+Attacker_state, +Who, +Result_state, -Message_stack).
@@ -482,6 +486,25 @@ process_single_move_effect(State, drain(Percent), DD, Result_state, Messages) :-
     Msg_drain = [recoil(Name)] % recoil is negative drain
   ),
   push_message_stack(Msg_drain, Msg_heal, Messages).
+process_single_move_effect(State, stats(Target, Prob, Increase_list), _, Result_state, Messages) :-
+  % status stage increases
+  rng_succeeds(Prob), % probability needs to succeed
+  (
+    % choose right target
+    Target = target,
+    process_stat_stage_increases(State, Increase_list, Result_state, Messages)
+    ;
+    % target is the user
+    Target = user,
+    swap_attacker_state(State, Swap_state), % target of the increases is the target in the attacker state
+    process_stat_stage_increases(Swap_state, Increase_list, Result_swap_state, Messages_opp),
+    messages_of_opposing_view(Messages_opp, Messages), % swap messages
+    swap_attacker_state(Result_swap_state, Result_state) % swap state back
+  )
+  ;
+  % rng did not succeed, thus no stat stages get increased
+  Messages = [],
+  Result_state = State.
 process_single_move_effect(State, E, _, State, Messages) :-
   % NFI
   Messages = [system(type(unsupported), category(effect), data(E))].
@@ -504,6 +527,58 @@ process_ailment_infliction(State, [sleep, Prob, Turn_limit], Result, Messages) :
 process_ailment_infliction(State, Data, State, Messages) :-
   % NFI
   push_message_stack([system(type(unsupported), category(ailment), data(Data))], [], Messages).
+
+%! process_stat_stage_increases(+Attacer_state, +List_of_increases, -Result_state, -Message_stack).
+%
+% Processes a list of status value stage increases on the target pokemon.
+% The status value stage increases have to be tupels of the form (Stat_name, Increase)
+% where Stat_name unifies with one of the following:
+%   * attack
+%   * defense
+%   * special-attack
+%   * special-defense
+%   * speed
+% Increase is any integer, though it is sufficient if the values are within range
+% from -12 to +12, as those are the lowest and highest values a status value stage increase could go.
+% E.g. as status value stages themselves range from -6 to 6 an attack stage of -6
+% can at max raise by +12 as (-6)+12 = 6 and the attack stage (as other stages) can not exceed +6.
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg List_of_increases List of tupels of the form (Stat_name, Increase)
+% @arg Result_state The resulting attacker state of the game
+% @arg Message_stack Stack of messages occured whilst processing
+process_stat_stage_increases(State,[],State,[]).
+process_stat_stage_increases(State, [(Stat,Inc)|Incs], Result_state, Messages) :-
+  process_single_stat_stage_increase(State, Stat, Inc, New_state, Msg_stage),
+  process_stat_stage_increases(New_state, Incs, Result_state, Msg_stages),
+  push_message_stack(Msg_stage, Msg_stages, Messages). % no tail recursion
+
+%! process_single_stat_stage_increase(+Attacer_state, +Stat_name, +Increase_value, -Result_state, -Message_stack).
+%
+% Processes a single status value stage increase on the target pokemon.
+% The status value stage increases have to be tupels of the form (Stat_name, Increase)
+% where Stat_name unifies with one of the following:
+%   * attack
+%   * defense
+%   * special-attack
+%   * special-defense
+%   * speed
+% Increase is any integer, though it is sufficient if the values are within range
+% from -12 to +12, as those are the lowest and highest values a status value stage increase could go.
+% E.g. as status value stages themselves range from -6 to 6 an attack stage of -6
+% can at max raise by +12 as (-6)+12 = 6 and the attack stage (as other stages) can not exceed +6.
+%
+% @arg Attacker_state The current state of the game from attacker point of view
+% @arg Stat_name Name of the status value stage to increase
+% @arg Increase_value Value the status stage shall be increased by
+% @arg Result_state The resulting attacker state of the game
+% @arg Message_stack Stack of messages occured whilst processing
+process_single_stat_stage_increase(State, Stat, Increase, Result_state, Messages) :-
+  defending_pokemon(State, Pokemon, Name), % get pokemon
+  stat_stage(Pokemon, Stat, Old_stage), % old stat stage for message creation
+  increase_stat_stage(Pokemon, Stat, Increase, New_pokemon), % increase
+  set_defending_pokemon(State, New_pokemon, Result_state),
+  stat_stage_increase_message(Name, Stat, Old_stage, Increase, Messages).
 
 %! process_fainting(+Pokemon, -Pokemon_fainted).
 %

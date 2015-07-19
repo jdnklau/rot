@@ -71,6 +71,25 @@ ui_display_single_message(_, effectiveness(very)) :-
 ui_display_single_message(_, critical) :-
   % moves lands a crittical hit
   tab(2), write('critical hit!').
+ui_display_single_message(Who, stat_stage(pokemon(Name), stat(Stat), cannot(Direction))) :-
+  % status value stage can not increase/decrease
+  member(Direction,[increase,decrease]), % make sure it is one of those
+  tab(2), write(Stat), write(' stat of '),
+  ui_display_pokemon_with_owner(Name, Who),
+  write('can not '), write(Direction), write(' any further').
+ui_display_single_message(Who, stat_stage(pokemon(Name), stat(Stat), value(Value))) :-
+  % status value stage increase
+  Value > 0,
+  tab(2), write(Stat), write(' stat of '),
+  ui_display_pokemon_with_owner(Name, Who),
+  write('increased by '), write(Value).
+ui_display_single_message(Who, stat_stage(pokemon(Name), stat(Stat), value(Value))) :-
+  % status value stage decrease
+  Value < 0,
+  Value_inv is -1*Value, % inverted value for dispaying reasons
+  tab(2), write(Stat), write(' stat of '),
+  ui_display_pokemon_with_owner(Name, Who),
+  write('decreased by '), write(Value_inv).
 ui_display_single_message(Who, fainted(Name)) :-
   % pokemon fainted
   tab(2), ui_display_pokemon_with_owner(Name, Who),

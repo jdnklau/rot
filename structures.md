@@ -12,13 +12,13 @@
   + Moves structure  
     `[[Move_1, PP_1], [Move_2, PP_2], [Move_3, PP_3], [Move_4, PP_4]]`
   + Status_data structure  
-    `[Ability, Stats, Types, Stat_increases, EV_and_DV]`
+    `[Ability, Stats, Types, Stat_stages, EV_and_DV]`
     + Stats structure  
       `stats(Attack, Defense, Special_attack, Special_defense, Speed)`
     + Types structure  
       a list containing one or two of the elementary types used in pokemon
-    + Stat_increases structure  
-      `stat_increases(Attack, Defense, Special_attack, Special_defense, Speed)`  
+    + Stat_stages structure  
+      `stat_stages(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
     + Status_conditions structure  
       `[Primary_condition, Secondary_conditions, Additional_conditions]`

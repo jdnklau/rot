@@ -225,9 +225,11 @@ has_type(Pokemon, Type) :-
   types(Pokemon, Types),
   member(Type, Types).
 
-%! stats(+Pokemon, -Attack, -Defense, -Special_attac, -Special_defense, -Speed).
+%! raw_stats(+Pokemon, -Attack, -Defense, -Special_attack, -Special_defense, -Speed).
 %
-% Gives the stat values of the given pokemon.
+% Returns the raw status values of the given pokemon.
+% Does not take eventual status increases or decreases into account.
+% For more battle relevant stats use stats/6.
 %
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Attack The attack stat
@@ -235,7 +237,104 @@ has_type(Pokemon, Type) :-
 % @arg Special_attack The special attack stat
 % @arg Special_defense The special defense stat
 % @arg Speed The speed stat
-stats([_,_,_,[_,stats(Atk, Def, Spa, Spd, Spe)|_]|_], Atk, Def, Spa, Spd, Spe).
+% @see stats/6
+raw_stats([_,_,_,[_,stats(Atk, Def, Spa, Spd, Spe)|_]|_], Atk, Def, Spa, Spd, Spe).
+
+%! stats(+Pokemon, -Attack, -Defense, -Special_attack, -Special_defense, -Speed).
+%
+% Returns the status values of the given pokemon.
+% Intended to use in battle as it takes status increases into account.
+% For the raw stats without accounting of stat increases use raw_stats/6.
+%
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Attack The attack stat
+% @arg Defense The defense stat
+% @arg Special_attack The special attack stat
+% @arg Special_defense The special defense stat
+% @arg Speed The speed stat
+% @see raw_stats/6
+stats(Pokemon, Atk, Def, Spa, Spd, Spe) :-
+  raw_stats(Pokemon, Atk_r, Def_r, Spa_r, Spd_r, Spe_r), % raw data
+  stat_stages(Pokemon, Atk_i, Def_i, Spa_i, Spd_i, Spe_i), % stat stages
+  % get battle stats
+  increased_stat(Atk_r, Atk_i, Atk),
+  increased_stat(Def_r, Def_i, Def),
+  increased_stat(Spa_r, Spa_i, Spa),
+  increased_stat(Spd_r, Spd_i, Spd),
+  increased_stat(Spe_r, Spe_i, Spe).
+
+%! stat_stages(+Pokemon, -Attack, -Defense, -Special_attack, -Special_defense, -Speed).
+%
+% Returns all the status value stages, each in range from -6 to 6.
+% To access a specific stat stage use stat_stage/3
+%
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Attack The attack stat stage
+% @arg Defense The defense stat stage
+% @arg Special_attack The special attack stat stage
+% @arg Special_defense The special defense stat stage
+% @arg Speed The speed stat stage
+stat_stages([_,_,_,[_,_,_,stat_stages(Atk,Def,Spa,Spd,Spe)|_]|_], Atk, Def, Spa, Spd, Spe).
+
+%! stat_stage(+Pokemon, +Stat_name, -Stat_stage).
+% Returns a specific status value stage.
+% To access all stat stages easily use stat_stages/6.
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Stat_name The name of the status value stage to return
+% @arg Stat_stage An integer within the range from -6 to 6 representing the status value stage
+stat_stage(Pokemon, attack, Stage) :-
+  stat_stages(Pokemon, Stage,_,_,_,_).
+stat_stage(Pokemon, defense, Stage) :-
+  stat_stages(Pokemon, _,Stage,_,_,_).
+stat_stage(Pokemon, special-attack, Stage) :-
+  stat_stages(Pokemon, _,_,Stage,_,_).
+stat_stage(Pokemon, special-defense, Stage) :-
+  stat_stages(Pokemon, _,_,_,Stage,_).
+stat_stage(Pokemon, speed, Stage) :-
+  stat_stages(Pokemon, _,_,_,_,Stage).
+
+%! increase_stat_stage(+Pokemon, +Stat_name, +Stage_increase, -Result_pokemon).
+% Increases the given pokemons status value stage by the given number.
+% The status value stage can not be lower than -6 nor higher than +6.
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Stat_name The name of the status value stage to increase
+% @arg Stage_increase The amount the status value stage will be increased (may be negative)
+% @arg Result_pokemon The resulting pokemon data
+increase_stat_stage(Pokemon, Stat_name, Stage_increase, Result_pokemon) :-
+  % get stat stage frame
+  Pokemon = [Name,Hp, Moves, [Ability,Stats,Types,Increases|Rest1]|Rest2],
+  % increase correspinding stat
+  increase_stat_stage_frame(Increases, Stat_name, Stage_increase, Result_increases),
+  % save result
+  Result_pokemon = [Name,Hp,Moves,[Ability,Stats,Types,Result_increases|Rest1]|Rest2].
+
+%! increase_stat_stage_frame(+Stat_stage_frame, +Stat_name, +Stage_increase, -Result_frame).
+% Increases the given status value stage frame's status value stage by the given number.
+% The status value stage can not be lower than -6 nor higher than +6.
+% @arg Stat_stage_frame The frame which has du be increased - of the form stat_stages(Attack, Defense, Special_attack, Special_defense, Speed)
+% @arg Stat_name The name of the status value stage to increase
+% @arg Stage_increase The amount the status value stage will be increased (may be negative)
+% @arg Result_frame The resulting status value stage frame
+increase_stat_stage_frame(stat_stages(A,D,Sa,Sd,Sp), attack, Inc, stat_stages(A_i,D,Sa,Sd,Sp)) :-
+  A_i is max(-6, min(6, A+Inc)). % needs to be in range -6 to 6
+increase_stat_stage_frame(stat_stages(A,D,Sa,Sd,Sp), defense, Inc, stat_stages(A,D_i,Sa,Sd,Sp)) :-
+  D_i is max(-6, min(6, D+Inc)). % needs to be in range -6 to 6
+increase_stat_stage_frame(stat_stages(A,D,Sa,Sd,Sp), special-attack, Inc, stat_stages(A,D,Sa_i,Sd,Sp)) :-
+  Sa_i is max(-6, min(6, Sa+Inc)). % needs to be in range -6 to 6
+increase_stat_stage_frame(stat_stages(A,D,Sa,Sd,Sp), special-defense, Inc, stat_stages(A,D,Sa,Sd_i,Sp)) :-
+  Sd_i is max(-6, min(6, Sd+Inc)). % needs to be in range -6 to 6
+increase_stat_stage_frame(stat_stages(A,D,Sa,Sd,Sp), speed, Inc, stat_stages(A,D,Sa,Sd,Sp_i)) :-
+  Sp_i is max(-6, min(6, Sp+Inc)). % needs to be in range -6 to 6
+
+%! clear_stat_stages(+Pokemon, -Result_pokemon).
+% Sets the status value stages of the given pokemon to 0.
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Result_pokemon The resulting pokemon data
+clear_stat_stages(Pokemon, Result_pokemon) :-
+  % get pokemon data
+  Pokemon = [Name,Hp, Moves, [Ability,Stats,Types,_|Rest1]|Rest2],
+  % save result with cleared stat stages
+  Result_pokemon = [Name,Hp,Moves,[Ability,Stats,Types,stat_stages(0,0,0,0,0)|Rest1]|Rest2].
 
 %! atk_stat_by_category(+Pokemon, +Category, -Attack_stat).
 %
@@ -275,7 +374,7 @@ attacking_speed_stat(Pokemon, AS) :-
   AS is floor(Speed * 1.5).
 attacking_speed_stat(Pokemon, AS) :-
   % paralysis reduces speed by 75% if the user has not the ability quick feet
-  primary_status_condition(Pokemon, paralisis),
+  primary_status_condition(Pokemon, paralysis),
   \+ ability(Pokemon, 'quick feet'),
   stats(Pokemon,_,_,_,_,Speed),
   AS is floor(Speed * 0.25).
