@@ -20,6 +20,10 @@
     + Stat_stages structure  
       `stat_stages(Attack, Defense, Special_attack, Special_defense, Speed)`  
       each stat increase value ranges from -6 to 6
+    + EV_and_DV structure  
+      a six-tupel of the form `(HP_tupel, Attack_tupel, Defense_tupel, Special_attack_tupel, Special_defense_tupel, Speed_tupel)`
+      + Stat_tupel structure  
+        A tupel of the form `(Effort_value, Determinant_value)` for the corresponding stat
   + Status_conditions structure  
     `[Primary_condition, Secondary_conditions, Additional_conditions]`
     + Primary_condition  

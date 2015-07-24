@@ -381,3 +381,23 @@ attacking_speed_stat(Pokemon, AS) :-
 attacking_speed_stat(Pokemon, AS) :-
   % base case
   stats(Pokemon,_,_,_,_,AS).
+
+%! ev_dv_data(+Pokemon, -EV_DV_data).
+% Returns the ev/dv data of the given pokemon.
+% The data has the format of a six-tupel corresponding to the six base stats.
+% Each value of this six-tupel is a tupel itself of the form (EV, DV) for the corresponding stat.
+% @arg Pokemon The pokemon data of the pokemon in question.
+% @arg EV_DV_data The EV and DV data of the pokemon.
+ev_dv_data([_,_,_[_,_,_,_,EV_DV|_]|_], EV_DV).
+
+%! ev_data(+Pokemon, -HP_ev, -Attack_ev, -Defense_ev, -Special_attack_ev, -Special_defense_ev, -Speed_ev).
+% Returns the effort values of the given pokemon.
+% @arg Pokemon The pokemon data of the pokemon in question.
+% @arg HP_ev The hit point's effort value
+% @arg Attack_ev The attacks's effort value
+% @arg Defense_ev The defense's effort value
+% @arg Special_attack_ev The special attack's effort value
+% @arg Special_defense_ev The special defense's effort value
+% @arg Speed_ev The speed's effort value
+ev_data(Pokemon, HP, Atk, Def, Spa, Spd, Spe) :-
+  ev_dv_data(Pokemon, ((HP,_), (Atk,_), (Def,_), (Spa,_), (Spd,_), (Spe,_))).
