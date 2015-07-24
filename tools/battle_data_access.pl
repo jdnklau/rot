@@ -77,6 +77,20 @@ type_effectiveness(A, [T1, T2], E) :-
   type_effectiveness(A, [T2], E2),
   E is E1*E2.
 
+%! very_effective_hit(+Pokemon, +Move_type).
+% True if the given pokemon gets hit very effective by a move of the given type.
+very_effective_hit(Pokemon, Type) :-
+  types(Pokemon, Types),
+  type_effectiveness(Type, Types, E),
+  E > 1.
+
+%! not_very_effective_hit(+Pokemon, +Move_type).
+% True if the given pokemon gets hit not very effective by a move of the given type.
+not_very_effective_hit(Pokemon, Type) :-
+  types(Pokemon, Types),
+  type_effectiveness(Type, Types, E),
+  E < 1.
+
 %! stab(+Pokemon_data, +Move_type).
 %! stab(+Pokemon_data, -Move_type).
 %
