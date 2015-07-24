@@ -56,32 +56,35 @@ set_up_pokemon(Name, Nature, Ability, [M1, M2, M3, M4], EV_DV, Item, Result) :-
   set_up_move(M4, Move_4),
   Moves = [Move_1, Move_2, Move_3, Move_4],
   pokemon(Name, Types, stats(B_KP, B_Atk, B_Def, B_Spa, B_Spd, B_Ini),_), % get base stats
-  set_up_kp(B_KP, KP),
-  set_up_stat(B_Atk, Raw_Atk),
-  set_up_stat(B_Def, Raw_Def),
-  set_up_stat(B_Spa, Raw_Spa),
-  set_up_stat(B_Spd, Raw_Spd),
-  set_up_stat(B_Ini, Raw_Ini),
+  EV_DV = (Hp_ed, Atk_ed, Def_ed, Spa_ed, Spd_ed, Spe_ed), % access ev/dv
+  set_up_kp(B_KP, Hp_ed, KP),
+  set_up_stat(B_Atk, Atk_ed, Raw_Atk),
+  set_up_stat(B_Def, Def_ed, Raw_Def),
+  set_up_stat(B_Spa, Spa_ed, Raw_Spa),
+  set_up_stat(B_Spd, Spd_ed, Raw_Spd),
+  set_up_stat(B_Ini, Spe_ed, Raw_Ini),
   apply_nature(Nature,Raw_Atk, Raw_Def, Raw_Spa, Raw_Spd, Raw_Ini, Atk, Def, Spa, Spd, Ini),
   Result =
     [Name, kp(KP, KP), Moves,
       [Ability, stats(Atk, Def, Spa, Spd, Ini), Types, stat_stages(0,0,0,0,0), EV_DV],
       Item, [nil, [], []]], !.
 
-%! set_up_kp(+Base_value, -Resulting_value)
+%! set_up_kp(+Base_value, +EV_DV_data, -Resulting_value)
 % Calculate the correct stat value from the base value
 % @arg Base_value The value of the pokemon's hp base stat
+% @arg EV_DV_data A tupel of the form (EV, DV), where EV ranges from 0 to 252 and DV from 0 to 31
 % @arg Resulting_value The actual value of the stat
-set_up_kp(Base_value, Stat_value) :-
-  DV_and_EV is 0,
+set_up_kp(Base_value, (EV,DV), Stat_value) :-
+  DV_and_EV is DV + EV//4,
   Stat_value is (2*Base_value + DV_and_EV + 100)/2 + 10.
 
-%! set_up_stat(+Base_value, -Resulting_value)
+%! set_up_stat(+Base_value, +EV_DV_data, -Resulting_value)
 % Calculate the correct stat value from the base value
 % @arg Base_value The value of the pokemon's hp base stat
+% @arg EV_DV_data A tupel of the form (EV, DV), where EV ranges from 0 to 252 and DV from 0 to 31
 % @arg Resulting_value The actual value of the stat
-set_up_stat(Base_value, Stat_value) :-
-  DV_and_EV is 0,
+set_up_stat(Base_value, (EV,DV), Stat_value) :-
+  DV_and_EV is DV + EV//4,
   Stat_value is (2*Base_value + DV_and_EV)/2 + 5.
 
 apply_nature(_,Atk,Def,Spa,Spd,Ini,Atk,Def,Spa,Spd,Ini). % NYI
