@@ -77,15 +77,20 @@ type_effectiveness(A, [T1, T2], E) :-
   type_effectiveness(A, [T2], E2),
   E is E1*E2.
 
-%! stab(+Move_type, +Users_type_list, -Stab_factor)
+%! stab(+Pokemon_data, +Move_type).
+%! stab(+Pokemon_data, -Move_type).
 %
-% Gets the stab factor of the move depending on the users types
+% True if the given pokemon has STAB for the given move type.
+% May be used to return move types the pokemon has STAB for.
 %
+% To calculate the STAB factor, use calculate_stab/3 instead.
+%
+% @arg Pokemon The pokemon data of the pokemon in question.
 % @arg Move_type The elemental type of the move
-% @arg Users_type_list The elemental type list of the move user
-% @arg Stab_factor The resulting factor, either 1 or 1.5
-stab(T, Ts, 1.5) :- member(T, Ts).
-stab(T, Ts, 1) :- \+ member(T, Ts).
+% @see calculate_stab/3
+stab(Pokemon, Type) :-
+  types(Pokemon, Types),
+  member(Type,Types).
 
 %! translate_attacker_state(+Game_state, +Attacker, -Attacker_state).
 %! translate_attacker_state(+Attacker_state, +Attacker, -Game_state).

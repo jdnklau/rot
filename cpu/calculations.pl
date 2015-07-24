@@ -72,12 +72,15 @@ calculate_type_effectiveness(Type, [Name|_], E) :-
 % @arg Stab The final stab factor, either 1, 1.5 or 2 if the users ability is adaptability
 % @tbd optimize the code a little
 calculate_stab(Pokemon, Type, 2) :-
+  % ability: adaptability increases STAB by additional 50%
   ability(Pokemon, adaptability),
-  types(Pokemon, Types),
-  stab(Type, Types, 1.5).
-calculate_stab(Pokemon, Type, Stab) :-
-  types(Pokemon, Types),
-  stab(Type, Types, Stab).
+  stab(Pokemon, Type).
+calculate_stab(Pokemon, Type, 1.5) :-
+  % STAB attacks do 50% more damage
+  \+ ability(Pokemon, adaptability),
+  stab(Pokemon, Type).
+calculate_stab(Pokemon, Type, 1) :-
+  \+ stab(Pokemon, Type).
 
 %! calculate_increased_stat(+Stat_before, +Stat_stage, -Stat_value)
 %
