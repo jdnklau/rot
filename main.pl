@@ -1,8 +1,11 @@
+:- use_module(library(random)).
+:- use_module(library(clpfd)).
 :- [test, teams].
 :- [database/movedex,
     database/natures,
     database/pokedex,
     database/typechart,
+    database/learndex,
     database/evolutions].
 :- [cpu/battle_processor,
     cpu/calculations,
@@ -19,7 +22,9 @@
 :- [rot/api,
     rot/ai,
     rot/search_tree].
-:- use_module(library(random)).
+:- [rot/expert/init,
+    rot/expert/inference_engine,
+    rot/expert/knowledge_base].
 
 %%%
 
