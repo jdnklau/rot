@@ -388,7 +388,7 @@ attacking_speed_stat(Pokemon, AS) :-
 % Each value of this six-tupel is a tupel itself of the form (EV, DV) for the corresponding stat.
 % @arg Pokemon The pokemon data of the pokemon in question.
 % @arg EV_DV_data The EV and DV data of the pokemon.
-ev_dv_data([_,_,_[_,_,_,_,EV_DV|_]|_], EV_DV).
+ev_dv_data([_,_,_,[_,_,_,_,EV_DV|_]|_], EV_DV).
 
 %! ev_data(+Pokemon, -HP_ev, -Attack_ev, -Defense_ev, -Special_attack_ev, -Special_defense_ev, -Speed_ev).
 % Returns the effort values of the given pokemon.
