@@ -91,7 +91,7 @@ set_up_stats(Base_stats, EV_DV, Hp, Stats) :-
 % @arg Resulting_value The actual value of the stat
 set_up_kp(Base_value, (EV,DV), Stat_value) :-
   DV_and_EV is DV + EV//4,
-  Stat_value is (2*Base_value + DV_and_EV + 100)/2 + 10.
+  Stat_value is (2*Base_value + DV_and_EV + 100)//2 + 10.
 
 %! set_up_stat(+Base_value, +EV_DV_data, -Resulting_value)
 % Calculate the correct stat value from the base value
@@ -100,7 +100,7 @@ set_up_kp(Base_value, (EV,DV), Stat_value) :-
 % @arg Resulting_value The actual value of the stat
 set_up_stat(Base_value, (EV,DV), Stat_value) :-
   DV_and_EV is DV + EV//4,
-  Stat_value is (2*Base_value + DV_and_EV)/2 + 5.
+  Stat_value is (2*Base_value + DV_and_EV)//2 + 5.
 
 apply_nature(_,Stats,Stats). % NYI
 
