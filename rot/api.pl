@@ -30,6 +30,10 @@ rot_clear :-
 % rot_derive_pokemon/1
 %
 % TODO: add how to retrieve the data
+% @arg Team_list List of the opponent's pokemon's names
+% @see rot_init_team/1
+% @see rot_init_pokemon/1
+% @see rot_derive_pokemon/1
 rot_initialize(Team) :-
   rot_init_team(Team), % initialize team
   rot_derive_team(_). % assert derived data of all pokemon

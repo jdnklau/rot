@@ -4,6 +4,7 @@
 %! rot_derive_team(-Team).
 % Returns a from the observed pokemon data of the opponent's team derived team.
 % @arg Team The derived team from the known opponent's pokemon data
+% @see rot_derive_pokemon/1
 rot_derive_team(Team_derived) :-
   rot(opponent_team(Team)), % get asserted team list
   maplist(rot_derive_pokemon, Team), % derive all pokemon
@@ -28,7 +29,7 @@ rot_derive_team(Team_derived) :-
 %
 % @arg Name The name of the pokemon
 rot_derive_pokemon(Name) :-
-  rot(derived([Name|_])). % if data already is derived we can skip this
+  rot(derived([Name|_])),!. % if data already is derived we can skip this
 rot_derive_pokemon(Name) :-
   rot(knows([Name|Data])), % get what's already known
   % acces data
