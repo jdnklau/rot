@@ -1,17 +1,12 @@
-%! rot_init(+Team_list).
-% Initializes the system.
+%! rot_init_team(+Team_list).
+% Initializes the opponents team..
 % Asserts the given team as rot(opponent_team(Team_list)) for quick reference.
-% Pokemon data are additionally asserted as rot(knows(Pokemon)).
+% Constructed pokemon data are additionally asserted as rot(knows(Pokemon)).
 % @arg Team_list List of pokemon names building a team.
-rot_init(Team) :-
+rot_init_team(Team) :-
   rot_clear, % clear eventually remaining asserts
   maplist(rot_init_pokemon, Team), % map init over the team list
   asserta(rot(opponent_team(Team))). % assert team
-
-%! rot_clear.
-% Clears all asserted rot/1 predicates
-rot_clear :-
-  retractall(rot(_)).
 
 %! rot_init_pokemon(+Pokemon_name).
 %
@@ -73,4 +68,4 @@ rot_init_pokemon_stats(Base_stat_frame, HP, Stat_frame, EV_DV) :-
 % @arg Pokemon The pokemon data of the pokemon in question (may be obviously missing moves)
 % @arg Move_data The data of the calculated moves
 rot_init_pokemon_moves(Pokemon, Moves) :-
-  Moves=[uncertain([tackle,30])].
+  Moves=[uncertain([tackle,35])].

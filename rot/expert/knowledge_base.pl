@@ -20,7 +20,7 @@
 % and a physical-wall can take physical damage easily,
 % but does not necessarily cause physical damage itself.
 %
-% @arg Pokemon The constructed pokemon data of the pokemon in question
+% @arg Pokemon The observed pokemon data of the pokemon in question
 % @arg Usage The usage class of the pokemon (see description)
 usage(Pokemon, Usage) :-
   potential_usage(Pokemon, Usage),
@@ -40,10 +40,10 @@ usage(Pokemon, Usage) :-
 
 
 %! proper_trained_stats(+Pokemon, +Usage).
-% True if the given constructed pokemon data allow a certain usage.
+% True if the given observed pokemon data allow a certain usage.
 % This means the possible effort value distribution allows high values for Those
 % stats needed for a specific usage, e.g. a sweeper has a high offensive value
-% @arg Pokemon The constructed pokemon data of the pokemon in question.
+% @arg Pokemon The observed pokemon data of the pokemon in question.
 % @arg Usage The role of the pokemon
 % @see usage/2
 proper_trained_stats(Pokemon, special-sweeper) :-
@@ -73,7 +73,7 @@ proper_trained_stats(Pokemon, physical-wall) :-
 % but practically some roles for some pokemon do not work well.
 % This predicate only returns those usages making a little sense as they harmonize
 % with what the pokemon has serious potential for.
-% @arg Pokemon The constructed pokemon data of the pokemon in question.
+% @arg Pokemon The observed pokemon data of the pokemon in question.
 % @arg Usage The role of the pokemon
 potential_usage(Pokemon, Usage) :-
   pokemon_name(Pokemon,Name),
