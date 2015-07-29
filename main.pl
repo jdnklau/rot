@@ -16,6 +16,7 @@
     tools/pokemon_data_access,
     tools/setups,
     tools/message_handling].
+:- [tools/adt/queue].
 :- [rot/api,
     rot/ai,
     rot/search_tree].

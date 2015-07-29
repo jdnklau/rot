@@ -78,22 +78,22 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
 - the following move effects are fully implemented:
   - physical and special move damage
   - moves inflicting primary status conditions
-    - primary status conditions are: `burn`, `freeze`, `paralysis`, `sleep`, `poison` (including `toxic poison`)
+      - primary status conditions are: `burn`, `freeze`, `paralysis`, `sleep`, `poison` (including `toxic poison`)
   - increases or decreases of the status values
-    - the status values are: `attack`, `defense`, `special-attack`, `special-defense`, `speed`
-    - at maximum they can be increased by `+6` stages
-    - at minimum they can be decreased by `-6` stages
+      - the status values are: `attack`, `defense`, `special-attack`, `special-defense`, `speed`
+      - at maximum they can be increased by `+6` stages
+      - at minimum they can be decreased by `-6` stages
   - life drain and recoil damage
-    - life drain effects increase the users hit points by a percentage of the damage done
-    - recoil effects inflict damage to the user based on a percentage of the damage done
+      - life drain effects increase the users hit points by a percentage of the damage done
+      - recoil effects inflict damage to the user based on a percentage of the damage done
 - not implemented (yet):
-  - unique move effects
-  - charging or recharging of moves
-  - _flinch_, _charm_, _confusion_ and other secondary status conditions
-  - abilities
-  - items and berries
-  - mega evolutions
-  - other things not explicitly mentioned to be implemented
+    - unique move effects
+    - charging or recharging of moves
+    - _flinch_, _charm_, _confusion_ and other secondary status conditions
+    - abilities
+    - items and berries
+    - mega evolutions
+    - other things not explicitly mentioned to be implemented
 
 ## Rot's AI
 - uses a search tree of depth 2, thus planing two turns ahead
