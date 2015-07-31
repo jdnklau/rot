@@ -45,11 +45,11 @@ process_by_priority(State, Action_player, Action_rot, _, Result_state) :-
 % @see process_end_of_turn/4
 process_ends_of_turn(State, Who_first, Result_state) :-
   process_end_of_turn(State, Who_first, New_state, Message_collection_first), % end of turn for faster player
-  create_message_frame(Who_first, Message_collection_first, Message_frame_first), % create the message frame of the faster player
+  create_message_frame(State, Who_first, end_of_turn, Message_collection_first, Message_frame_first), % create the message frame of the faster player
   ui_display_messages(Message_frame_first), % print message frame
   opponent(Who_first, Who_second), % get the slower player by name
   process_end_of_turn(New_state, Who_second, Result_state, Message_collection_second), % end of turn for slower player
-  create_message_frame(Who_second, Message_collection_second, Message_frame_second), % create the message frame of the slower player
+  create_message_frame(New_state,Who_second, end_of_turn,Message_collection_second, Message_frame_second), % create the message frame of the slower player
   ui_display_messages(Message_frame_second). % print message frame
 
 %! process_end_of_turn(+Game_state, +Who, -Result_state, -Message_collection).
@@ -158,11 +158,11 @@ process_fainted_check(State, _, State, []). % Lead has not fainted, so the game 
 % @see process_action/5
 process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
   process_action(State, Action_first, Who_first, New_state, Message_collection_first),
-  create_message_frame(Who_first, Message_collection_first, Message_frame_first),
+  create_message_frame(State,Who_first,Action_first,Message_collection_first, Message_frame_first),
   ui_display_messages(Message_frame_first), % print messages of faster player
   opponent(Who_first, Who_second), % get the slower player by name
   process_action(New_state, Action_second, Who_second, Result_state, Message_collection_second),
-  create_message_frame(Who_second, Message_collection_second, Message_frame_second),
+  create_message_frame(New_state,Who_second,Action_second, Message_collection_second, Message_frame_second),
   ui_display_messages(Message_frame_second). % print message s of slower player
 
 %! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_collection).

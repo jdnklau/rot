@@ -9,7 +9,7 @@ ui_display_messages(Frame) :-
   empty_message_frame(Frame),!.
 ui_display_messages(Frame) :-
   \+ rot(searching),
-  message_frame_owner(Frame, Who), % get corresponding player
+  message_frame_meta_data(Frame, Who, Action, Pokemon_who, Pokemon_opp), % get the frame's meta data
   get_message_frame_list(Frame, Messages), % get the frames messages
   ui_display_message_list(Who, Messages), nl.
 

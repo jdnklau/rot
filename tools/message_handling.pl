@@ -1,35 +1,60 @@
-%! create_message_frame(+Player, -Message_frame).
+%! create_message_frame(+State, +Player, +Action, -Message_frame).
 %
 % Creates an empty message frame for the given player.
+%
+% The frame is intended to contain all messages of events caused by the given
+% action to the given game state.
+% The given game state does not reflect those events and is to be understood
+% as the base state the events are applied to (does not happen in the message frame
+% but externally by the program).
 %
 % To create a message frame already filled with messages use create_message_frame/3
 %
 % To add messages to the frame use add_message_frame/3
 %
+% @arg State The base game state the messages originate from
 % @arg Player Either `player` or `rot`
+% @arg Action The action applied to the base game state causing the messages
 % @arg Message_frame The resuting message frame
 % @see create_message_frame/3
-create_message_frame(Who, msg(Who, msgcol([]))).
+create_message_frame(State, Who, Action, msg(Who, Action, A1, A2, msgcol([]))) :-
+  translate_attacker_state(State, Who, State_atk),
+  % get active pokemon
+  attacking_pokemon(State_atk, A1),
+  defending_pokemon(State_atk, A2).
 
-%! create_message_frame(+Player, +Message_collection, -Message_frame).
+%! create_message_frame(+State, +Player, +Action, +Message_collection, -Message_frame).
 %
 % Creates a message frame for the given player.
 % The message frame contains the messages of the given message collection.
+%
+% The frame is intended to contain all messages of events caused by the given
+% action to the given game state.
+% The given game state does not reflect those events and is to be understood
+% as the base state the events are applied to (does not happen in the message frame
+% but externally by the program).
 %
 % To create an empty message frame use create_message_frame/2.
 %
 % To add messages to the frame use add_message_frame/3
 %
+% @arg State The base game state the messages originate from
 % @arg Player Either `player` or `rot`
+% @arg Action The action applied to the base game state causing the messages
 % @arg Message_collection A message collection preferably build with add_messages/3
 % @arg Message_frame The resuting message frame
-create_message_frame(Who, msgcol(Message_collection), msg(Who, msgcol(Message_collection))).
+create_message_frame(State, Who, Action, msgcol(Message_collection), Message_frame) :-
+  create_message_frame(State,Who,Action,Empty_frame), % create empty frame
+  add_message_frame(msgcol(Message_collection), Empty_frame, Message_frame). % add messages to frame
 
-%! message_frame_owner(+Message_frame, -Player).
-% Returns the to the message frame corresponding player.
+%! message_frame_meta_data(+Message_frame, -Player, -Action, -Active_pokemon_player, -Active_pokemon_opponent).
+% Retrieves the meta informations from a given message frame.
 % @arg Message_frame The message frame in question
-% @arg Player Either `rot` or `player`
-message_frame_owner(msg(Who, _), Who).
+% @arg Player The corresponding player; either `rot` or `player`
+% @arg Action The action causing the messages frame's messages
+% @arg Active_pokemon_player The active pokemon of the given player
+% @arg Active_pokemon_opponent The active pokemon of the given player's opponent
+message_frame_meta_data(msg(Who,Ac,A1,A2,_), Who, Ac, A1, A2).
 
 %! add_messages(+Messages, +Collection, -Resulting_message_collection)
 %
@@ -62,7 +87,7 @@ add_messages(msgcol(Pushs), msgcol(Stack), msgcol(Result)) :-
 % @arg Message_collection The message collection to be added to the message frame
 % @arg Message_frame The message frame the messages are added to
 % @arg Resulting_message_collection The resulting message frame containing the new messages
-add_message_frame(Messages, msg(Who, Message_collection), msg(Who, New_message_collection)) :-
+add_message_frame(Messages, msg(Who,Ac,A1,A2, Message_collection), msg(Who,Ac,A1,A2, New_message_collection)) :-
   add_messages(Messages, Message_collection, New_message_collection).
 
 %! pop_message_frame(-Message , +Message_frame, -Resulting_message_frame).
@@ -73,7 +98,10 @@ add_message_frame(Messages, msg(Who, Message_collection), msg(Who, New_message_c
 % @arg Message The next message
 % @arg Message_frame The message frame the next message shall be extracted from
 % @arg Resulting_message_frame The message frame without the popped message
-pop_message_frame(Message, msg(Who, msgcol([Message|Message_collection])), msg(Who, msgcol(Message_collection))).
+pop_message_frame(Message,
+    msg(Who, Ac, A1, A2, msgcol([Message|Message_collection])),
+    msg(Who, Ac, A1, A2, msgcol(Message_collection))
+  ).
 
 %! empty_message_frame(+Message_frame).
 % True if the given message frame contains no messages
