@@ -1,6 +1,9 @@
 # The project documentation
 doc/**
 
+# File for commit messages
+commit.txt
+
 # =========================
 # Windows stuff
 # =========================

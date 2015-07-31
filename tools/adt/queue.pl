@@ -18,15 +18,17 @@ create_queue(L-L).
 enqueue(E, L-[E|R], L-R).
 
 %! enqueue_list(+List, +Queue, -Result_queue).
-% Enqueues a given list of elements to a queue.
-% @arg List The list of elements to be enqueued
+% Enqueues a given list of elements to a queue. This list can be a queue itself.
+% @arg List The list of elements to be enqueued.
 % @arg Queue The queue the elements gets enqueued to
 % @arg Result_queue The resulting queue
 % @see enqueue/3
-enqueue_list([],Q,Q).
+enqueue_list([],Q,Q). % base case: nothing to enqueue
 enqueue_list([H|T],Q, Q_new) :-
+  % enqueues a list
   enqueue(H,Q,QQ),
   enqueue_list(T,QQ,Q_new).
+enqueue_list(L-R,Q-L, Q-R). % enqueues queues
 
 %! dequeue(-Element, +Queue, -Result_queue).
 % Dequeues the first element from a queue.
@@ -41,7 +43,7 @@ dequeue(E, L-Last, NewL-Last) :-
 % True if the given queue is empty.
 %
 % This predicate is only intended to check whether a queue is empty.
-% To get a new queue for enqueueing and dequeueing us create_queue/1 instead.
+% To get a new queue for enqueueing and dequeueing use create_queue/1 instead.
 % @arg Queue An empty queue.
 % @see create_queue/1
 empty_queue(L-M) :-
