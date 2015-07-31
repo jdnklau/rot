@@ -1,40 +1,48 @@
-%! move_use_message(+Attacker_state, +Move, -Message_stack)
-% Returns a message stack containing messages that the attacking pokemon uses the given move.
+%! move_use_message(+Attacker_state, +Move, -Message_collection)
+% Returns a message collection containing messages that the attacking pokemon uses the given move.
 % @arg Attacker_state The current state of the game from the attackers point of view
 % @arg Move The move to be used
-% @arg Message_stack The message stack containing the messages about the move useage
-move_use_message(state([[Name|_]|_],_,_), Move, [user(uses(pokemon(Name), move(Move)))]).
+% @arg Message_collection The message collection containing the messages about the move useage
+move_use_message(state([[Name|_]|_],_,_), Move, Msg) :-
+  add_messages([user(uses(pokemon(Name), move(Move)))], [], Msg).
 
-%! move_effectiveness_message(+Effectiveness_tag, -Message_stack).
-% Returns a message stack containing messages indicating a given effectiveness.
+%! move_effectiveness_message(+Effectiveness_tag, -Message_collection).
+% Returns a message collection containing messages indicating a given effectiveness.
 % @arg Effectiveness_tag One of the following: `normal`, `effective`, `noneffective`
-% @arg Message_stack The message stack containing the message about the effectiveness
+% @arg Message_collection The message collection containing the message about the effectiveness
 move_effectiveness_message(normal,[]).
-move_effectiveness_message(noneffective, [user(effectiveness(not))]).
-move_effectiveness_message(effective,[user(effectiveness(very))]).
+move_effectiveness_message(noneffective, Msg) :-
+  add_messages([user(effectiveness(not))], [], Msg).
+move_effectiveness_message(effective, Msg) :-
+  add_messages([user(effectiveness(very))], [], Msg).
 
-%! move_critical_message(+Critical_tag, -Message_stack).
-% Returns a message stack containing messages indicating whether the previous executed move
+%! move_critical_message(+Critical_tag, -Message_collection).
+% Returns a message collection containing messages indicating whether the previous executed move
 % was a critical hit or not.
 % @arg Critical_tag One of the following: `normal`, `critical`
-% @arg Message_stack The message stack containing the message about an eventually critical hit
+% @arg Message_collection The message collection containing the message about an eventually critical hit
 move_critical_message(normal,[]).
-move_critical_message(critical,[user(critical)]).
+move_critical_message(critical,Msg) :-
+  add_messages([user(critical)], [], Msg).
 
-%! stat_stage_increase_message(+Name, +Stat_name, +Old_stat_stage, +Stage_increase, -Message_stack).
-% Returns a message stack containing messages how a goven status value stage changed.
+%! stat_stage_increase_message(+Name, +Stat_name, +Old_stat_stage, +Stage_increase, -Message_collection).
+% Returns a message collection containing messages how a goven status value stage changed.
 % @arg Name The name of the pokemon affected by the changes
 % @arg Stat_name The name of the status value stage
 % @arg Old_stat_stage The old stage value of the stat
 % @arg Stage_increase The amount the status stage has increased
-% @arg Message_stack The message stack containing the messages about the status stage change
-stat_stage_increase_message(Name, Stat, 6, Inc, [target(stat_stage(pokemon(Name),stat(Stat),cannot(increase)))]) :-
+% @arg Message_collection The message collection containing the messages about the status stage change
+stat_stage_increase_message(Name, Stat, 6, Inc, Msg) :-
   % maxed out
-  Inc > 0.
-stat_stage_increase_message(Name, Stat, -6, Inc, [target(stat_stage(pokemon(Name),stat(Stat),cannot(decrease)))]) :-
+  Inc > 0,
+  add_messages([target(stat_stage(pokemon(Name),stat(Stat),cannot(increase)))], [], Msg).
+stat_stage_increase_message(Name, Stat, -6, Inc, Msg) :-
   % minial stage
-  Inc < 0.
-stat_stage_increase_message(Name, Stat, _, Increase, [target(stat_stage(pokemon(Name),stat(Stat),value(Increase)))]). % base case
+  Inc < 0,
+  add_messages([target(stat_stage(pokemon(Name),stat(Stat),cannot(decrease)))], [], Msg).
+stat_stage_increase_message(Name, Stat, _, Increase, Msg) :-
+  % base case
+  add_messages([target(stat_stage(pokemon(Name),stat(Stat),value(Increase)))], [], Msg).
 
 %! set_up_pokemon(+Name, +Nature, +Ability, +Move_list, +EV_DV_data, +Item, -Result)
 %

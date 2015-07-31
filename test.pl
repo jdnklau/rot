@@ -20,9 +20,17 @@ test_battle :-
   write(team_loaded),nl,
   start_battle(T,T).
 
-test_available :-
-  team_1(T),
-  available_moves(T, A),
+test_turn :-
+  team_rot(T),
+  State = state(T,T,_),
+  available_actions(T,[A|_]),
+  ui_display(State),
+  process_turn(State,A,A,Result),
+  ui_display(Result).
+
+test_available_actions :-
+  team_rot(T),
+  available_actions(T, A),
   write(A).
 
 test_tree :-
@@ -36,20 +44,8 @@ test_tree(D) :-
   retract(rot(searching)),
   write('tree created'),nl.
 
-test_repeatedly :-
-  write('predicate to test: '),
-  read(P),
-  write('times to repeat: '),
-  read(R),
-  test_repeatedly(P,R).
-test_repeatedly(_,0).
-test_repeatedly(P,R) :-
-  call(P),
-  RR is R-1,
-  test_repeatedly(P,RR).
-
-test_search_tree :-
-  team_1(T),
+test_tree_search :-
+  team_rot(T),
   write('tree depth: '),
   read(D),
   asserta(rot(searching)),

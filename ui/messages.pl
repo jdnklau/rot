@@ -1,25 +1,28 @@
 %! ui_display_messages(+Message_frame).
 % Displays the messages of the given message frame.
 % @arg Message_frame The message frame to be displayed.
-ui_display_messages(msg(_, [])). % empty message stack
-ui_display_messages(msg(_, _)) :-
+ui_display_messages(_) :-
   % suppress message output while rot creates his search tree
   rot(searching).
-ui_display_messages(msg(Who, Messages)) :-
+ui_display_messages(Frame) :-
+  % no messages to display
+  empty_message_frame(Frame),!.
+ui_display_messages(Frame) :-
   \+ rot(searching),
-  Messages \= [],
-  ui_display_message_stack(Who, Messages), nl.
+  message_frame_meta_data(Frame, Who, Action, Pokemon_who, Pokemon_opp), % get the frame's meta data
+  get_message_frame_list(Frame, Messages), % get the frames messages
+  ui_display_message_list(Who, Messages), nl.
 
-%! ui_display_message_stack(+Player, +Message_stack).
-% Displays the messages of the given message stack.
+%! ui_display_message_list(+Player, +Message_list).
+% Displays the messages of the given message list.
 % @arg Player Either `player` or `rot`; indicating to whom the messages correspond to
-% @arg Message_stack The message stack to be displayed.
-ui_display_message_stack(_, []). % no messages
-ui_display_message_stack(Who, [Message|Messages]) :-
+% @arg Message_list The message list to be displayed.
+ui_display_message_list(_, []). % no messages
+ui_display_message_list(Who, [Message|Messages]) :-
   % printing the stack in reverse (bottom element shall be printed first)
-  ui_display_message_stack(Who, Messages),
-  ui_display_single_targeted_message(Who, Message), % print top of stack after rest stack
-  nl.
+  ui_display_single_targeted_message(Who, Message), % print message
+  nl,
+  ui_display_message_list(Who, Messages). % print remaining messages
 
 %! ui_display_single_targeted_message(+Player, +Message).
 % Displays the given message dependent on eventually targeting frames attached to it.

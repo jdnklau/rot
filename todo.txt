@@ -6,6 +6,7 @@
 - add predicate to extract a moves offensive and defensive categories and it's base power
 - complete damage calculation (calculation of certain factors)
 - implement missing move effects
+- shift primary ailment infliction from pokemon_data_access to battle_processor
 
 ## Rot's AI
 - add basic pruning (no moves without effect)
