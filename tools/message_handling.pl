@@ -1,52 +1,128 @@
-%! message_frame(+Player, +Message_stack, -Message_frame).
+%! create_message_frame(+Player, -Message_frame).
+%
+% Creates an empty message frame for the given player.
+%
+% To create a message frame already filled with messages use create_message_frame/3
+%
+% To add messages to the frame use add_message_frame/3
+%
+% @arg Player Either `player` or `rot`
+% @arg Message_frame The resuting message frame
+% @see create_message_frame/3
+create_message_frame(Who, msg(Who, msgcol([]))).
+
+%! create_message_frame(+Player, +Message_collection, -Message_frame).
 %
 % Creates a message frame for the given player.
-% The message frame contains the messages of the given message stack.
-% To add messages to the frame use push_message_frame/3
+% The message frame contains the messages of the given message collection.
+%
+% To create an empty message frame use create_message_frame/2.
+%
+% To add messages to the frame use add_message_frame/3
 %
 % @arg Player Either `player` or `rot`
-% @arg Message_stack A list containing the messages occured in anti-chronological order
+% @arg Message_collection A message collection preferably build with add_messages/3
 % @arg Message_frame The resuting message frame
-message_frame(Who, Message_stack, msg(Who, Message_stack)).
+create_message_frame(Who, msgcol(Message_collection), msg(Who, msgcol(Message_collection))).
 
-%! empty_message_frame(+Player, -Message_frame)
-%
-% Creates an empty message frame.
-% The same as `message_frame(Player, [], Message_frame)`.
-%
-% @arg Player Either `player` or `rot`
-% @arg Message_frame The resuting message frame
-% @see message_frame/3
-empty_message_frame(Who, msg(Who, [])).
+%! message_frame_owner(+Message_frame, -Player).
+% Returns the to the message frame corresponding player.
+% @arg Message_frame The message frame in question
+% @arg Player Either `rot` or `player`
+message_frame_owner(msg(Who, _), Who).
 
-%! push_message_stack(+Stack, +Messages, -Resulting_stack)
+%! add_messages(+Messages, +Collection, -Resulting_message_collection)
 %
-% Pushes the given messages onto the stack.
+% Adds the given messages to the message collection.
 %
-% @arg Stack The stack the messages are to be pushed onto
-% @arg Messages The messages in anti-chronological order to be pushed onto the stack
-% @arg Resulting_stack The resulting stack containing the pushed messages
-push_message_stack(Stack, [], Stack).
-push_message_stack(Stack, [Push], [Push|Stack]).
-push_message_stack(Stack, Pushs, Result_stack) :-
-  append(Pushs, Stack, Result_stack).
+% @arg Messages A message collection or a list of messages in chronological order to be added
+% @arg Collection The message collection the new messages shall be added to
+% @arg Resulting_message_collection The resulting collection containing the new messages
+add_messages([], msgcol(Stack), msgcol(Stack)). % add nothing to a collection
+%add_messages([], List, Messages) :-
+%  % add nothing to a list that is not a collection.
+%  List \= msgcol(_),
+%  add_messages(List, [], Messages). % create a message collection
+add_messages([Push], msgcol(Stack), msgcol([Push|Stack])). % add  message to a collection
+add_messages(Pushs, [], Result) :-
+  % add a message to an empty collection
+  add_messages(Pushs, msgcol([]), Result), !.
+add_messages([Push|Pushs], msgcol(Stack), Result_stack) :-
+  % add a list of messages to a collection
+  add_messages([Push], msgcol(Stack), New_stack),
+  add_messages(Pushs, New_stack, Result_stack).
+add_messages(msgcol(Pushs), msgcol(Stack), msgcol(Result)) :-
+  % add two message collections together
+  append(Pushs, Stack, Result).
 
-%! push_message_frame(+Message_frame, +Messages, -Resulting_message_frame).
+%! add_message_frame(+Message_collection, +Message_frame, -Resulting_message_frame).
 %
-% Pushes the given message to the given message frame.
+% Adds a message collection to the message frame.
 %
-% @arg Message_frame The message frame the messages are to be pushed to
-% @arg Messages The messages in chronological order to be pushed to the message frame
-% @arg Resulting_stack The resulting message frame containing the pushed messages
-push_message_frame(msg(Who, Message_stack), Push_stack, msg(Who, New_message_stack)) :-
-  push_message_stack(Message_stack, Push_stack, New_message_stack).
+% @arg Message_collection The message collection to be added to the message frame
+% @arg Message_frame The message frame the messages are added to
+% @arg Resulting_message_collection The resulting message frame containing the new messages
+add_message_frame(Messages, msg(Who, Message_collection), msg(Who, New_message_collection)) :-
+  add_messages(Messages, Message_collection, New_message_collection).
 
-%! messages_of_opposing_view(+Message_stack, -Message_stack_opposing_view)
+%! pop_message_frame(-Message , +Message_frame, -Resulting_message_frame).
 %
-% Translates the given message stack to a view opposing to the given one.
-% Turns all `target(Msg)` messages to `user(Msg)` messages and vice versa
-messages_of_opposing_view([], []).
-messages_of_opposing_view([target(Msg)|Msgs], [user(Msg)|Msgs_opposing]) :-
+% Retrieves and deletes the next message from a given message frame.
+% Fails if there is no message left.
+%
+% @arg Message The next message
+% @arg Message_frame The message frame the next message shall be extracted from
+% @arg Resulting_message_frame The message frame without the popped message
+pop_message_frame(Message, msg(Who, msgcol([Message|Message_collection])), msg(Who, msgcol(Message_collection))).
+
+%! empty_message_frame(+Message_frame).
+% True if the given message frame contains no messages
+% @arg Message_frame The message frame in question
+empty_message_frame(Frame) :-
+  \+ pop_message_frame(_, Frame, _). % peek if there would be a message
+
+%! messages_of_opposing_view(+Message_collection, -Message_collection_opposing_view)
+%
+% Translates the given message collection to a view opposing to the given one.
+%
+% As each message in the collection may be framed by either `target/1` or `user/1` predicates
+% it carries a semantic link for whoms player side the message is meant.
+% By translating to the opposing view all `target/1` frame become `user/1` frames and vice versa.
+%
+% Note that messages without such a frame have their `user/1` frame implied and thus are
+% translated to have a `target/1` frame.
+%
+% Note also that, as `user/1` is implied for messages without explicit frames, messages
+% with `target/1` frames may be translated to become frameless (as `user/1` is,
+% like already said, implied then).
+%
+% @arg Message_collection The collection of messages to be translated
+% @arg Message_collection_opposing_view The translated message collection
+messages_of_opposing_view(msgcol(Msg),msgcol(Msg_opp)) :-
+  % to operate on the message lists only split the msgcol/1 frame
+  messages_of_opposing_view(Msg, Msg_opp).
+messages_of_opposing_view([], []). % base case
+messages_of_opposing_view([target(Msg)|Msgs], [Msg|Msgs_opposing]) :-
+  % target/1 to user/1 (implied)
   messages_of_opposing_view(Msgs, Msgs_opposing).
-  messages_of_opposing_view([user(Msg)|Msgs], [target(Msg)|Msgs_opposing]) :-
-    messages_of_opposing_view(Msgs, Msgs_opposing).
+messages_of_opposing_view([user(Msg)|Msgs], [target(Msg)|Msgs_opposing]) :-
+  % user/1 to target/1
+  messages_of_opposing_view(Msgs, Msgs_opposing).
+messages_of_opposing_view([Msg|Msgs], [target(Msg)|Msgs_opposing]) :-
+  % user/1 (implied) to target/1
+  Msg \= target(_),
+  Msg \= user(_),
+  messages_of_opposing_view(Msgs, Msgs_opposing).
+
+%! get_message_frame_list(+Message_frame, -List).
+% Returns a list of messages occured in the frame in chronological order
+% @arg Message_frame The message frame in question
+% @arg List The list of messages the frame contains
+get_message_frame_list(Frame, List) :-
+  get_message_frame_list_acc(Frame, [], List).
+% accumulator to reverse list: by LearnPrologNow
+get_message_frame_list_acc(Frame,Seen,List) :-
+  pop_message_frame(Msg, Frame, New_frame),
+  get_message_frame_list_acc(New_frame, [Msg|Seen], List).
+get_message_frame_list_acc(Frame, List, List) :-
+  empty_message_frame(Frame).

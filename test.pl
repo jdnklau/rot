@@ -20,6 +20,14 @@ test_battle :-
   write(team_loaded),nl,
   start_battle(T,T).
 
+test_turn :-
+  team_rot(T),
+  State = state(T,T,_),
+  available_actions(T,[A|_]),
+  ui_display(State),
+  process_turn(State,A,A,Result),
+  ui_display(Result).
+
 test_available_actions :-
   team_rot(T),
   available_actions(T, A),

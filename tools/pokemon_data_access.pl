@@ -53,7 +53,7 @@ primary_status_condition_category(Pokemon, Condition) :-
   Condition \= toxin(_),
   Condition \= sleep(_,_).
 
-%! inflict_primary_status_condition(+Attacker_state, +Condition, +Probability, -Result_state).
+%! inflict_primary_status_condition(+Attacker_state, +Condition, +Probability, -Result_state, -Message_collection).
 %
 % Attempts to inflict a given primary status condition to the target pokemon.
 % - Pokemon already suffering a primary status condition can not be inflicted, neither do fainted ones.
@@ -65,6 +65,7 @@ primary_status_condition_category(Pokemon, Condition) :-
 % @arg Condition One of the primary status conditions
 % @arg Probability The probability the given condition will be applied
 % @arg Result_state The resulting attacker state
+% @arg Message_collection Collection of messages occured whilst processing
 inflict_primary_status_condition(State, _, Probability, State, []) :-
   % case: ailment is not inflicted due to rng saying so
   % this predicate is designed to fail if the rng succeeds as the clauses below
@@ -96,13 +97,14 @@ inflict_primary_status_condition(State, Poison, _, State, []) :-
 inflict_primary_status_condition(State, toxin, _, Result, Messages) :-
   % toxin needs to carry information about the number of turns the pokemon suffers it already as it grows stronger
   inflict_primary_status_condition(State, toxin(1), 0, Result, Messages). % base case can handle this
-inflict_primary_status_condition(State, Cond, _, Result, [target(ailment(pokemon(Name), suffers(Cond_cat)))]) :-
+inflict_primary_status_condition(State, Cond, _, Result, Msg) :-
   % base case
   State = state(Attacker,[Pokemon|Team],Field),
   Pokemon = [Name|_],
   primary_status_condition(Pokemon, nil),
   set_primary_status_condition(Pokemon, Cond, Result_pokemon),
   primary_status_condition_category(Result_pokemon, Cond_cat),
+  add_messages([target(ailment(pokemon(Name), suffers(Cond_cat)))], [], Msg), % set up message
   Result = state(Attacker,[Result_pokemon|Team],Field).
 
 %! set_primary_status_condition(+Pokemon, +Condition, -Result_pokemon).
