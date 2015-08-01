@@ -52,8 +52,8 @@ create_message_frame(State, Who, Action, msgcol(Message_collection), Message_fra
 % @arg Message_frame The message frame in question
 % @arg Player The corresponding player; either `rot` or `player`
 % @arg Action The action causing the messages frame's messages
-% @arg Active_pokemon_player The active pokemon of the given player
-% @arg Active_pokemon_opponent The active pokemon of the given player's opponent
+% @arg Active_pokemon_player The active pokemon's name of the given player
+% @arg Active_pokemon_opponent The active pokemon's name of the given player's opponent
 message_frame_meta_data(msg(Who,Ac,A1,A2,_), Who, Ac, A1, A2).
 
 %! add_messages(+Messages, +Collection, -Resulting_message_collection)
