@@ -88,18 +88,18 @@ process_end_of_turn_damage(State, New_state, Messages) :-
 % @arg Message_collection Collection of messages occured whilst processing
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon burns or is poisoned
-  attacking_pokemon(State, Pokemon, Name),
+  attacking_pokemon(State, Pokemon),
   primary_status_condition(Pokemon, Cond),
   member(Cond, [burn, poison]),
   % set up ailment message
   (
     % pokemon burns
     Cond = burn,
-    add_messages([burns(Name)], [], Msg_ail)
+    add_messages([burns], [], Msg_ail)
     ;
     % pokemon is poisoned
     Cond = poison,
-    add_messages([poisoned(Name)], [], Msg_ail)
+    add_messages([poisoned], [], Msg_ail)
   ),
   % do ailment damage
   swap_attacker_state(State, Swap_state), % swap state to inflict the damage
@@ -109,7 +109,7 @@ process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   add_messages(Msg_dmg, Msg_ail, Messages). % add damage message
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon suffers toxin
-  attacking_pokemon(State, Pokemon, Name),
+  attacking_pokemon(State, Pokemon),
   primary_status_condition(Pokemon, toxin(Turn)),
   swap_attacker_state(State, Swap_state), % swap state to inflict the damage
   Damage is Turn * 6.25, % damage raises each turn
@@ -117,7 +117,7 @@ process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   swap_attacker_state(New_swap_state, New_state), % swap back
   messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
   % set up messages
-  add_messages([poisoned(Name)],[],Msg_poi),
+  add_messages([poisoned],[],Msg_poi),
   add_messages(Msg_dmg, Msg_poi, Messages),
   % increase the turn counter
   New_turn is Turn+1,
@@ -198,18 +198,16 @@ process_move_routine(State, _, State, Messages) :-
   attacking_pokemon(State,Pokemon),
   primary_status_condition(Pokemon, paralysis),
   rng_succeeds(75),  % 25 % the pokemon can not attack this turn
-  pokemon_name(Pokemon, Name),
-  add_messages([paralyzed(Name)],[],Messages).
+  add_messages([paralyzed],[],Messages).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
   State = state([Pokemon|Team],Target,Field),
   primary_status_condition(Pokemon, sleep(Remaining,Max)),
   New_remaining is Remaining-1,
-  pokemon_name(Pokemon, Name),
   (
     % counter of remaining sleep turns reaches 0 -> pokemon wakes up
     New_remaining = 0,
-    add_messages([woke_up(Name)], [], Msg_woke), % woke up message
+    add_messages([woke_up], [], Msg_woke), % woke up message
     % clear sleep state of pokemon
     set_primary_status_condition(Pokemon, nil, New_pokemon),
     % process pokemons move
@@ -219,7 +217,7 @@ process_move_routine(State, Move, Result_state, Messages) :-
     % pokemon does not wake up yet
     set_primary_status_condition(Pokemon, sleep(New_remaining, Max), New_pokemon),
     Result_state = state([New_pokemon|Team], Target, Field), % alter state
-    add_messages([sleeps(Name)],[],Messages)
+    add_messages([sleeps],[],Messages)
   ).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers freeze
@@ -238,12 +236,12 @@ process_move_routine(State, Move, Result_state, Messages) :-
     ;
     % pokemon does not wake up yet
     Result_state = State,
-    add_messages([frozen(Name)],[],Messages)
+    add_messages([frozen],[],Messages)
   ).
 process_move_routine(State, Move, Result_state, Messages) :-
   % base case
   move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
-  move_use_message(State, Move, Msg_uses), % message that this move is used
+  add_messages([move(Move)],[],Msg_uses), % message that this move is used
   ( % test whether the move hits or not
     move_hits(Accuracy),
     process_move(State, Move, Result_state, Msg_move),
@@ -274,11 +272,22 @@ process_move(State, Move, Result_state, Messages) :-
   calculate_damage(State, Move, Damage, E_tag, C_tag),
   process_hits(State, Damage, Flags, Effects, Hits, Result_state, Msg_hits),
   % set up messages
-  move_critical_message(C_tag, Msg_crit),
-  move_effectiveness_message(E_tag, Msg_effective),
-  add_messages(Msg_crit,[],Msg_c1),
+  (
+    % crit
+    C_tag = critical(yes),
+    add_messages([C_tag],[],Msg_c1)
+    ;
+    Msg_c1 = [] % no crit, empty collection
+  ),
   add_messages(Msg_hits, Msg_c1, Msg_c2),
-  add_messages(Msg_effective, Msg_c2, Messages).
+  (
+    % effectiveness
+    E_tag \= effectiveness(normal),
+    add_messages([E_tag], Msg_c2, Messages)
+    ;
+    % normal effective
+    Msg_c2 = Messages
+  ).
 
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_collection).
 %
@@ -296,8 +305,7 @@ process_move(State, Move, Result_state, Messages) :-
 process_switch(state([Attacker|Team_attacker], Team_target, Field), Team_mate, state(New_team_attacker, Team_target, Field), Messages) :-
   clear_stat_stages(Attacker, New_attacker), % clear status value stages
   calculate_switch([New_attacker|Team_attacker], Team_mate, New_team_attacker),
-  pokemon_name(New_attacker, Out), %extract name of active pokemon
-  add_messages([user(switch(from(Out), to(Team_mate)))], [], Messages). % only message
+  add_messages([switch(Team_mate)], [], Messages). % only message
 
 %! process_forced_switch(+Attacker_state, +Who, +Result_state, -Message_collection).
 %
@@ -387,19 +395,19 @@ process_single_hit(State, _, _, _, State, []) :- % no damage if targed has faint
 % @arg Result_state The resulting attacker state of the game after the damage was executed
 % @arg Message_collection Collection of messages occured whilst processing
 % @tbd Moves having no effect shall be treated differently in the future
-process_damage(State, 0, 0, State, [user(no_effect)]).
+process_damage(State, 0, 0, State, [effectiveness(none)]).
 process_damage(State, Damage, Damage_done, Result_state, Messages) :-
   defending_pokemon(State, Target), % get target
   Target = [Name, kp(Curr, Max)|Rest_data], % get hp frame, name
   New_curr is max(0, min(Max, Curr - Damage)), % the minimum is required as healing is just negative damage
   Damage_done is Curr-New_curr, % the damage amount dealt
-  add_messages([target(damaged(pokemon(Name), kp(New_curr, Max)))], [], Msg_damaged), % create message collection
+  add_messages([target(damaged(kp(New_curr, Max)))], [], Msg_damaged), % create message collection
   New_target = [Name, kp(New_curr, Max)|Rest_data], % alter target
   % check for fainting
   (
     % new hp are 0, pokemon has fainted
     New_curr is 0,
-    add_messages([target(fainted(Name))], Msg_damaged, Messages),
+    add_messages([target(fainted)], Msg_damaged, Messages),
     process_fainting(New_target, Result_target)
     ;
     % pokemon has not fainted yet
@@ -501,10 +509,10 @@ process_single_move_effect(State, drain(Percent), DD, Result_state, Messages) :-
   attacking_pokemon(Result_state, _, Name),
   (
     Reversed_heal =< 0, % Heal >= 0
-    add_messages([drain(Name)],[],Msg_drain)
+    add_messages([drain],[],Msg_drain)
     ;
     % Heal < 0, so actually it did damage
-    add_messages([recoil(Name)],[],Msg_drain) % recoil is negative drain
+    add_messages([recoil],[],Msg_drain) % recoil is negative drain
   ),
   add_messages(Msg_heal, Msg_drain, Messages).
 process_single_move_effect(State, stats(Target, Prob, Increase_list), _, Result_state, Messages) :-
@@ -595,11 +603,11 @@ process_stat_stage_increases(State, [(Stat,Inc)|Incs], Result_state, Messages) :
 % @arg Result_state The resulting attacker state of the game
 % @arg Message_collection Collection of messages occured whilst processing
 process_single_stat_stage_increase(State, Stat, Increase, Result_state, Messages) :-
-  defending_pokemon(State, Pokemon, Name), % get pokemon
+  defending_pokemon(State, Pokemon), % get pokemon
   stat_stage(Pokemon, Stat, Old_stage), % old stat stage for message creation
   increase_stat_stage(Pokemon, Stat, Increase, New_pokemon), % increase
   set_defending_pokemon(State, New_pokemon, Result_state),
-  stat_stage_increase_message(Name, Stat, Old_stage, Increase, Messages).
+  stat_stage_increase_message(Stat, Old_stage, Increase, Messages).
 
 %! process_fainting(+Pokemon, -Pokemon_fainted).
 %

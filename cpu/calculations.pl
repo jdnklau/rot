@@ -97,8 +97,8 @@ calculate_increased_stat(Stat_before, Stat_stage, Stat_value) :-
 % @arg Attacker_state The current state of the game from attacker point of view
 % @arg Move The move used by the attacker - can not be a status move
 % @arg Damage the resulting damage
-% @arg Effectiveness_tag Atom representing how effective the move is - either `effective`, `noneffective` or `normal`
-% @arg Critical_tag Atome representing whether the move lands a critical hit or not - either `critical` or `normal`
+% @arg Effectiveness_tag Predicate representing how effective the move is - either `effectiveness(very)`, `effectiveness(not)` or `effectiveness(normal)`
+% @arg Critical_tag Either `critical(yes)` or `critical(no)`, indicating whether the damage is critical or not
 calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, Field_global]), Move, Damage, Eff_tag, Crit_tag) :-
   move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed taht the move is not a status move
   Move_catpow =.. [Move_category, Move_base_power], % get move category and base power
@@ -115,21 +115,21 @@ calculate_damage(state([Attacker|_], [Target|_], [Field_attacker, Field_target, 
   % set up effectiveness atom to return
   (
     TE > 1,
-    Eff_tag = effective
+    Eff_tag = effectiveness(very)
     ;
     TE < 1,
-    Eff_tag = noneffective
+    Eff_tag = effectiveness(not)
     ;
     TE =:= 1,
-    Eff_tag = normal
+    Eff_tag = effectiveness(normal)
   ),
   % set up critical atom to return
   (
     CM > 1,
-    Crit_tag = critical
+    Crit_tag = critical(yes)
     ;
     CM =:= 1,
-    Crit_tag = normal
+    Crit_tag = critical(no)
   ).
 
 %! calculate_final_damage(+Base_damage, +Stab, +Attack_stat, +Defense_stat, +Critical_multiplier, +F1, +F2, +F3, +Type_effectiveness, -Final_damage)
