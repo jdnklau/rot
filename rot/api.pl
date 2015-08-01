@@ -61,3 +61,18 @@ rot_known_pokemon_data(Name, [Name|Data]) :-
 rot_derived_pokemon_data(Name, [Name|Data]) :-
   rot(derived([Name|Data])).
 
+%! rot_evaluate_message_frame(+Message_frame).
+%
+% Let's Rot evaluate a message frame to collect information about the battle and thus
+% constructing/updating the known pokemon data of the player's team pokemon.
+%
+% @arg Message_frame The message frame to be evaluated
+rot_evaluate_message_frame(_) :-
+  % do nothing as rot is in its heuristic
+  rot(searching).
+rot_evaluate_message_frame(Frame) :-
+  % evaluate frame
+  \+ rot(searching),
+  get_message_frame_list(Frame, List), % get list of messages
+  message_frame_meta_data(Frame, Who, _, A1, A2), % get meta data
+  rot_evaluate_message_list(Who, A1, A2, List).

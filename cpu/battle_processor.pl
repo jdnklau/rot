@@ -160,10 +160,12 @@ process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
   process_action(State, Action_first, Who_first, New_state, Message_collection_first),
   create_message_frame(State,Who_first,Action_first,Message_collection_first, Message_frame_first),
   ui_display_messages(Message_frame_first), % print messages of faster player
+  rot_evaluate_message_frame(Message_frame_first), % rot evaluates the messages
   opponent(Who_first, Who_second), % get the slower player by name
   process_action(New_state, Action_second, Who_second, Result_state, Message_collection_second),
   create_message_frame(New_state,Who_second,Action_second, Message_collection_second, Message_frame_second),
-  ui_display_messages(Message_frame_second). % print message s of slower player
+  ui_display_messages(Message_frame_second), % print message s of slower player
+  rot_evaluate_message_frame(Message_frame_second). % rot evaluates the messages
 
 %! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_collection).
 %

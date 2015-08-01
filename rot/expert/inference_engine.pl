@@ -122,3 +122,43 @@ rot_derive_moves([uncertain(Move)|Rest], [Move|Rest_derived]) :-
 rot_derive_moves([Move|Rest],[Move,Rest_derived]) :-
   % certain moves are ... well, certain...
   rot_derive_moves(Rest, Rest_derived).
+
+%! rot_update_moves(+Pokemon_name, +Move).
+% Updates the move set of the given pokemon in its known pokemon data.
+% @arg Pokemon_name The name of the pokemon, serving as identifier
+% @arg Move The move the pokemon used.
+rot_update_moves(Name, Move) :-
+  rot_known_pokemon_data(Name, Pokemon), % get known data
+  Pokemon =[Name,Hp,Move_data|Rest],
+  rot_update_move_data(Move, Move_data, New_move_data),
+  rot_update_known_pokemon([Name,Hp,New_move_data|Rest]).
+
+%! rot_update_move_data(+Move, +Move_data, -Updated_move_data).
+% Updates the given move data to reflect the usage of the given move.
+%
+% Does nothing if the move already is part of the move set.
+% If the move is only listed as uncertain it will added as certain move.
+% If the move is not yet in the data, but not all 4 move slots are taken, it will be added.
+% If the move is not yet in the data and the move data already contains 4 moves an uncertain move will be removed.
+% If the move is not yet in the data and there are no uncertain moves in the data, this predicate will fail.
+%
+% @arg Move The used move
+% @arg Move_data The move data to be updated
+% @arg Updated_move_data The updated move data
+rot_update_move_data(Move, Data, Data) :-
+  % Move is already known by Rot
+  member([Move,_], Data), !.
+rot_update_move_data(Move, Data, [[Move,PP]|New_data]) :-
+  % Move was guessed by Rot, but was not certain
+  member(uncertain([Move,PP]),Data), !,
+  delete(Data, uncertain([Move,PP]),New_data). % delete uncertain move from data
+rot_update_move_data(Move, Data, [[Move,PP]|Data]) :-
+  % completely unknown move, but the move list has free spots
+  length(Data, L),
+  L<4, !,
+  move(Move,_,_,_,pp(PP),_,_,_,_). % get PP
+rot_update_move_data(Move, Data, [[Move,PP]|New_data]) :-
+  % one of the uncertain moves is incorrect
+  member(uncertain([UMove, _]),Data), % get first uncertain move
+  delete(Data, uncertain([UMove,_]), New_data), % delete this first uncertain move
+  move(Move,_,_,_,pp(PP),_,_,_,_). % get PP

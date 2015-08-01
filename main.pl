@@ -25,7 +25,8 @@
     rot/search_tree].
 :- [rot/expert/init,
     rot/expert/inference_engine,
-    rot/expert/knowledge_base].
+    rot/expert/knowledge_base,
+    rot/expert/data_evaluation].
 
 %%%
 
