@@ -19,6 +19,13 @@ read_rot_switch(State, Switch) :-
 rot_clear :-
   retractall(rot(_)).
 
+%! rot_clear_derived_pokemon(+Pokemon_name).
+% Clears the derived pokemon data of the given pokemon.
+% @arg Pokemon_name The name of the pokemon.
+rot_clear_derived_pokemon(Name) :-
+  % retract derived data if existent
+  retractall(rot(derived([Name|_]))).
+
 %! rot_initialize(+Team_list).
 %
 % Initializes Rot's system.
@@ -37,3 +44,20 @@ rot_clear :-
 rot_initialize(Team) :-
   rot_init_team(Team), % initialize team
   rot_derive_team(_). % assert derived data of all pokemon
+
+%! rot_known_pokemon_data(+Pokemon_name, -Known_pokemon_data).
+% Returns the to Rot known data of the given pokemon.
+% Fails if the pokemon is not known at all to Rot.
+% @arg Pokemon_name The name of the pokemon
+% @arg Known_pokemon_data The known pokemon data of the pokemon.
+rot_known_pokemon_data(Name, [Name|Data]) :-
+  rot(knows([Name|Data])).
+
+%! rot_derived_pokemon_data(+Pokemon_name, -Derived_pokemon_data).
+% Returns the from Rot derived data of the given pokemon.
+% Fails if the pokemon is not derived currently.
+% @arg Pokemon_name The name of the pokemon
+% @arg Derived_pokemon_data The derived pokemon data of the pokemon.
+rot_derived_pokemon_data(Name, [Name|Data]) :-
+  rot(derived([Name|Data])).
+

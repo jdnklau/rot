@@ -9,6 +9,16 @@
 opponent(player, rot).
 opponent(rot, player).
 
+%! team_list(+Team, -Team_list).
+% Returns a list containing all the pokemon's names of a given team
+% @arg Team The pokemon team
+% @arg Team_list A list of the team pokemon's names
+team_list([], []). % base case: empty team
+team_list([P|Ps], [N|Ns]) :-
+  % get names from team pokemon
+  pokemon_name(P,N),
+  team_list(Ps,Ns).
+
 %! game_over(+Game_state).
 %
 % True if the game is over and either rot or the player has won.

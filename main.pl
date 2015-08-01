@@ -30,9 +30,12 @@
 %%%
 
 start_battle(Team_player, Team_rot) :-
+  team_list(Team_player, List_player),
+  rot_initialize(List_player),
   State = state(Team_player, Team_rot, [[],[],[]]),
   ui_display_battle_start(Team_player, Team_rot),
-  run_battle(State), !.
+  run_battle(State),
+  rot_clear, !.
 
 run_battle(State) :-
   ui_display(State),

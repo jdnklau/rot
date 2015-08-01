@@ -56,6 +56,14 @@ validate_player_action(_, run). % ends the battle
 validate_player_action(_, help) :- !, % red cut
   % display help
   ui_display_help, fail.
+validate_player_action(_, known(Name)) :-
+  % display what Rot knows about a certain pokemon form the player's team
+  rot_known_pokemon_data(Name, Pokemon),
+  write(Pokemon),nl,!,fail.
+validate_player_action(_, derived(Name)) :-
+  % display what Rot derived about a certain pokemon form the player's team
+  rot_derived_pokemon_data(Name, Pokemon),
+  write(Pokemon),nl,!,fail.
 validate_player_action(Team, info(Team_member)) :-
   % display team member information
   member([Team_member|Rest], Team), !, % red cut
