@@ -104,7 +104,7 @@ inflict_primary_status_condition(State, Cond, _, Result, Msg) :-
   primary_status_condition(Pokemon, nil),
   set_primary_status_condition(Pokemon, Cond, Result_pokemon),
   primary_status_condition_category(Result_pokemon, Cond_cat),
-  add_messages([target(ailment(pokemon(Name), suffers(Cond_cat)))], [], Msg), % set up message
+  add_messages([target(ailment(Cond_cat))], [], Msg), % set up message
   Result = state(Attacker,[Result_pokemon|Team],Field).
 
 %! set_primary_status_condition(+Pokemon, +Condition, -Result_pokemon).
