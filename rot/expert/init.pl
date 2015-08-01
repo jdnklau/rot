@@ -30,7 +30,7 @@ rot_init_pokemon(Pokemon) :-
   rot_init_pokemon_stats(Base_stats, HP, Stats, EV_DV), % stats/ev/dv
   rot_init_pokemon_moves(P, Moves),
   % assert the pokemon
-  asserta(rot(knows(P))).
+  rot_update_known_pokemon(P).
 
 %! rot_init_pokemon_stats(+Base_stat_frame, -Hit_points, -Stat_frame, -EV_DV_data).
 % Returns domains of status values depending on the given base stats

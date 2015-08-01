@@ -1,6 +1,27 @@
 % core of the system
 % derives recommendations/solutions from knowledge base
 
+%! rot_update_known_pokemon(+Known_pokemon_data).
+% Updates Rot's known pokemon data for the given pokemon.
+%
+% The pokemon to be updated is determined by the pokemon name contained in the
+% given data.
+% The predicate retracts eventually assertet data and then asserts the new data.
+%
+% This predicate can be used to assert known pokemon data in the first place,
+% thus updating the empty data.
+%
+% As the data gets updated, eventually derived data for the pokemon will be
+% retracted from the knowledge base.
+%
+% The in this way asserted data can be accessed by calling `rot(knows(Known_pokemon_data))`
+%
+% @arg Known_pokemon_data The updated known pokemon data to be saved to the knowledge base
+rot_update_known_pokemon([Name|Data]) :-
+  retractall(rot(knows([Name|_]))), % retract former data
+  asserta(rot(knows([Name|Data]))), % assert new data
+  retractall(rot(derived([Name|_]))). % retract derived data
+
 %! rot_derive_team(-Team).
 % Returns a from the observed pokemon data of the opponent's team derived team.
 % @arg Team The derived team from the known opponent's pokemon data
