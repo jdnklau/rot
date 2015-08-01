@@ -20,8 +20,8 @@
 create_message_frame(State, Who, Action, msg(Who, Action, A1, A2, msgcol([]))) :-
   translate_attacker_state(State, Who, State_atk),
   % get active pokemon
-  attacking_pokemon(State_atk, A1),
-  defending_pokemon(State_atk, A2).
+  attacking_pokemon(State_atk, _, A1),
+  defending_pokemon(State_atk, _, A2).
 
 %! create_message_frame(+State, +Player, +Action, +Message_collection, -Message_frame).
 %
