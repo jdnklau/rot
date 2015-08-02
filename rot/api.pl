@@ -65,6 +65,14 @@ rot_known_pokemon_data(Name, [Name|Data]) :-
 rot_derived_pokemon_data(Name, [Name|Data]) :-
   rot(derived([Name|Data])).
 
+%! rot_has_pokemon_data(+Pokemon_name, -Pokemon_data).
+% Returns the pokemon data of Rot's given pokemon
+% Fails if the pokemon is not in Rot's team.
+% @arg Pokemon_name The name of the pokemon
+% @arg Pokemon_data The pokemon data of the pokemon.
+rot_has_pokemon_data(Name, [Name|Data]) :-
+  rot(has([Name|Data])).
+
 %! rot_evaluate_message_frame(+Message_frame).
 %
 % Let's Rot evaluate a message frame to collect information about the battle and thus
