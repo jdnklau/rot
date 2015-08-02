@@ -10,3 +10,5 @@
 
 ## Rot's AI
 - add basic pruning (no moves without effect)
+- add better move guessing
+- add a better way to scrap a uncertain move from the move set as "using the first one"

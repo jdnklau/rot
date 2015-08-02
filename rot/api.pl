@@ -26,24 +26,28 @@ rot_clear_derived_pokemon(Name) :-
   % retract derived data if existent
   retractall(rot(derived([Name|_]))).
 
-%! rot_initialize(+Team_list).
+%! rot_initialize(+Player_team_list, +Rot_team_data).
 %
 % Initializes Rot's system.
 %
-% The pokemon names in the given list serve to create a first idea of how this pokemon
+% The pokemon names in the given player's team list serve to create a first idea of how this pokemon
 % could be played. See rot_init_pokemon/1 for more information.
 %
 % Further more the observed pokemon data gets derived and asserted again by
 % rot_derive_pokemon/1
 %
+% The given team data for Rot's team are assumed to be fully setup.
+%
 % TODO: add how to retrieve the data
-% @arg Team_list List of the opponent's pokemon's names
+% @arg Player_team_list List of the opponent's pokemon's names
+% @arg Rot_team_data The team data of Rot's team
 % @see rot_init_team/1
 % @see rot_init_pokemon/1
 % @see rot_derive_pokemon/1
-rot_initialize(Team) :-
+rot_initialize(Team, Team_rot) :-
   rot_init_team(Team), % initialize team
-  rot_derive_team(_). % assert derived data of all pokemon
+  rot_derive_team(_), % assert derived data of all pokemon
+  rot_init_self(Team_rot). % assert own team data
 
 %! rot_known_pokemon_data(+Pokemon_name, -Known_pokemon_data).
 % Returns the to Rot known data of the given pokemon.

@@ -8,6 +8,24 @@ rot_init_team(Team) :-
   maplist(rot_init_pokemon, Team), % map init over the team list
   asserta(rot(opponent_team(Team))). % assert team
 
+%! rot_init_self(+Team_data).
+%
+% Rot asserts its own team to its knowledge base.
+%
+% The data of each pokemon are accessible by calling rot(has(Pokemon_data)).
+%
+% @arg Team_data The already setup team data of Rot's team
+rot_init_self(Team) :-
+  retractall(rot(has(_))), % retract all information rot has about it's own team
+  maplist(rot_init_own_pokemon, Team). % assert
+
+%! rot_init_own_pokemon(+Pokemon).
+% Asserts the given pokemon data.
+% Accessible by calling rot(has(Pokemon)).
+% @arg Pokemon The pokemon data to be asserted
+rot_init_own_pokemon(P) :-
+  asserta(rot(has(P))).
+
 %! rot_init_pokemon(+Pokemon_name).
 %
 % Guesses the set of a given pokemon without further input
