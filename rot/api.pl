@@ -63,6 +63,7 @@ rot_known_pokemon_data(Name, [Name|Data]) :-
 % @arg Pokemon_name The name of the pokemon
 % @arg Derived_pokemon_data The derived pokemon data of the pokemon.
 rot_derived_pokemon_data(Name, [Name|Data]) :-
+  rot_derive_pokemon(Name), % make sure the pokemon is derived
   rot(derived([Name|Data])).
 
 %! rot_has_pokemon_data(+Pokemon_name, -Pokemon_data).
@@ -72,6 +73,20 @@ rot_derived_pokemon_data(Name, [Name|Data]) :-
 % @arg Pokemon_data The pokemon data of the pokemon.
 rot_has_pokemon_data(Name, [Name|Data]) :-
   rot(has([Name|Data])).
+
+%! rot_get_pokemon_data(+Player, +Pokemon_name, -Pokemon_data).
+% Returns the pokemon data of the given player's pokemon.
+%
+% In case the given player is rot, this is the same as calling rot_has_pokemon_data/2.
+% If it is the player (Rot's opponent) it is the same as calling rot_derived_pokemon_data/2.
+%
+% @arg Player The player owning the given pokemon, either `rot` or `player`
+% @arg Pokemon_name The name of the pokemon
+% @arg Pokemon_data The pokemon data of the pokemon.
+rot_get_pokemon_data(rot,Name,Data) :-
+  rot_has_pokemon_data(Name,Data).
+rot_get_pokemon_data(player,Name,Data) :-
+  rot_derived_pokemon_data(Name,Data).
 
 %! rot_evaluate_message_frame(+Message_frame).
 %
