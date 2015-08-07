@@ -1,5 +1,5 @@
 %! fainted(+Pokemon).
-% True if te given pokemon has fainted
+% True if the given pokemon has fainted
 % @arg Pokemon The pokemon data of the pokemon in question
 fainted([_,kp(0,_),_,_,_,[fainted|_]]).
 
@@ -403,3 +403,60 @@ ev_dv_data([_,_,_,[_,_,_,_,EV_DV|_]|_], EV_DV).
 % @arg Speed_ev The speed's effort value
 ev_data(Pokemon, HP, Atk, Def, Spa, Spd, Spe) :-
   ev_dv_data(Pokemon, ((HP,_), (Atk,_), (Def,_), (Spa,_), (Spd,_), (Spe,_))).
+
+%! set_ev_dv_data(+Pokemon, +EV_DV_Data, -Resulting_pokemon).
+% Replaces the eventually former ev/dv data of the given pokemon by the new data.
+%
+% The data needs to be of the format of a six-tuple, having each value as a tuple itself
+% of the form (EV, DV).
+%
+% The six data tuples in the six-tuple are in the following order:
+%   1. hit points
+%   2. attack
+%   3. defense
+%   4. special attack
+%   5. special defense
+%   6. speed
+%
+% To set a specific stat's ev/dv-data pair use set_ev_dv_data/4.
+% @arg Pokemon The pokemon data to be altered
+% @arg EV_DV_Data The ev/dv data to be set
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_ev_dv_data/4
+set_ev_dv_data(Pokemon, Data, New_pokemon) :-
+  Pokemon = [Name,Hp,Moves,[Ability,Stats,Types,Stat_incs,_|Rest1]|Rest2],
+  New_pokemon = [Name,Hp,Moves,[Ability,Stats,Types,Stat_incs,Data|Rest1]|Rest2].
+
+%! set_ev_data(+Pokemon, +EV_DV_Tuple, +Status_value_name, -Resulting_pokemon).
+% Replaces the given status values ev/dv tuple in the pokemon data.
+%
+% The Tuple has the form (EV, DV) and the possible status values are:
+%   1. ``hit-points``
+%   2. ``attack``
+%   3. ``defense``
+%   4. ``special-attack``
+%   5. ``special-defense``
+%   6. ``speed``
+% @arg Pokemon The pokemon data to be altered
+% @arg EV_DV_Tuple The ev/dv data to be set
+% @arg Status_value_name One of the 6 status values (see description)
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_ev_dv_data/4
+set_ev_dv_data(Pokemon, Data, hit-points, New_pokemon) :-
+  ev_dv_data(Pokemon, (_,Atk,Def,Spa,Spd,Spe)), % get previous data
+  set_ev_dv_data(Pokemon, (Data,Atk,Def,Spa,Spd,Spe), New_pokemon).
+set_ev_dv_data(Pokemon, Data, attack, New_pokemon) :-
+  ev_dv_data(Pokemon, (Hp,_,Def,Spa,Spd,Spe)), % get previous data
+  set_ev_dv_data(Pokemon, (Hp,Data,Def,Spa,Spd,Spe), New_pokemon).
+set_ev_dv_data(Pokemon, Data, defense, New_pokemon) :-
+  ev_dv_data(Pokemon, (Hp,Atk,_,Spa,Spd,Spe)), % get previous data
+  set_ev_dv_data(Pokemon, (Hp,Atk,Data,Spa,Spd,Spe), New_pokemon).
+set_ev_dv_data(Pokemon, Data, special-attack, New_pokemon) :-
+  ev_dv_data(Pokemon, (Hp,Atk,Def,_,Spd,Spe)), % get previous data
+  set_ev_dv_data(Pokemon, (Hp,Atk,Def,Data,Spd,Spe), New_pokemon).
+set_ev_dv_data(Pokemon, Data, special-defense, New_pokemon) :-
+  ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,_,Spe)), % get previous data
+  set_ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,Data,Spe), New_pokemon).
+set_ev_dv_data(Pokemon, Data, speed, New_pokemon) :-
+  ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,Spd,_)), % get previous data
+  set_ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,Spd,Data), New_pokemon).
