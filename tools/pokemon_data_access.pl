@@ -441,7 +441,7 @@ set_ev_dv_data(Pokemon, Data, New_pokemon) :-
 % @arg EV_DV_Tuple The ev/dv data to be set
 % @arg Status_value_name One of the 6 status values (see description)
 % @arg Resulting_pokemon The pokemon with the given ev/dv data.
-% @see set_ev_dv_data/4
+% @see set_ev_dv_data/3
 set_ev_dv_data(Pokemon, Data, hit-points, New_pokemon) :-
   ev_dv_data(Pokemon, (_,Atk,Def,Spa,Spd,Spe)), % get previous data
   set_ev_dv_data(Pokemon, (Data,Atk,Def,Spa,Spd,Spe), New_pokemon).
@@ -460,3 +460,101 @@ set_ev_dv_data(Pokemon, Data, special-defense, New_pokemon) :-
 set_ev_dv_data(Pokemon, Data, speed, New_pokemon) :-
   ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,Spd,_)), % get previous data
   set_ev_dv_data(Pokemon, (Hp,Atk,Def,Spa,Spd,Data), New_pokemon).
+
+%! set_atk_ev_dv_by_category(+Pokemon, +EV_DV_Tuple, +Category, -Resulting_pokemon).
+% Replaces the attack ev/dv data of the given pokemon by damage category.
+% @arg Pokemon The pokemon data to be altered
+% @arg EV_DV_Tuple The ev/dv data to be set
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_ev_dv_data/3
+% @see set_ev_dv_data/4
+set_atk_ev_dv_by_category(Pokemon, Data, physical, New_pokemon) :-
+  set_ev_dv_data(Pokemon, Data, attack, New_pokemon).
+set_atk_ev_dv_by_category(Pokemon, Data, special, New_pokemon) :-
+  set_ev_dv_data(Pokemon, Data, special-attack, New_pokemon).
+
+%! set_def_ev_dv_by_category(+Pokemon, +EV_DV_Tuple, +Category, -Resulting_pokemon).
+% Replaces the defense ev/dv data of the given pokemon by damage category.
+% @arg Pokemon The pokemon data to be altered
+% @arg EV_DV_Tuple The ev/dv data to be set
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_ev_dv_data/3
+% @see set_ev_dv_data/4
+set_atk_ev_dv_by_category(Pokemon, Data, physical, New_pokemon) :-
+  set_ev_dv_data(Pokemon, Data, defense, New_pokemon).
+set_atk_ev_dv_by_category(Pokemon, Data, special, New_pokemon) :-
+  set_ev_dv_data(Pokemon, Data, special-defense, New_pokemon).
+
+%! set_stats(+Pokemon, +Attack, +Defense, +Special_attack, +Special_defense, +Speed, -Resulting_pokemon).
+% Replaces the stats of the given pokemon.
+%
+% To set a specific stat's value use set_stats/4.
+% @arg Pokemon The pokemon data to be altered
+% @arg Attack The attack value to be set
+% @arg Defense The defense value to be set
+% @arg Special_attack The special attack value to be set
+% @arg Special_defense The special defense value to be set
+% @arg Speed The speed value to be set
+% @arg Resulting_pokemon The pokemon with the given stats.
+% @see set_stat/4
+set_stats(Pokemon, Atk, Def, Spa, Spd, Spe, New_pokemon) :-
+  Pokemon = [Name,Hp,Moves,[Ability,_|Rest1]|Rest2],
+  New_pokemon = [Name,Hp,Moves,[Ability,stats(Atk,Def,Spa,Spd,Spe)|Rest1]|Rest2].
+
+%! set_stat(+Pokemon, +Status_value, +Status_value_name, -Resulting_pokemon).
+% Replaces the given status value in the pokemon data.
+%
+% The possible status values are:
+%   1. ``attack``
+%   2. ``defense``
+%   3. ``special-attack``
+%   4. ``special-defense``
+%   5. ``speed``
+% @arg Pokemon The pokemon data to be altered
+% @arg Status_value The new value to be set
+% @arg Status_value_name One of the 5 status values (see description)
+% @arg Resulting_pokemon The pokemon with the given status value.
+% @see set_stats/7
+set_stat(Pokemon, Value, attack, New_pokemon) :-
+  stats(Pokemon, _, Def, Spa, Spd, Spe),
+  set_stats(Pokemon, Value, Def, Spa, Spd, Spe).
+set_stat(Pokemon, Value, defense, New_pokemon) :-
+  stats(Pokemon, Atk, _, Spa, Spd, Spe),
+  set_stats(Pokemon, Atk, Value, Spa, Spd, Spe).
+set_stat(Pokemon, Value, special-attack, New_pokemon) :-
+  stats(Pokemon, Atk, Def, _, Spd, Spe),
+  set_stats(Pokemon, Atk, Def, Value, Spd, Spe).
+set_stat(Pokemon, Value, special-defense, New_pokemon) :-
+  stats(Pokemon, Atk, Def, Spa, _, Spe),
+  set_stats(Pokemon, Atk, Def, Spa, Value, Spe).
+set_stat(Pokemon, Value, speed, New_pokemon) :-
+  stats(Pokemon, Atk, Def, Spa, Spd, _),
+  set_stats(Pokemon, Atk, Def, Spa, Spd, Value).
+
+%! set_atk_stat_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+% Replaces the attack status value of the given pokemon by damage category.
+% @arg Pokemon The pokemon data to be altered
+% @arg Stat_value The status value to be set
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_stats/7
+% @see set_stat/4
+set_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
+  set_stat(Pokemon, Data, attack, New_pokemon).
+set_atk_stat_category(Pokemon, Data, special, New_pokemon) :-
+  set_stat(Pokemon, Data, special-attack, New_pokemon).
+
+%! set_def_stat_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+% Replaces the defense status value of the given pokemon by damage category.
+% @arg Pokemon The pokemon data to be altered
+% @arg Stat_value The status value to be set
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @see set_stats/7
+% @see set_stat/4
+set_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
+  set_stat(Pokemon, Data, defense, New_pokemon).
+set_def_stat_category(Pokemon, Data, special, New_pokemon) :-
+  set_stat(Pokemon, Data, special-defense, New_pokemon).

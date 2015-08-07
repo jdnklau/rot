@@ -8,6 +8,10 @@
 - implement missing move effects
 - shift primary ailment infliction from pokemon_data_access to battle_processor
 
+## Code
+- tidy up source code organization
+    - relocate increased_stat/3 from battle_data_access to pokemon_data_access
+
 ## Rot's AI
 - add basic pruning (no moves without effect)
 - add better move guessing
