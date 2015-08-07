@@ -519,19 +519,19 @@ set_stats(Pokemon, Atk, Def, Spa, Spd, Spe, New_pokemon) :-
 % @see set_stats/7
 set_stat(Pokemon, Value, attack, New_pokemon) :-
   stats(Pokemon, _, Def, Spa, Spd, Spe),
-  set_stats(Pokemon, Value, Def, Spa, Spd, Spe).
+  set_stats(Pokemon, Value, Def, Spa, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, defense, New_pokemon) :-
   stats(Pokemon, Atk, _, Spa, Spd, Spe),
-  set_stats(Pokemon, Atk, Value, Spa, Spd, Spe).
+  set_stats(Pokemon, Atk, Value, Spa, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, special-attack, New_pokemon) :-
   stats(Pokemon, Atk, Def, _, Spd, Spe),
-  set_stats(Pokemon, Atk, Def, Value, Spd, Spe).
+  set_stats(Pokemon, Atk, Def, Value, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, special-defense, New_pokemon) :-
   stats(Pokemon, Atk, Def, Spa, _, Spe),
-  set_stats(Pokemon, Atk, Def, Spa, Value, Spe).
+  set_stats(Pokemon, Atk, Def, Spa, Value, Spe, New_pokemon).
 set_stat(Pokemon, Value, speed, New_pokemon) :-
   stats(Pokemon, Atk, Def, Spa, Spd, _),
-  set_stats(Pokemon, Atk, Def, Spa, Spd, Value).
+  set_stats(Pokemon, Atk, Def, Spa, Spd, Value, New_pokemon).
 
 %! set_atk_stat_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
 % Replaces the attack status value of the given pokemon by damage category.
