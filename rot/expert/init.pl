@@ -87,3 +87,37 @@ rot_init_pokemon_stats(Base_stat_frame, HP, Stat_frame, EV_DV) :-
 % @arg Move_data The data of the calculated moves
 rot_init_pokemon_moves(Pokemon, Moves) :-
   Moves=[uncertain([tackle,35])].
+
+%! rot_init_ev_dv_vars(+EV_DV_domain_data_frame, -EV_DV_domain_vars_frame).
+% Takes the ev/dv domains given and returns finite domain variables matching the data.
+%
+% The form for both the frames is a 6-tuple, having tuples as data. Those tuples are
+% of the form (EV, DV) and come in the following semantic order:
+%   1. hit points
+%   2. attack
+%   3. defense
+%   4. special attack
+%   5. special defense
+%   6. speed
+% @arg EV_DV_domain_data_frame An ev/dv frame containing the value's domains
+% @arg EV_DV_domain_vars_frame An ev/dv frame containing vars tied to the given domains
+rot_init_ev_dv_vars(EV_DV, EV_DV_vars) :-
+  EV_DV = ((Hp_e, Hp_d),(Atk_e, Atk_d),(Def_e, Def_d),(Spa_e,Spa_d),(Spd_e,Spd_d),(Spe_e,Spe_d)),
+  % set up domains for ev - _ed suffix for (e)v (d)omain
+  Hp_ed in Hp_e,
+  Atk_ed in Atk_e,
+  Def_ed in Def_e,
+  Spa_ed in Spa_e,
+  Spd_ed in Spd_e,
+  Spe_ed in Spe_e,
+  EV = [Hp_ed,Atk_ed,Def_ed,Spa_ed,Spd_ed,Spe_ed],
+  sum(EV, #=<, 510), % sum of ev is =< 510
+  % set up domains for dv - _dd suffix for (d)v (d)omain
+  Hp_dd in Hp_d,
+  Atk_dd in Atk_d,
+  Def_dd in Def_d,
+  Spa_dd in Spa_d,
+  Spd_dd in Spd_d,
+  Spe_dd in Spe_d,
+  EV_DV_vars = ((Hp_ed, Hp_dd),(Atk_ed, Atk_dd),(Def_ed, Def_dd),
+                    (Spa_ed,Spa_dd),(Spd_ed,Spd_dd),(Spe_ed,Spe_dd)).

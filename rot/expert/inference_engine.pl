@@ -102,31 +102,14 @@ rot_derive_pokemon(Name) :-
 % @arg EV_DV_domain_data The data of the possible domains for effort and determinant values
 % @arg Pokemon_usage The role of the pokemon
 % @arg Derived_EV_DV_data The resulting derived ev/dv distribution.
-rot_derive_ev_dv(EV_DV, Use, EV_DV_derived) :-
-  % access data
-  EV_DV = ((Hp_e, Hp_d),(Atk_e, Atk_d),(Def_e, Def_d),(Spa_e,Spa_d),(Spd_e,Spd_d),(Spe_e,Spe_d)),
-  % set up domains for ev - _ed suffix for (e)v (d)erived
-  Hp_ed in Hp_e,
-  Atk_ed in Atk_e,
-  Def_ed in Def_e,
-  Spa_ed in Spa_e,
-  Spd_ed in Spd_e,
-  Spe_ed in Spe_e,
+rot_derive_ev_dv(EV_DV, Use, EV_DV_bound) :-
+  rot_init_ev_dv_vars(EV_DV, EV_DV_bound), % bind the vars to constrains
+  EV_DV_bound = ((Hp_ed, Hp_dd),(Atk_ed, Atk_dd),(Def_ed, Def_dd),(Spa_ed,Spa_dd),(Spd_ed,Spd_dd),(Spe_ed,Spe_dd)),
+  % label data
   EV = [Hp_ed,Atk_ed,Def_ed,Spa_ed,Spd_ed,Spe_ed],
-  sum(EV, #=<, 510), % sum of ev is =< 510
   labeling_ev(Use, Hp_ed, Atk_ed, Def_ed, Spa_ed, Spd_ed, Spe_ed),
-  % set up domains for dv - _dd suffix for (d)v (d)erived
-  Hp_dd in Hp_d,
-  Atk_dd in Atk_d,
-  Def_dd in Def_d,
-  Spa_dd in Spa_d,
-  Spd_dd in Spd_d,
-  Spe_dd in Spe_d,
   DV = [Hp_dd, Atk_dd, Def_dd, Spa_dd, Spd_dd, Spe_dd],
-  labeling([down],DV),
-  % return changes
-  EV_DV_derived = ((Hp_ed, Hp_dd),(Atk_ed, Atk_dd),(Def_ed, Def_dd),
-                    (Spa_ed,Spa_dd),(Spd_ed,Spd_dd),(Spe_ed,Spe_dd)).
+  labeling([down],DV).
 
 %! rot_derive_moves(+Assumed_moves, -Derived_moves).
 % Get's rid of the uncertain/1 frame surrounding guessed but not yet observed moves.
