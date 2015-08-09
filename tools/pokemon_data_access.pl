@@ -482,9 +482,9 @@ set_atk_ev_dv_by_category(Pokemon, Data, special, New_pokemon) :-
 % @arg Resulting_pokemon The pokemon with the given ev/dv data.
 % @see set_ev_dv_data/3
 % @see set_ev_dv_data/4
-set_atk_ev_dv_by_category(Pokemon, Data, physical, New_pokemon) :-
+set_def_ev_dv_by_category(Pokemon, Data, physical, New_pokemon) :-
   set_ev_dv_data(Pokemon, Data, defense, New_pokemon).
-set_atk_ev_dv_by_category(Pokemon, Data, special, New_pokemon) :-
+set_def_ev_dv_by_category(Pokemon, Data, special, New_pokemon) :-
   set_ev_dv_data(Pokemon, Data, special-defense, New_pokemon).
 
 %! set_stats(+Pokemon, +Attack, +Defense, +Special_attack, +Special_defense, +Speed, -Resulting_pokemon).
@@ -533,7 +533,7 @@ set_stat(Pokemon, Value, speed, New_pokemon) :-
   stats(Pokemon, Atk, Def, Spa, Spd, _),
   set_stats(Pokemon, Atk, Def, Spa, Spd, Value, New_pokemon).
 
-%! set_atk_stat_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+%! set_atk_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
 % Replaces the attack status value of the given pokemon by damage category.
 % @arg Pokemon The pokemon data to be altered
 % @arg Stat_value The status value to be set
@@ -543,10 +543,10 @@ set_stat(Pokemon, Value, speed, New_pokemon) :-
 % @see set_stat/4
 set_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
   set_stat(Pokemon, Data, attack, New_pokemon).
-set_atk_stat_category(Pokemon, Data, special, New_pokemon) :-
+set_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
   set_stat(Pokemon, Data, special-attack, New_pokemon).
 
-%! set_def_stat_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+%! set_def_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
 % Replaces the defense status value of the given pokemon by damage category.
 % @arg Pokemon The pokemon data to be altered
 % @arg Stat_value The status value to be set
@@ -556,5 +556,5 @@ set_atk_stat_category(Pokemon, Data, special, New_pokemon) :-
 % @see set_stat/4
 set_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
   set_stat(Pokemon, Data, defense, New_pokemon).
-set_def_stat_category(Pokemon, Data, special, New_pokemon) :-
+set_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
   set_stat(Pokemon, Data, special-defense, New_pokemon).
