@@ -167,9 +167,17 @@ stat_stage_factor(-6, 0.25).
 %
 % Calculates the value of a battle stat by it's raw value and status stage increase.
 %
+% Works with clpfd domains as raw stat
+%
 % @arg Raw_stat The basic stat value
 % @arg Stat_stage The stat stage increase - an integer within range from -6 to 6
 % @arg Result_stat The resulting status value
+increased_stat(Raw, Stage, Stat_l..Stat_h) :-
+  % handle clpfd domains
+  Raw = Raw_l..Raw_h, !, % unifies
+  stat_stage_factor(Stage, Factor), % get factor
+  Stat_l is floor(Raw_l * Factor),
+  Stat_h is floor(Raw_h * Factor).
 increased_stat(Raw, Stage, Stat) :-
   stat_stage_factor(Stage, Factor),
   Stat is floor(Raw*Factor).

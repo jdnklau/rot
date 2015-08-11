@@ -156,6 +156,14 @@ hp_percent([_, kp(Curr, Max)|_], P) :-
 % @arg HP_frame The HP frame
 hp_frame([_,HP|_], HP).
 
+%! set_hp_frame(+Pokemon, +HP_frame, -Resulting_pokemon).
+% Replaces the hp frame in the given pokemon data by the given frame.
+% The frame is of the form `kp(Current_hp, Max_hp)`
+% @arg Pokemon The pokemon data to be changed
+% @arg HP_frame The HP frame to be set
+% @arg Resulting_pokemon The pokemon data containing the given hp frame
+set_hp_frame([Name,_|Data], kp(C,M), [Name,kp(C,M)|Data]).
+
 %! available_actions(+Team, -Available_actions).
 %
 % Gives a list of available actions (moves switches) the owner of the team can use.
