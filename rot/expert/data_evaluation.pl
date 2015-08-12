@@ -77,17 +77,22 @@ rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
   calculate_F1(Attacker, Field_target, Field_global, Move_type, Move_category, CM, F1), % special factor F1
   calculate_F2(Attacker, F2), % special factor F2
   calculate_F3(Attacker, Target, TE, F3), % special factor F3
-  % break damage down (divide the factors off)
-  Raw_dmg is Dmg / F3 / TE / Stab / F2,% remaining: 22 * BaseDamage * AtkDefCoef * F1 FIXME ignoring the +2 part of formula
+  % get fractions as the clpfd does not handle decimals - ugly work around
+  decimal_to_fraction(F1, F1_N, F1_D),
+  decimal_to_fraction(CM, CM_N, CM_D),
+  decimal_to_fraction(F2, F2_N, F2_D),
+  decimal_to_fraction(Stab, Stab_N, Stab_D),
+  decimal_to_fraction(TE, TE_N, TE_D),
+  decimal_to_fraction(F3, F3_N, F3_D),
   % get stats
-  def_stat_by_category(Target, Category, Def), % rot def stat
-  atk_stat_by_category(Attacker, Category, Atk_dom), % player atk stat domain
-  Assumed_atk is Raw_dmg / F1 / Base_damage / 22 * 50 * Def,
-  % figure out attack stat
-  Atk in Atk_dom, % at least the stat is in the old known domain
-  Assumed_low is floor(Assumed_atk*0.85), % take randomization adjustment into account
-  Assumed_high is floor(Assumed_atk/0.85), % take randomization adjustment into account
-  Atk in Assumed_low..Assumed_high, % the stat is also in the just calculated range
+  atk_stat_by_category(Attacker, Category, Atk_d), % attack stat of player pokemon
+  def_stat_by_category(Target, Category, Def), % defense domain of rot pokemon
+  Atk in Atk_d,
+  % rebuild damage calculation
+  RA in 85..100, % randomization adjustment
+  Dmg #= (22 * Base_damage * Atk / (50 * Def) * F1_N/F1_D + 2)
+          * CM_N/CM_D * F2_N/F2_D * RA/100 * Stab_N/Stab_D * TE_N/TE_D * F3_N/F3_D,
+    % ^ adjusts Atk domain
   fd_dom(Atk, New_dom), % get new dom
   set_atk_stat_by_category(Attacker, New_dom, Category, New_attacker),
   rot_update_known_pokemon(New_attacker), % alter asserted data
