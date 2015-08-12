@@ -13,12 +13,15 @@
 % @arg Active_pokemon_opponent The active pokemon's name of the given player's opponent
 % @arg Message_list List of occured messages.
 rot_evaluate_message_list(_,_,_,[]). % base case: empty list, nothing to evaluate
-%% evaluate the player
 rot_evaluate_message_list(player, A1, A2, [move(Move)|List]) :-
   % observing a move of the opponent's pokemon
   rot_update_moves(A1,Move), % add the move to the known moves
   rot_evaluate_move(player, Move, A1, A2, List, Remaining_list), % eval this move
-  rot_evaluate_message_list(player, A1, A2, List). % eval rest
+  rot_evaluate_message_list(player, A1, A2, Remaining_list). % eval rest
+rot_evaluate_message_list(rot, A1, A2, [move(Move)|List]) :-
+  % observe targeted pokemon's defense
+  rot_evaluate_move(rot, Move, A1, A2, List, Remaining_list), % eval this move
+  rot_evaluate_message_list(rot, A1, A2, Remaining_list). % eval rest
 rot_evaluate_message_list(Who,A1,A2,[_|List]) :-
   % skip messages that do not get evaluated
   rot_evaluate_message_list(Who,A1,A2,List).
@@ -42,8 +45,7 @@ rot_evaluate_move(player, Move, A1, A2, List, Remaining_list) :-
   (
     % critical
     List = [critical(yes),target(damaged(kp(C,M)))|Remaining_list],
-    Crit = critical(yes),
-    write(found(crit)),nl
+    Crit = critical(yes)
     ;
     % non-critical
     List = [target(damaged(kp(C,M)))|Remaining_list],
@@ -55,6 +57,41 @@ rot_evaluate_move(player, Move, A1, A2, List, Remaining_list) :-
   rot_evaluate_damage(player, Move, Dmg, Crit, A1, A2),
   set_hp_frame(Rot_pkm, kp(C,M), New_rot_pkm),
   rot_update_own_pokemon(New_rot_pkm).
+rot_evaluate_move(rot, Move, A1, A2, List, Remaining_list) :-
+  % split messages from list
+  (
+    % critical
+    List = [critical(yes),target(damaged(kp(C,M)))|Remaining_list],
+    Crit = critical(yes)
+    ;
+    % non-critical
+    List = [target(damaged(kp(C,M)))|Remaining_list],
+    Crit = critical(no)
+  ),
+  % to play fair we extract the percentage to which the player pokemon was brought down
+  % and do not use the real values contained in the message.
+  New_P is round(100*C/M), % get new hp percent
+  rot_known_pokemon_data(A2, Player_pkm), % get pokemon data of player
+  hp_frame(Player_pkm, kp(Cur_l..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
+  Old_P is round(100*Cur_h/Max_h), % get old hp percent
+  Dmg_P is Old_P - New_P, % get damage percent
+  % get domains
+  Hp_max in Max_l..Max_h,
+  Dmg #= Hp_max * Dmg_P / 100, % get damage domain
+  rot_evaluate_damage(rot, Move, Dmg, Crit, A1, A2), % evaluates defense / reduces Dmg domain even further
+  % calculate hit points
+  Variance in -1..1,
+  New_hp_max in Max_l..Max_h,
+  New_hp_max #= Dmg * 100 / Dmg_P + Variance, % new maximum
+  New_hp_cur #= New_P * New_hp_max / 100, % new current
+  fd_dom(New_hp_max, Hp_max_dom),
+  fd_dom(New_hp_cur, Hp_cur_dom),
+  % update pokemon
+  rot_known_pokemon_data(A2, Player_pkm_eval), % get data again, as it was updated in rot_evaluate_damage
+  set_hp_frame(Player_pkm_eval, kp(Hp_cur_dom,Hp_max_dom), New_player_pkm),
+  rot_update_known_pokemon(New_player_pkm), % save changes
+  % evaluate hit point ev/dv
+  rot_evaluate_ev_dv(A2).
 
 rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
   move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed that the move is not a status move
@@ -98,6 +135,50 @@ rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
   rot_update_known_pokemon(New_attacker), % alter asserted data
   % figure attack ev/dv
   rot_evaluate_ev_dv(A1).
+rot_evaluate_damage(rot, Move, Dmg, critical(Crit), A1, A2) :-
+  move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed that the move is not a status move
+  Move_catpow =.. [Move_category, Move_base_power], % get move category and base power
+  % get pokemon data
+  rot_has_pokemon_data(A1, Attacker), % attacking pokemon
+  rot_known_pokemon_data(A2, Target), % defending pokemon
+  % critical factor
+  (
+    Crit = yes,
+    CM = 1.5
+    ;
+    Crit = no,
+    CM = 1
+  ),
+  % get damage factors
+  calculate_stab(Attacker, Move_type, Stab),
+  calculate_type_effectiveness(Move_type, Target, TE),
+  calculate_base_damage(Attacker, Target, Field_global, Move_base_power, Move_type, Base_damage),
+  calculate_F1(Attacker, Field_target, Field_global, Move_type, Move_category, CM, F1), % special factor F1
+  calculate_F2(Attacker, F2), % special factor F2
+  calculate_F3(Attacker, Target, TE, F3), % special factor F3
+  % get fractions as the clpfd does not handle decimals - ugly work around
+  decimal_to_fraction(F1, F1_N, F1_D),
+  decimal_to_fraction(CM, CM_N, CM_D),
+  decimal_to_fraction(F2, F2_N, F2_D),
+  decimal_to_fraction(Stab, Stab_N, Stab_D),
+  decimal_to_fraction(TE, TE_N, TE_D),
+  decimal_to_fraction(F3, F3_N, F3_D),
+  % get stats
+  atk_stat_by_category(Attacker, Category, Atk), % attack stat of rot pokemon
+  def_stat_by_category(Target, Category, Def_d), % defense domain of player pokemon
+  Def in Def_d,
+  % rebuild damage calculation
+  RA in 85..100, % randomization adjustment
+  Dmg #= (22 * Base_damage * Atk / (50 * Def) * F1_N/F1_D + 2)
+          * CM_N/CM_D * F2_N/F2_D * RA/100 * Stab_N/Stab_D * TE_N/TE_D * F3_N/F3_D,
+    % ^ adjusts Def and Dmg domain
+  % assert new defense
+  fd_dom(Def, New_def_dom),
+  set_def_stat_by_category(Target, New_def_dom, Category, New_target),
+  rot_update_known_pokemon(New_target),
+  % figure out ev/dv
+  rot_evaluate_ev_dv(A2).
+
 
 %! rot_evaluate_ev_dv(+Pokemon_name).
 %
