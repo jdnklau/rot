@@ -56,11 +56,12 @@ rot_evaluate_move(player, Move, A1, A2, List, Remaining_list) :-
   set_hp_frame(Rot_pkm, kp(C,M), New_rot_pkm),
   rot_update_own_pokemon(New_rot_pkm).
 
-rot_evaluate_damage(Who, Move, Dmg, critical(Crit), A1, A2) :-
+rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
+  move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed that the move is not a status move
+  Move_catpow =.. [Move_category, Move_base_power], % get move category and base power
   % get pokemon data
-  rot_get_pokemon_data(Who, A1, Attacker), % attacking pokemon
-  opponent(Who, Not_who), % get opposing player
-  rot_get_pokemon_data(Not_who, A2, Target), % defending pokemon
+  rot_known_pokemon_data(A1, Attacker), % attacking pokemon
+  rot_has_pokemon_data(A2, Target), % defending pokemon
   % critical factor
   (
     Crit = yes,
@@ -70,8 +71,6 @@ rot_evaluate_damage(Who, Move, Dmg, critical(Crit), A1, A2) :-
     CM = 1
   ),
   % get damage factors
-  move(Move, Move_type, Move_catpow, _, _, _, _, _, _), % it is assumed that the move is not a status move
-  Move_catpow =.. [Move_category, Move_base_power], % get move category and base power
   calculate_stab(Attacker, Move_type, Stab),
   calculate_type_effectiveness(Move_type, Target, TE),
   calculate_base_damage(Attacker, Target, Field_global, Move_base_power, Move_type, Base_damage),
@@ -80,41 +79,18 @@ rot_evaluate_damage(Who, Move, Dmg, critical(Crit), A1, A2) :-
   calculate_F3(Attacker, Target, TE, F3), % special factor F3
   % break damage down (divide the factors off)
   Raw_dmg is Dmg / F3 / TE / Stab / F2,% remaining: 22 * BaseDamage * AtkDefCoef * F1 FIXME ignoring the +2 part of formula
-  Atk_def_coef is Raw_dmg / F1 / Base_damage / 22,
-  rot_evaluate_attack_stat(Move_category, A1, A2, Atk_def_coef).
-
-%! rot_evaluate_attack_stack(+Category, +Attacking_pokemon_name, +Defending_pokemon_name, +Coefficient).
-%
-% Recalculates the attacking pokemon's offensive status value, depending on the
-% given damage category.
-%
-% The calculation uses the given coefficient, as it is assumed the coefficient
-% is of the form `attackers offensive stat / 50 * defenders defense stat`.
-% This is inline with the damage calculation formula.
-%
-% As Rot has full access to it's own pokemon data, the predicate assumes that the
-% attacking pokemon is from the player's team.
-%
-% @arg Category The damage category for the offensive stat to be recalculated; either `special` or `physical`
-% @arg Attacking_pokemon_name The name of the player's pokemon which attack stat shall be evaluated
-% @arg Defending_pokemon_name The name of Rot's pokemon
-% @arg Coefficient An attack/defense coefficient as mentioned in the predicate descritpion.
-rot_evaluate_attack_stat(Category, A1, A2, ADC) :-
-  rot_known_pokemon_data(A1, Pkm_player), % get player pokemon
-  rot_has_pokemon_data(A2, Pkm_rot), % get rot pokemon
   % get stats
-  def_stat_by_category(Pkm_rot, Category, Def), % rot def stat
-  atk_stat_by_category(Pkm_player, Category, Atk_dom), % player atk stat domain
-  % figure attack stat out
+  def_stat_by_category(Target, Category, Def), % rot def stat
+  atk_stat_by_category(Attacker, Category, Atk_dom), % player atk stat domain
+  Assumed_atk is Raw_dmg / F1 / Base_damage / 22 * 50 * Def,
+  % figure out attack stat
   Atk in Atk_dom, % at least the stat is in the old known domain
-  Assumed_atk is ceil(ADC * 50 * Def),
   Assumed_low is floor(Assumed_atk*0.85), % take randomization adjustment into account
   Assumed_high is floor(Assumed_atk/0.85), % take randomization adjustment into account
   Atk in Assumed_low..Assumed_high, % the stat is also in the just calculated range
   fd_dom(Atk, New_dom), % get new dom
-  write(old(Atk_dom)-new(New_dom)),nl, % TODO delete this line
-  set_atk_stat_by_category(Pkm_player, New_dom, Category, New_pkm_player),
-  rot_update_known_pokemon(New_pkm_player), % alter asserted data
+  set_atk_stat_by_category(Attacker, New_dom, Category, New_attacker),
+  rot_update_known_pokemon(New_attacker), % alter asserted data
   % figure attack ev/dv
   rot_evaluate_ev_dv(A1).
 

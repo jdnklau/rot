@@ -1,3 +1,13 @@
+%! decimal_to_fraction(+Decimal, -Numerator, -Denominator).
+% Splits a decimal into the numerator and denominator of it's representing fraction.
+% @arg Decimal A decimal number, like 0.75
+% @arg Numerator The numerator of the given decimal's fractional representation, like 3
+% @arg Numerator The denominator of the given decimal's fractional representation, like 4
+decimal_to_fraction(Dc, Nm, Dn) :-
+  Nm rdiv Dn is rationalize(Dc), !.
+decimal_to_fraction(Dc, Nm, 1) :-
+  Nm is rationalize(Dc).
+
 %! stat_stage_increase_message(+Stat_name, +Old_stat_stage, +Stage_increase, -Message_collection).
 % Returns a message collection containing messages how a goven status value stage changed.
 % @arg Stat_name The name of the status value stage
