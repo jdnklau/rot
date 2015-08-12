@@ -119,7 +119,7 @@ rot_derive_moves([],[]). % base case
 rot_derive_moves([uncertain(Move)|Rest], [Move|Rest_derived]) :-
   % uncertain moves are assumed as certain
   rot_derive_moves(Rest,Rest_derived).
-rot_derive_moves([Move|Rest],[Move,Rest_derived]) :-
+rot_derive_moves([Move|Rest],[Move|Rest_derived]) :-
   % certain moves are ... well, certain...
   rot_derive_moves(Rest, Rest_derived).
 
