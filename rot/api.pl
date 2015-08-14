@@ -78,7 +78,7 @@ rot_has_pokemon_data(Name, [Name|Data]) :-
 % Returns the pokemon data of the given player's pokemon.
 %
 % In case the given player is rot, this is the same as calling rot_has_pokemon_data/2.
-% If it is the player (Rot's opponent) it is the same as calling rot_derived_pokemon_data/2.
+% If it is the player (Rot's opponent) it is the same as calling rot_known_pokemon_data/2.
 %
 % @arg Player The player owning the given pokemon, either `rot` or `player`
 % @arg Pokemon_name The name of the pokemon
@@ -86,7 +86,18 @@ rot_has_pokemon_data(Name, [Name|Data]) :-
 rot_get_pokemon_data(rot,Name,Data) :-
   rot_has_pokemon_data(Name,Data).
 rot_get_pokemon_data(player,Name,Data) :-
-  rot_derived_pokemon_data(Name,Data).
+  rot_known_pokemon_data(Name,Data).
+
+%! rot_set_pokemon_data(+Player, +Pokemon_data).
+% Sets the asserted pokemon data to the given data. The former data will be retracted.
+%
+% The pokemon data to be overriden is determined by the pokemon name contained in the new, given data.
+% @arg Player The player owning the given pokemon, either `rot` or `player`
+% @arg Pokemon_data The pokemon data of the pokemon.
+rot_set_pokemon_data(rot,Data) :-
+  rot_update_own_pokemon(Data).
+rot_set_pokemon_data(player,Data) :-
+  rot_update_known_pokemon(Data).
 
 %! rot_evaluate_message_frame(+Message_frame).
 %

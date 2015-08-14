@@ -13,18 +13,66 @@
 % @arg Active_pokemon_opponent The active pokemon's name of the given player's opponent
 % @arg Message_list List of occured messages.
 rot_evaluate_message_list(_,_,_,[]). % base case: empty list, nothing to evaluate
+% general move observation
 rot_evaluate_message_list(player, A1, A2, [move(Move)|List]) :-
   % observing a move of the opponent's pokemon
   rot_update_moves(A1,Move), % add the move to the known moves
   rot_evaluate_move(player, Move, A1, A2, List, Remaining_list), % eval this move
   rot_evaluate_message_list(player, A1, A2, Remaining_list). % eval rest
 rot_evaluate_message_list(rot, A1, A2, [move(Move)|List]) :-
-  % observe targeted pokemon's defense
+  % observe targeted player pokemon's defense
   rot_evaluate_move(rot, Move, A1, A2, List, Remaining_list), % eval this move
   rot_evaluate_message_list(rot, A1, A2, Remaining_list). % eval rest
+rot_evaluate_message_list(Who, A1, A2, [Message|List]) :-
+  % observe unrelated messages individually
+  (
+    % target message
+    Message = target(Msg),
+    opponent(Who, Who_opp),
+    rot_get_pokemon_data(Who_opp,A2,Data),
+    rot_evaluate_single_message(Who_opp, Data, Msg)
+    ;
+    rot_get_pokemon_data(Who, A1, Data),
+    rot_evaluate_single_message(Who, Data, Message)
+  ),
+  rot_evaluate_message_list(Who,A1,A2,List). % remaining messages
 rot_evaluate_message_list(Who,A1,A2,[_|List]) :-
   % skip messages that do not get evaluated
   rot_evaluate_message_list(Who,A1,A2,List).
+
+rot_evaluate_single_message(Who,Pokemon,stat_stage(stat(S), value(V))) :-
+  % attacking pokemon's status stages got changed
+  increase_stat_stage(Pokemon, S, V, New_pokemon),
+  rot_set_pokemon_data(Who, New_pokemon).
+rot_evaluate_single_message(Who,Pokemon,ailment(A)) :-
+  % primary status ailment: paralysis, burn, freeze or poison
+  member(A, [paralysis,burn,poison,freeze]),
+  set_primary_status_condition(Pokemon,A,New_pokemon),
+  rot_set_pokemon_data(Who,New_pokemon).
+rot_evaluate_single_message(Who,Pokemon,ailment(sleep)) :-
+  % primary status ailment: sleep
+  set_primary_status_condition(Pokemon,sleep(2,2),New_pokemon), % TODO figure out a usefull value for this
+  rot_set_pokemon_data(Who,New_pokemon).
+rot_evaluate_single_message(Who,Pokemon,woke_up) :-
+  % pokemon woke up
+  set_primary_status_condition(Pokemon,nil,New_pokemon),
+  rot_set_pokemon_data(Who,New_pokemon).
+rot_evaluate_single_message(Who,Pokemon,defrosted) :-
+  % pokemon defrosted
+  set_primary_status_condition(Pokemon,nil,New_pokemon),
+  rot_set_pokemon_data(Who,New_pokemon).
+rot_evaluate_single_message(rot,Pokemon,damaged(kp(C,M))) :-
+  % rot's pokemon got damaged
+  set_hp_frame(Pokemon,kp(C,M),New_pokemon),
+  rot_update_own_pokemon(New_pokemon).
+rot_evaluate_single_message(player,Pokemon,damaged(kp(C,M))) :-
+  % players's pokemon got damaged
+  P is round(100*C/M), % get percentage
+  hp_frame(Pokemon, kp(_,Max_dom)), % get hp domain
+  Hp_c in Max_dom * P / 100,
+  fd_dom(Hp_c,Cur_dom), % new current domain
+  set_hp_frame(Pokemon,kp(Cur_dom,Max_dom),New_pokemon),
+  rot_update_known_pokemon(New_pokemon).
 
 %! rot_evaluate_move(+Player, +Move, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Remaining_message_list).
 %
