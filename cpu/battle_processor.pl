@@ -47,10 +47,12 @@ process_ends_of_turn(State, Who_first, Result_state) :-
   process_end_of_turn(State, Who_first, New_state, Message_collection_first), % end of turn for faster player
   create_message_frame(State, Who_first, end_of_turn, Message_collection_first, Message_frame_first), % create the message frame of the faster player
   ui_display_messages(Message_frame_first), % print message frame
+  rot_evaluate_message_frame(Message_frame_first), % let rot evaluate the messages
   opponent(Who_first, Who_second), % get the slower player by name
   process_end_of_turn(New_state, Who_second, Result_state, Message_collection_second), % end of turn for slower player
   create_message_frame(New_state,Who_second, end_of_turn,Message_collection_second, Message_frame_second), % create the message frame of the slower player
-  ui_display_messages(Message_frame_second). % print message frame
+  ui_display_messages(Message_frame_second), % print message frame
+  rot_evaluate_message_frame(Message_frame_second). % let rot evaluate the messages
 
 %! process_end_of_turn(+Game_state, +Who, -Result_state, -Message_collection).
 %

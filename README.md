@@ -72,7 +72,6 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
   - there shall be a predicate to challenge Rot other as `test_battle`
   - before the battle begins the user may choose one of his saved teams to play with
 
-
 ## Battle Engine
 - available actions are either the active pokemon's moves or switches to it's team mates
 - the following move effects are fully implemented:
@@ -98,4 +97,9 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
 ## Rot's AI
 - uses a search tree of depth 2, thus planing two turns ahead
 - if forced to switch out a pokemon, Rot currently chooses randomly - to be changed
-- Rot still knows everything about your team, from moves to ev/dv distribution - also to be changed
+- Rot continuously learns about your team
+    - first it sets up very generic data that could unify with every possible set for each pokemon
+    - the data gets updated whilst battling
+        - damage done by moves is used to get more information  about the ev/dv split of the pokemon
+    - instead of the real game state Rot creates its own, assumed game state
+        - this game state is used for Rots search tree

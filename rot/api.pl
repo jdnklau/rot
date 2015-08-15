@@ -2,9 +2,13 @@
 
 %! read_rot_action(+State, -Action).
 % Let's Rot start his heuristics to choose an action for the next turn.
-% @arg Game_state The current state of the game
+%
+% As of current implementation Rot uses it's own derives game state instead of
+% using the given one
+% @arg Game_state The current state of the game - *ignored*
 % @arg Action The action rot has choosen
-read_rot_action(State, Action) :-
+read_rot_action(_, Action) :-
+  rot_get_game_state(State),
   rot_choose_action(State, Action).
 
 %! rot_choose_switch(+State, -Switch).
@@ -38,16 +42,42 @@ rot_clear_derived_pokemon(Name) :-
 %
 % The given team data for Rot's team are assumed to be fully setup.
 %
-% TODO: add how to retrieve the data
+% To access the data later on, there are the following possibilities:
+%   1. rot_known_pokemon_data/2 to access the known data of a specific pokemon of Rot's opponent
+%   2. rot_derived_pokemon_data/2 to access the derived data of a specific pokemon of Rot's opponent
+%   3. rot_has_pokemon_data/2 to access a specific pokemon of Rot
+%   4. rot_get_pokemon_data/3 to access dynamically a pokemon from either team
+%   5. *most important:* rot_get_game_state/1 to access the current state of the game as Rot thinks it is
 % @arg Player_team_list List of the opponent's pokemon's names
 % @arg Rot_team_data The team data of Rot's team
 % @see rot_init_team/1
 % @see rot_init_pokemon/1
 % @see rot_derive_pokemon/1
-rot_initialize(Team, Team_rot) :-
-  rot_init_team(Team), % initialize team
+rot_initialize(Team_player, Team_rot) :-
+  rot_clear, % clear eventually remaining asserts
+  rot_init_team(Team_player), % initialize team
+  Team_player = [Active_player|_],
+  asserta(rot(opponent_active(Active_player))), % assert active pokemon of opponent
   rot_derive_team(_), % assert derived data of all pokemon
-  rot_init_self(Team_rot). % assert own team data
+  rot_init_self(Team_rot), % assert own team data
+  team_list(Team_rot,[Active_rot|_]),
+  asserta(rot(own_active(Active_rot))). % assert active pokemon of rot
+
+%! rot_get_game_state(-Game_state).
+% Returns Rot's assumed game state.
+% @arg Game_state The state of the game rot assumes.
+rot_get_game_state(state(Player,Rot,[[],[],[]])) :-
+  % get player team
+  rot_derive_team(Player_intern),
+  % set active pokemon of the player
+  rot(opponent_active(Player_active)),
+  calculate_switch(Player_intern,Player_active,Player), % set active pokemon as lead (obviously)
+  % get rot team
+  rot(own_team(Ps)),
+  findall([P|Data], (member(P,Ps),rot(has([P|Data]))), Rot_intern),
+  % set active pokemon of rot
+  rot(own_active(Rot_active)),
+  calculate_switch(Rot_intern,Rot_active,Rot). % set active pokemon as lead (obviously)
 
 %! rot_known_pokemon_data(+Pokemon_name, -Known_pokemon_data).
 % Returns the to Rot known data of the given pokemon.

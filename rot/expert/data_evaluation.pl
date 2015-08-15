@@ -69,10 +69,24 @@ rot_evaluate_single_message(player,Pokemon,damaged(kp(C,M))) :-
   % players's pokemon got damaged
   P is round(100*C/M), % get percentage
   hp_frame(Pokemon, kp(_,Max_dom)), % get hp domain
-  Hp_c in Max_dom * P / 100,
+  Hp_m in Max_dom,
+  Hp_c #= Hp_m * P / 100,
   fd_dom(Hp_c,Cur_dom), % new current domain
   set_hp_frame(Pokemon,kp(Cur_dom,Max_dom),New_pokemon),
   rot_update_known_pokemon(New_pokemon).
+rot_evaluate_single_message(Who,Pokemon,fainted) :-
+  % pokemon fainted
+  set_primary_status_condition(Pokemon,fainted,New_pokemon),
+  rot_set_pokemon_data(Who,New_pokemon).
+rot_evaluate_single_message(player,_,switch(Pokemon)) :-
+  % change player active pokemon
+  retractall(rot(opponent_active(_))),
+  asserta(rot(opponent_active(Pokemon))).
+rot_evaluate_single_message(rot,_,switch(Pokemon)) :-
+  % change rot active pokemon
+  retractall(rot(own_active(_))),
+  asserta(rot(own_active(Pokemon))).
+rot_evaluate_single_message(_,_,_). % not a message that gets evaluated
 
 %! rot_evaluate_move(+Player, +Move, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Remaining_message_list).
 %

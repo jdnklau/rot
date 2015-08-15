@@ -37,6 +37,7 @@ usage(Pokemon, Usage) :-
   %   thus guessing usage independend from the base stats.
   proper_trained_stats(Pokemon, Usage),
   \+ potential_usage(Pokemon, Usage). % suppresses double output
+usage(_,unique). % truly unique ev/dv distribution
 
 
 %! proper_trained_stats(+Pokemon, +Usage).
@@ -145,3 +146,5 @@ labeling_ev(special-wall,Hp,_,Def,_,Spd,_) :-
   labeling([down],[Spd,Hp,Def]).
 labeling_ev(physical-wall,Hp,_,Def,_,Spd,_) :-
   labeling([down],[Def,Hp,Spd]).
+labeling_ev(unique,Hp,Atk,Def,Spa,Spd,Spe) :-
+  labeling([down],[Spe,Atk,Spa,Def,Spd,Hp]).

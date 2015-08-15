@@ -40,6 +40,9 @@ calculate_priority([Lead|_], Move, (Move_priority, Speed)) :-
 % @arg Team The team doing the switch
 % @arg Team_mate Name of an unfainted pokemon contained in the given team who is not the active pokemon
 % @arg Resulting_team The team after the switch was executed
+calculate_switch([Lead|Team], Lead_name, [Lead|Team]) :-
+  % switching to active pokemon, so do nothing
+  pokemon_name(Lead, Lead_name).
 calculate_switch([Lead|Team], Team_mate, Resulting_team) :-
   calculate_switch_acc(Lead, Team_mate, [], Team, Resulting_team).
 calculate_switch_acc(L, M, Seen, [Top|Rest], [Top|Result]) :-
