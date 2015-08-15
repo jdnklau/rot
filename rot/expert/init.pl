@@ -86,7 +86,56 @@ rot_init_pokemon_stats(Base_stat_frame, HP, Stat_frame, EV_DV) :-
 % @arg Pokemon The pokemon data of the pokemon in question (may be obviously missing moves)
 % @arg Move_data The data of the calculated moves
 rot_init_pokemon_moves(Pokemon, Moves) :-
-  Moves=[uncertain([tackle,35])].
+  types(Pokemon,Ts),
+  rot_init_pokemon_moves_acc(Pokemon,Ts,[],[],Moves).
+% accumulator stops at 4 moves
+% it selects the strongest move of a given type in the type list (2nd arg) available to the pokemon (1st arg)
+% if the typelist is empty it selects an additional type to increase the type coverage granted by the moves
+rot_init_pokemon_moves_acc(_,_,_,Moves,Moves) :-
+  % has 4 moves
+  length(Moves,4), !.
+rot_init_pokemon_moves_acc(Pokemon,[],Types_used,Moves_found,Moves) :-
+  % get a move for coverage
+  rot_init_pokemon_moves_coverage_type(Types_used,T),
+  rot_init_pokemon_moves_acc(Pokemon,[T],Types_used,Moves_found,Moves).
+rot_init_pokemon_moves_acc(Pokemon,[T|Ts],Types_used,Moves_found,Moves) :-
+  % find the strongest move of the wanted type
+  pokemon_name(Pokemon,Name),
+  findall((M,R), (can_learn(Name,M),move(M,T,_,_,_,_,_,_,_),
+                  rot_init_pokemon_moves_rated_power(Pokemon,M,R)), Ms),
+  Ms \= [], % no such move learned? thats... to bad
+  sort(2,@>,Ms,[(Move,_)|_]),
+  % get pp
+  move(Move,_,_,_,pp(PP),_,_,_,_),
+  rot_init_pokemon_moves_acc(Pokemon,Ts,[T|Types_used],[uncertain([Move,PP])|Moves_found],Moves).
+
+%! rot_init_pokemon_moves_rated_power(+Known_pokemon_data, +Move, -Rating).
+% Rates a move choice for a given pokemon by it's base power. Fails for status moves
+% @arg Known_pokemon_data The pokemon data of the pokemon in question (may be obviously missing moves)
+% @arg Move The name of the move in question
+% @arg Rating An integer based on certain factors to give a rough idea how strong the move is
+rot_init_pokemon_moves_rated_power(Pokemon, Move, Rating) :-
+  move(Move,T,CP,acc(Acc),pp(PP),_,_,_,_),
+  CP =.. [Cat,Pow],
+  number(Pow),
+  atk_stat_by_category(Pokemon,Cat,_..Atk),
+  calculate_stab(Pokemon,T,Stab),
+  (Acc = always,Acc_value=100 ; Acc_value=Acc),
+  Rating is Pow*Atk*Acc_value*min(PP,10)*Stab, !.
+
+rot_init_pokemon_moves_coverage_type(Ts, Cov) :-
+  findall(T,(type(T),\+member(T,Ts)),Rs), % get list of all remaining types
+  rot_init_pokemon_moves_coverage_type_acc(Ts,Rs,[],Cov).
+% the accumulator collects every result (3rd arg) of the coverage amount
+% every type od the remainign type list (2nd arg) gets added to the existing type list (1st arg)
+% and propagates through all possibilities. The best result will be returned (4th arg)
+rot_init_pokemon_moves_coverage_type_acc(Ts,[R|Rs],Values,Cov) :-
+  findall(P, (pokemon(P,PTs,_,_),once((member(T,[R|Ts]),type_effectiveness(T,PTs,E),E>1))), Ps), % get pokemon that get hit very effectively
+  length(Ps,L), % amount of very effectively hit pokemon
+  rot_init_pokemon_moves_coverage_type_acc(Ts,Rs,[(R,L)|Values],Cov).
+rot_init_pokemon_moves_coverage_type_acc(_,[],Values,Cov) :-
+  sort(2,@>=,Values,Sorted_values),
+  member((Cov,_),Sorted_values).
 
 %! rot_init_ev_dv_vars(+EV_DV_domain_data_frame, -EV_DV_domain_vars_frame).
 % Takes the ev/dv domains given and returns finite domain variables matching the data.

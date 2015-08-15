@@ -23,6 +23,8 @@ rot_choose_switch(state(_, Team, _), Switch) :-
   available_switches(Team, Available),
   rot_choose_random(Available, Switch).
 
+%! rot_choose_random(+List, -Choice).
+% To be deleted in future
 rot_choose_random(X, _) :-
   var(X),
   write(' >>> error in rot.pl: rot_choose_random needs a non empty list but received an unbound variable <<<'), nl.
