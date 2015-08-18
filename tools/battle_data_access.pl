@@ -143,25 +143,29 @@ translate_attacker_state(state(T, A, [Field_t, Field_a, Field_g]), rot, state(A,
 swap_attacker_state(State, Swap) :-
   translate_attacker_state(State, rot, Swap).
 
-%! stat_stage_factor(Stat_stage, Factor)
+%! stat_stage_factor(+Stat_stage, -Factor)
 %
-% Gives the multiplier corresponding to the given stat stage
+% Gives the multiplier corresponding to the given stat stage.
+%
+% The factor is given in the format Numerator/Denominator, allowing one to call
+% `stat_stage_factor(Stage, N/D)`.
+% This is as some of these factors are fractions, but some calculations demand pure integers.
 %
 % @arg Stat_stage An integer from -6 to 6
 % @arg Factor The factor depending on the stat increase or decrease
-stat_stage_factor(6, 4).
-stat_stage_factor(5, 3.5).
-stat_stage_factor(4, 3).
-stat_stage_factor(3, 2.5).
-stat_stage_factor(2, 2).
-stat_stage_factor(1, 1.5).
-stat_stage_factor(0, 1).
-stat_stage_factor(-1, (2/3)).
-stat_stage_factor(-2, 0.5).
-stat_stage_factor(-3, 0.4).
-stat_stage_factor(-4, (1/3)).
-stat_stage_factor(-5, (2/7)).
-stat_stage_factor(-6, 0.25).
+stat_stage_factor(6, 4/1). % 4
+stat_stage_factor(5, 7/2). % 3.5
+stat_stage_factor(4, 3/1). % 3
+stat_stage_factor(3, 5/2). % 2.5
+stat_stage_factor(2, 2/1). % 2
+stat_stage_factor(1, 3/2). % 1.5
+stat_stage_factor(0, 1/1). % 1
+stat_stage_factor(-1, 2/3). % 0.666..
+stat_stage_factor(-2, 1/2). % 0.5
+stat_stage_factor(-3, 2/5). % 0.4
+stat_stage_factor(-4, 1/3). % 0.333..
+stat_stage_factor(-5, 2/7). % 0.286..
+stat_stage_factor(-6, 1/4). % 0.25
 
 %! increased_stat(+Raw_stat, +Stat_stage, -Result_stat).
 %

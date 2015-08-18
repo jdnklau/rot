@@ -526,19 +526,19 @@ set_stats(Pokemon, Atk, Def, Spa, Spd, Spe, New_pokemon) :-
 % @arg Resulting_pokemon The pokemon with the given status value.
 % @see set_stats/7
 set_stat(Pokemon, Value, attack, New_pokemon) :-
-  stats(Pokemon, _, Def, Spa, Spd, Spe),
+  raw_stats(Pokemon, _, Def, Spa, Spd, Spe),
   set_stats(Pokemon, Value, Def, Spa, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, defense, New_pokemon) :-
-  stats(Pokemon, Atk, _, Spa, Spd, Spe),
+  raw_stats(Pokemon, Atk, _, Spa, Spd, Spe),
   set_stats(Pokemon, Atk, Value, Spa, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, special-attack, New_pokemon) :-
-  stats(Pokemon, Atk, Def, _, Spd, Spe),
+  raw_stats(Pokemon, Atk, Def, _, Spd, Spe),
   set_stats(Pokemon, Atk, Def, Value, Spd, Spe, New_pokemon).
 set_stat(Pokemon, Value, special-defense, New_pokemon) :-
-  stats(Pokemon, Atk, Def, Spa, _, Spe),
+  raw_stats(Pokemon, Atk, Def, Spa, _, Spe),
   set_stats(Pokemon, Atk, Def, Spa, Value, Spe, New_pokemon).
 set_stat(Pokemon, Value, speed, New_pokemon) :-
-  stats(Pokemon, Atk, Def, Spa, Spd, _),
+  raw_stats(Pokemon, Atk, Def, Spa, Spd, _),
   set_stats(Pokemon, Atk, Def, Spa, Spd, Value, New_pokemon).
 
 %! set_atk_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
@@ -546,7 +546,7 @@ set_stat(Pokemon, Value, speed, New_pokemon) :-
 % @arg Pokemon The pokemon data to be altered
 % @arg Stat_value The status value to be set
 % @arg Category Either ´physical´ or ´special´
-% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @arg Resulting_pokemon The pokemon with the given status value
 % @see set_stats/7
 % @see set_stat/4
 set_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
@@ -559,10 +559,90 @@ set_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
 % @arg Pokemon The pokemon data to be altered
 % @arg Stat_value The status value to be set
 % @arg Category Either ´physical´ or ´special´
-% @arg Resulting_pokemon The pokemon with the given ev/dv data.
+% @arg Resulting_pokemon The pokemon with the given status value
 % @see set_stats/7
 % @see set_stat/4
 set_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
   set_stat(Pokemon, Data, defense, New_pokemon).
 set_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
   set_stat(Pokemon, Data, special-defense, New_pokemon).
+
+%! set_staged_atk_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+% Replaces the attack status value of the given pokemon by damage category, taking stat stage increases into account
+%
+% It is assumed, that the attack stat to be set is influenced by the stat stage increases of the pokemon,
+% which will be calculated off first.
+% @arg Pokemon The pokemon data to be altered
+% @arg Stat_value The status value to be set, may be a domain
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given status value.
+% @see set_stats/7
+% @see set_stat/4
+set_staged_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
+  stat_stage(Pokemon, attack, Stage), % get stage
+  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
+  (
+    % handle domains
+    Data = _.._, !,
+    D in Data,
+    Stat #= D * FD / FN,
+    fd_dom(Stat,Stat_data)
+    ;
+    integer(Data), % no domain
+    Stat_data = ceil(Data * FD / FN)
+  ),
+  set_stat(Pokemon, Stat_data, attack, New_pokemon).
+set_staged_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
+  stat_stage(Pokemon, special-attack, Stage), % get stage
+  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
+  (
+    % handle domains
+    Data = _.._, !,
+    D in Data,
+    Stat #= D * FD / FN,
+    fd_dom(Stat,Stat_data)
+    ;
+    integer(Data), % no domain
+    Stat_data = ceil(Data * FD / FN)
+  ),
+  set_stat(Pokemon, Stat_data, special-attack, New_pokemon).
+
+%! set_staged_def_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
+% Replaces the defense status value of the given pokemon by damage category, taking stat stage increases into account
+%
+% It is assumed, that the defense stat to be set is influenced by the stat stage increases of the pokemon,
+% which will be calculated off first.
+% @arg Pokemon The pokemon data to be altered
+% @arg Stat_value The status value to be set
+% @arg Category Either ´physical´ or ´special´
+% @arg Resulting_pokemon The pokemon with the given status value
+% @see set_stats/7
+% @see set_stat/4
+set_staged_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
+  stat_stage(Pokemon, defense, Stage), % get stage
+  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
+  (
+    % handle domains
+    Data = _.._, !,
+    D in Data,
+    Stat #= D * FD / FN,
+    fd_dom(Stat,Stat_data)
+    ;
+    integer(Data), % no domain
+    Stat_data = ceil(Data * FD / FN)
+  ),
+  set_stat(Pokemon, Stat_data, defense, New_pokemon).
+set_staged_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
+  stat_stage(Pokemon, special-defense, Stage), % get stage
+  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
+  (
+    % handle domains
+    Data = _.._, !,
+    D in Data,
+    Stat #= D * FD / FN,
+    fd_dom(Stat,Stat_data)
+    ;
+    integer(Data), % no domain
+    Stat_data = ceil(Data * FD / FN)
+  ),
+  set_stat(Pokemon, Stat_data, special-defense, New_pokemon).

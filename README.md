@@ -54,9 +54,9 @@ As there currently is no API worth mentioning (see below: _State of implementati
 # About Rot
 *Rot* is a portmanteau of *red* and *bot*.
 
-Red stands for the main protagonist of the first generation of core game series of pokemon, namely Pokemon Red Edition and Pokemon Blue Edition. In those games the player plays Red, a 10 year old boy traveling through all the land to become the leading pokemon champion.
+Red stands for the main protagonist of the first generation of core game series of pokemon, namely Pokemon Red Edition and Pokemon Blue Edition. In those games the player plays Red, a 10 year old boy travelling through all the land to become the leading pokemon champion.
 
-Bot is a commonly used short for (software) robot, indicating that the AI of Rot indeed chooses it's actions by itself and without external input but the current game state.
+Bot is a commonly used short for (software) robot, indicating that the AI of Rot indeed chooses its actions by itself and without external input but the current game state.
 
 Additionally is *rot* the German word for *red*, thus further implying that Rot is indeed meant to be a software version of Red from the core game series.
 
@@ -73,7 +73,7 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
   - before the battle begins the user may choose one of his saved teams to play with
 
 ## Battle Engine
-- available actions are either the active pokemon's moves or switches to it's team mates
+- available actions are either the active pokemon's moves or switches to its team mates
 - the following move effects are fully implemented:
   - physical and special move damage
   - moves inflicting primary status conditions

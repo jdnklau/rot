@@ -142,9 +142,8 @@ rot_evaluate_move(rot, Move, A1, A2, List, Remaining_list) :-
   Dmg #= Hp_max * Dmg_P / 100, % get damage domain
   rot_evaluate_damage(rot, Move, Dmg, Crit, A1, A2), % evaluates defense / reduces Dmg domain even further
   % calculate hit points
-  Variance in -1..1,
   New_hp_max in Max_l..Max_h,
-  New_hp_max #= Dmg * 100 / Dmg_P + Variance, % new maximum
+  New_hp_max #= Dmg * 100 / Dmg_P, % new maximum
   New_hp_cur #= New_P * New_hp_max / 100, % new current
   fd_dom(New_hp_max, Hp_max_dom),
   fd_dom(New_hp_cur, Hp_cur_dom),
@@ -184,8 +183,8 @@ rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
   decimal_to_fraction(TE, TE_N, TE_D),
   decimal_to_fraction(F3, F3_N, F3_D),
   % get stats
-  atk_stat_by_category(Attacker, Category, Atk_d), % attack stat of player pokemon
-  def_stat_by_category(Target, Category, Def), % defense domain of rot pokemon
+  atk_stat_by_category(Attacker, Move_category, Atk_d), % attack stat of player pokemon
+  def_stat_by_category(Target, Move_category, Def), % defense domain of rot pokemon
   Atk in Atk_d,
   % rebuild damage calculation
   RA in 85..100, % randomization adjustment
@@ -193,7 +192,7 @@ rot_evaluate_damage(player, Move, Dmg, critical(Crit), A1, A2) :-
           * CM_N/CM_D * F2_N/F2_D * RA/100 * Stab_N/Stab_D * TE_N/TE_D * F3_N/F3_D,
     % ^ adjusts Atk domain
   fd_dom(Atk, New_dom), % get new dom
-  set_atk_stat_by_category(Attacker, New_dom, Category, New_attacker),
+  set_staged_atk_stat_by_category(Attacker, New_dom, Move_category, New_attacker),
   rot_update_known_pokemon(New_attacker), % alter asserted data
   % figure attack ev/dv
   rot_evaluate_ev_dv(A1).
@@ -226,8 +225,8 @@ rot_evaluate_damage(rot, Move, Dmg, critical(Crit), A1, A2) :-
   decimal_to_fraction(TE, TE_N, TE_D),
   decimal_to_fraction(F3, F3_N, F3_D),
   % get stats
-  atk_stat_by_category(Attacker, Category, Atk), % attack stat of rot pokemon
-  def_stat_by_category(Target, Category, Def_d), % defense domain of player pokemon
+  atk_stat_by_category(Attacker, Move_category, Atk), % attack stat of rot pokemon
+  def_stat_by_category(Target, Move_category, Def_d), % defense domain of player pokemon
   Def in Def_d,
   % rebuild damage calculation
   RA in 85..100, % randomization adjustment
@@ -236,7 +235,7 @@ rot_evaluate_damage(rot, Move, Dmg, critical(Crit), A1, A2) :-
     % ^ adjusts Def and Dmg domain
   % assert new defense
   fd_dom(Def, New_def_dom),
-  set_def_stat_by_category(Target, New_def_dom, Category, New_target),
+  set_staged_def_stat_by_category(Target, New_def_dom, Move_category, New_target),
   rot_update_known_pokemon(New_target),
   % figure out ev/dv
   rot_evaluate_ev_dv(A2).
@@ -269,7 +268,7 @@ rot_evaluate_ev_dv(A1) :-
   EV_DV_vars = ((Hp_ed, Hp_dd),(Atk_ed, Atk_dd),(Def_ed, Def_dd),(Spa_ed,Spa_dd),(Spd_ed,Spd_dd),(Spe_ed,Spe_dd)),
   % get status value domains
   hp_frame(Pokemon, kp(_,Hp_d)),
-  stats(Pokemon, Atk_d, Def_d, Spa_d, Spd_d, Spe_d),
+  raw_stats(Pokemon, Atk_d, Def_d, Spa_d, Spd_d, Spe_d),
   % status value constraint vars
   Hp in Hp_d,
   Atk in Atk_d,
