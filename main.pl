@@ -27,7 +27,12 @@
 :- [rot/expert/init,
     rot/expert/inference_engine,
     rot/expert/knowledge_base,
-    rot/expert/data_evaluation].
+    rot/expert/eval/message_frame_eval,
+    rot/expert/eval/stats_eval,
+    rot/expert/eval/move_eval,
+    rot/expert/eval/end_of_turn_eval,
+    rot/expert/eval/damage_eval,
+    rot/expert/eval/switch_eval].
 
 %%%
 

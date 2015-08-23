@@ -129,18 +129,28 @@ rot_set_pokemon_data(rot,Data) :-
 rot_set_pokemon_data(player,Data) :-
   rot_update_known_pokemon(Data).
 
-%! rot_evaluate_message_frame(+Message_frame).
+%! rot_transmit_message_frames(+First_frame, +Second_frame).
+% Transmits two message frames to Rot, so it can evaluate the outcomes of an action.
 %
-% Let's Rot evaluate a message frame to collect information about the battle and thus
-% constructing/updating the known pokemon data of the player's team pokemon.
+% This is to be used for message frames semantically fitting together,
+% e.g. the choosen moves of both players or both end of turn results.
 %
-% @arg Message_frame The message frame to be evaluated
-rot_evaluate_message_frame(_) :-
-  % do nothing as rot is in its heuristic
-  rot(searching).
-rot_evaluate_message_frame(Frame) :-
-  % evaluate frame
-  \+ rot(searching),
-  get_message_frame_list(Frame, List), % get list of messages
-  message_frame_meta_data(Frame, Who, _, A1, A2), % get meta data
-  rot_evaluate_message_list(Who, A1, A2, List).
+% If you only got one message frame and have no second to pair it up with, use rot_transmit_message_frame/1
+% @arg First_frame The first frame occurring
+% @arg Second_frame The second frame occurring
+rot_transmit_message_frames(F1,F2) :-
+  % only refering to the evaluating predicate to keep the api file clean and easier to maintain
+  rot_evaluate_message_frames(F1,F2),
+  !. % cut to eventually keep call stack clean
+
+%! rot_transmit_message_frame(+Frame).
+% Transmits a message frame to Rot, so it can evaluate the outcomes of an action.
+%
+% This is to be used for a single message frame.
+% If you got two frames that semantically fit together, use rot_transmit_message_frames/2 instead.
+%
+% @arg Frame The message frame to be transmitted
+rot_transmit_message_frame(F1) :-
+  % only refering to the evaluating predicate to keep the api file clean and easier to maintain
+  rot_evaluate_message_frame(F1),
+  !. % cut to eventually keep call stack clean

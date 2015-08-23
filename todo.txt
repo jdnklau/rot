@@ -7,6 +7,7 @@
 - complete damage calculation (calculation of certain factors)
 - implement missing move effects
 - shift primary ailment infliction from pokemon_data_access to battle_processor
+- in move data base: drain value to fractions
 
 ## Code
 - tidy up source code organization
@@ -15,4 +16,4 @@
 ## Rot's AI
 - add basic pruning (no moves without effect)
 - add better move guessing
-- add a better way to scrap a uncertain move from the move set as "using the first one"
+- add a better way to scrap an uncertain move from the move set as "using the first one"

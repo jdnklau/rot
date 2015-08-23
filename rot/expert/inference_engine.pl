@@ -123,21 +123,21 @@ rot_derive_moves([Move|Rest],[Move|Rest_derived]) :-
   % certain moves are ... well, certain...
   rot_derive_moves(Rest, Rest_derived).
 
-%! rot_update_moves(+Pokemon_name, +Move).
+%! rot_update_moves(+Pokemon, +Move, -Result_pokemon).
 % Updates the move set of the given pokemon in its known pokemon data.
-% @arg Pokemon_name The name of the pokemon, serving as identifier
+% @arg Pokemon_name The pokemon data of the pokemon using the move
 % @arg Move The move the pokemon used.
-rot_update_moves(Name, Move) :-
-  rot_known_pokemon_data(Name, Pokemon), % get known data
+% @arg Result_pokemon The pokemon data with updated moves
+rot_update_moves(Pokemon, Move, Result) :-
   Pokemon =[Name,Hp,Move_data|Rest],
   rot_update_move_data(Move, Move_data, New_move_data),
-  rot_update_known_pokemon([Name,Hp,New_move_data|Rest]).
+  Result =[Name,Hp,New_move_data|Rest].
 
 %! rot_update_move_data(+Move, +Move_data, -Updated_move_data).
 % Updates the given move data to reflect the usage of the given move.
 %
 % Does nothing if the move already is part of the move set.
-% If the move is only listed as uncertain it will added as certain move.
+% If the move is only listed as uncertain it will be added as certain move.
 % If the move is not yet in the data, but not all 4 move slots are taken, it will be added.
 % If the move is not yet in the data and the move data already contains 4 moves an uncertain move will be removed.
 % If the move is not yet in the data and there are no uncertain moves in the data, this predicate will fail.
