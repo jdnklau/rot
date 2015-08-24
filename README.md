@@ -78,7 +78,7 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
 - the following move effects are fully implemented:
   - physical and special move damage
   - moves inflicting primary status conditions
-      - primary status conditions are: `burn`, `freeze`, `paralysis`, `sleep`, `poison` (including `toxic poison`)
+      - primary status conditions are: `burn`, `freeze`, `paralysis`, `sleep`, `poison`, `bad-poison`
   - increases or decreases of the status values
       - the status values are: `attack`, `defense`, `special-attack`, `special-defense`, `speed`
       - at maximum they can be increased by `+6` stages

@@ -108,22 +108,22 @@ process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
   add_messages(Msg_dmg, Msg_ail, Messages). % add damage message
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
-  % pokemon suffers toxin
+  % pokemon suffers bad-poison
   attacking_pokemon(State, Pokemon),
-  primary_status_condition(Pokemon, toxin(Turn)),
-  swap_attacker_state(State, Swap_state), % swap state to inflict the damage
+  primary_status_condition(Pokemon, poison(Turn)),
+  % increase the turn counter
+  New_turn is Turn+1,
+  set_primary_status_condition(Pokemon, poison(New_turn), New_pokemon),
+  set_attacking_pokemon(State, New_pokemon, New_state), % save to state
+  % calculate damage based on old turn count
+  swap_attacker_state(New_state, Swap_state), % swap state to inflict the damage
   Damage is Turn * 6.25, % damage raises each turn
-  process_damage_by_percent_max(Swap_state, Damage, _, New_swap_state, Msg_dmg_opp), % 1/8 of total hp
-  swap_attacker_state(New_swap_state, New_state), % swap back
+  process_damage_by_percent_max(Swap_state, Damage, _, New_swap_state, Msg_dmg_opp),
+  swap_attacker_state(New_swap_state, Result_state), % swap back
   messages_of_opposing_view(Msg_dmg_opp, Msg_dmg), % also swap messages
   % set up messages
   add_messages([poisoned],[],Msg_poi),
-  add_messages(Msg_dmg, Msg_poi, Messages),
-  % increase the turn counter
-  New_turn is Turn+1,
-  attacking_pokemon(New_state, Damaged_pokemon),
-  set_primary_status_condition(Damaged_pokemon, toxin(New_turn), New_pokemon),
-  set_attacking_pokemon(New_state, New_pokemon, Result_state).
+  add_messages(Msg_dmg, Msg_poi, Messages).
 process_end_of_turn_primary_status_damage(State, State, []) :-
   % base case
   attacking_pokemon(State, Pokemon),
@@ -547,7 +547,7 @@ process_single_move_effect(State, E, _, State, Messages) :-
 % @arg Result_state The resulting attacker state of the game after the ailment was executed
 % @arg Message_collection Collection of messages occured whilst processing
 process_ailment_infliction(State, [Ailment, Prob], Result, Messages) :-
-  member(Ailment, [burn, freeze, paralysis, poison, toxin]), % the only ailments without a turn limit
+  member(Ailment, [burn, freeze, paralysis, poison, bad-poison]), % the only ailments without a turn limit
   inflict_primary_status_condition(State, Ailment, Prob, Result, Messages).
 process_ailment_infliction(State, [sleep, Prob, Turn_limit], Result, Messages) :-
   % sleep is the only primary status condition having a limit in turns

@@ -32,7 +32,8 @@ primary_status_condition([_,_,_,_,_,[Condition|_]], Condition).
 %   * burn
 %   * freeze
 %   * paralysis
-%   * poison (includes toxin)
+%   * poison
+%   * bad-poison
 %   * sleep
 %   * nil (no ailment)
 %
@@ -41,16 +42,16 @@ primary_status_condition([_,_,_,_,_,[Condition|_]], Condition).
 %
 % @arg Pokemon The pokemon data of the pokemon in question
 % @arg Condition The primary status condition category the given pokemon suffers
-primary_status_condition_category(Pokemon, poison) :-
-  % toxin has to be treated differently internally but has to be displayed as poisoning
-  primary_status_condition(Pokemon, toxin(_)).
+primary_status_condition_category(Pokemon, bad-poison) :-
+  % bad-poison has to be treated differently internally
+  primary_status_condition(Pokemon, poison(_)).
 primary_status_condition_category(Pokemon, sleep) :-
   % sleep comes along with a counter to be get rid of in the category display
   primary_status_condition(Pokemon, sleep(_,_)).
 primary_status_condition_category(Pokemon, Condition) :-
   % base case
   primary_status_condition(Pokemon, Condition),
-  Condition \= toxin(_),
+  Condition \= bad-poison(_),
   Condition \= sleep(_,_).
 
 %! inflict_primary_status_condition(+Attacker_state, +Condition, +Probability, -Result_state, -Message_collection).
@@ -91,12 +92,12 @@ inflict_primary_status_condition(State, freeze, _, State, []) :-
   has_type(Pokemon, ice).
 inflict_primary_status_condition(State, Poison, _, State, []) :-
   % poison type pokemon can not be poisoned
-  member(Poison, [poison, toxin]),
+  member(Poison, [poison, bad-poison]),
   State = state(_,[Pokemon|_],_),
   has_type(Pokemon, poison).
-inflict_primary_status_condition(State, toxin, _, Result, Messages) :-
-  % toxin needs to carry information about the number of turns the pokemon suffers it already as it grows stronger
-  inflict_primary_status_condition(State, toxin(1), 0, Result, Messages). % base case can handle this
+inflict_primary_status_condition(State, bad-poison, _, Result, Messages) :-
+  % bad-poison needs to carry information about the number of turns the pokemon suffers it already as it grows stronger
+  inflict_primary_status_condition(State, poison(1), always, Result, Messages). % base case can handle this
 inflict_primary_status_condition(State, Cond, _, Result, Msg) :-
   % base case
   State = state(Attacker,[Pokemon|Team],Field),
