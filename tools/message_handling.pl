@@ -46,6 +46,8 @@ create_message_frame(State, Who, Action, msg(Who, Action, A1, A2, msgcol([]))) :
 create_message_frame(State, Who, Action, msgcol(Message_collection), Message_frame) :-
   create_message_frame(State,Who,Action,Empty_frame), % create empty frame
   add_message_frame(msgcol(Message_collection), Empty_frame, Message_frame). % add messages to frame
+create_message_frame(State, Who, Action, [], Message_frame) :-
+  create_message_frame(State,Who,Action,Message_frame). % create empty frame
 
 %! message_frame_meta_data(+Message_frame, -Player, -Action, -Active_pokemon_player, -Active_pokemon_opponent).
 % Retrieves the meta informations from a given message frame.
