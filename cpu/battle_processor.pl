@@ -28,11 +28,13 @@ process_by_priority(State, Action_player, Action_rot, priorities(Prio_player, Pr
   faster(Prio_player, Prio_rot), % succeds if player is faster
   !, % red cut to suppress useage of 2nd clause where Rot would be faster
   process_actions(State, Action_player, Action_rot, player, New_state),
-  process_ends_of_turn(New_state, player, Result_state).
+  process_ends_of_turn(New_state, player, End_of_turn_state),
+  process_fainted_checks(End_of_turn_state, player, Result_state).
 process_by_priority(State, Action_player, Action_rot, _, Result_state) :-
   % as faster/2 in 1st clause has failed, Rot's action has higher priority
   process_actions(State, Action_rot, Action_player, rot, New_state),
-  process_ends_of_turn(New_state, rot, Result_state).
+  process_ends_of_turn(New_state, rot, End_of_turn_state),
+  process_fainted_checks(End_of_turn_state, rot, Result_state).
 
 %! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
 %
@@ -63,9 +65,8 @@ process_ends_of_turn(State, Who_first, Result_state) :-
 % @arg Message_collection Collection of messages occured whilst processing
 process_end_of_turn(State, Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker), % translate state
-  process_end_of_turn_damage(State_attacker, Damaged_state_attacker, Msg_dmg), % do damage to be dealt at the end of every turn
-  process_fainted_check(Damaged_state_attacker, Who, New_state_attacker, Msg_faint), % any active pokemon fainted last turn needs to be switched out
-  add_messages(Msg_faint, Msg_dmg, Messages), % add new messages
+  process_end_of_turn_damage(State_attacker, New_state_attacker, Msg_dmg), % do damage to be dealt at the end of every turn
+  add_messages(Msg_dmg, [], Messages), % create message collection
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
 
 %! process_end_of_turn_damage(+Attacker_state, -Result_state, -Message_collection).
@@ -130,19 +131,58 @@ process_end_of_turn_primary_status_damage(State, State, []) :-
   primary_status_condition_category(Pokemon, Cond),
   \+ member(Cond,[burn,poison]).
 
+%! process_fainted_checks(+Game_state, +Who_first, -Result_state).
+%
+% Checks for active but fainted pokemon and forces their corresponding player to switch them out.
+%
+% As due to entry hazards the newly switched in pokemon could instantly faint also,
+% this check will be looped until both players either have an unfainted, active pokemon
+% to use in the next turn, or one player has no pokemon left and loses.
+%
+% @arg Game_state The current state of the game
+% @arg Who_first Either `player` or `rot` to show who has higher priority this turn
+% @arg Result_state The resulting state of the game after executing the end of this turn for both players
+% @see process_end_of_turn/4
+process_fainted_checks(State, Who_first, Result_state) :-
+  process_fainted_check(State, Who_first, New_state, Message_collection_first),
+  create_message_frame(State, Who_first, fainted_check, Message_collection_first, Message_frame_first), % create the message frame of the faster player
+  ui_display_messages(Message_frame_first), % print message frame
+  opponent(Who_first, Who_second), % get the slower player by name
+  process_fainted_check(New_state, Who_second, Newer_state, Message_collection_second), % end of turn for slower player
+  create_message_frame(New_state,Who_second, fainted_check,Message_collection_second, Message_frame_second), % create the message frame of the slower player
+  ui_display_messages(Message_frame_second), % print message frame
+  process_fainted_checks_loop(Newer_state, Who_first, Result_state).
+
+process_fainted_checks_loop(State, Who_first, Result_state) :-
+  % repeat fainted check if the player's new active pokemon has already fainted again (due to entry hazards e.g.)
+  attacker_fainted(State),
+  \+ attacker_team_fainted(State),!, % check if any switch is actually needed
+  process_fainted_checks(State, Who_first, Result_state).
+process_fainted_checks_loop(State, Who_first, Result_state) :-
+  % repeat fainted check if Rot's new active pokemon has already fainted again (due to entry hazards e.g.)
+  target_fainted(State),
+  \+ target_team_fainted(State),!, % check if any switch is actually needed
+  process_fainted_checks(State, Who_first, Result_state).
+process_fainted_checks_loop(State, _, State). % base case
+
 %! process_fainted_check(+Game_state, +Who, -Result_state, -Message_collection).
 %
-% TODO
+% Forces the given player to switch out a fainted active pokemon.
+%
+% If the active pokemon has not fainted yet, nothing happens
 %
 % @arg Game_state The current state of the game
 % @arg Who Either `player` or `rot`
 % @arg Result_state The resulting state of the game after executing the check for the given player
 % @arg Message_collection Collection of messages occured whilst processing
 % @tbd Change implementation of fainting
-process_fainted_check(state([Lead|Team], Target, Field), Who, Result_state, Messages) :-
-  fainted(Lead), % lead has fainted
+process_fainted_check(State, Who, Result_state, Messages) :-
+  % case: active pokemon has fainted
+  translate_attacker_state(State,Who,Attacker_state),
+  attacker_fainted(Attacker_state),
   !, % red cut to omit `not fainted(lead)` check in 2nd predicate
-  process_fainted_routine(state([Lead|Team], Target, Field), Who, Result_state, Messages).
+  process_fainted_routine(Attacker_state, Who, New_attacker_state, Messages),
+  translate_attacker_state(New_attacker_state, Who, Result_state). % translate back
 process_fainted_check(State, _, State, []). % Lead has not fainted, so the game state does not change
 
 %! process_actions(+Game_state, +Action_first, +Action_second, +Who_first, -Result_state).
@@ -179,12 +219,14 @@ process_action(State, switch(Team_member), Who, Result_state, Messages) :-
   translate_attacker_state(State, Who, State_attacker), % translate state to attacker state
   process_switch(State_attacker, Team_member, New_state_attacker, Messages), % process the switch
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-process_action(State, _, Who, Result_state, Messages) :-
+process_action(State, _, Who, State, Messages) :-
   % attacking pokemon has fainted before it could attack
   translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  attacker_fainted(State_attacker), % active pokemon of attacker has fainted
-  process_fainted_routine(State_attacker, Who, Result_state_attacker, Messages),
-  translate_attacker_state(Result_state_attacker, Who, Result_state). % translate result back
+  attacker_fainted(State_attacker). % active pokemon of attacker has fainted
+process_action(State, _, Who, State, Messages) :-
+  % target pokemon has fainted before it could be attacked
+  translate_attacker_state(State, Who, State_attacker), % translate to attacker state
+  target_fainted(State_attacker).
 process_action(State, Move, Who, Result_state, Messages) :-
   % (base case) action chosen: a move
   move(Move, _,_,_,_,_,_,_,_),

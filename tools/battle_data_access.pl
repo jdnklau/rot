@@ -30,6 +30,14 @@ game_over(state(_, Rot, _)) :-
 attacker_fainted(state([Lead|_], _, _)) :-
   fainted(Lead).
 
+%! attacker_team_fainted(Attacker_state)
+%
+% True if the attacking player's team has fainted completely
+%
+% @arg Attacker_state The current game state from the attackers point of view
+attacker_team_fainted(state(Team, _, _)) :-
+  team_completely_fainted(Team).
+
 %! target_fainted(Attacker_state)
 %
 % True if the active pokemon of the defending player has fainted
@@ -37,6 +45,14 @@ attacker_fainted(state([Lead|_], _, _)) :-
 % @arg Attacker_state The current game state from the attackers point of view
 target_fainted(state(_, [Lead|_], _)) :-
   fainted(Lead).
+
+%! target_team_fainted(Attacker_state)
+%
+% True if the target player's team has fainted completely
+%
+% @arg Attacker_state The current game state from the attackers point of view
+target_team_fainted(state(_, Team, _)) :-
+  team_completely_fainted(Team).
 
 %! team_completely_fainted(+Team)
 %
