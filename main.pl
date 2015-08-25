@@ -1,7 +1,9 @@
 :- [test, teams].
 :- [database/movedex,
     database/natures,
-    database/pokedex,
+    database/pokedex/pokemon_forms,
+    database/pokedex/pokemon_species,
+    database/pokedex/pokemon_stats,
     database/typechart,
     database/evolutions].
 :- [cpu/battle_processor,
