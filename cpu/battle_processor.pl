@@ -235,11 +235,22 @@ process_action(State, Move, Who, Result_state, Messages) :-
   translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
 
 %! process_move_routine(+Attacker_state, +Move, -Result_state, -Message_collection)
+%
+% Processes a routine before move useage and then calle eventually the move procession.
+%
+% The routine checks firstly for events preventing the move useage, like freeze or paralysis.
+% If the move can be executed without the occurrence of such an event disrupting it,
+% process_move/4 will be called.
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Move The move to be executed
+% @arg Result_state The resulting state of the game after executing the given action
+% @arg Message_collection Collection of messages occured whilst processing
 process_move_routine(State, _, State, Messages) :-
   % case: pokemon suffers paralysis
   attacking_pokemon(State,Pokemon),
   primary_status_condition(Pokemon, paralysis),
-  rng_succeeds(75),  % 25 % the pokemon can not attack this turn
+  rng_succeeds(25),  % 25 percent chance the pokemon can not attack this turn
   add_messages([paralyzed],[],Messages).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
