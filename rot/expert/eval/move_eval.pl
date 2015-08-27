@@ -184,35 +184,33 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     % and do not use the real values contained in the message.
   rot_ask_message(target(damaged),[kp(Cur,Max)],Dmg_list,Damaged_list), % new hp frame contained in message
   rot_evaluate_fainting(rot,Attacker_crit,Target_crit,Damaged_list,Rot_pkm,Player_pkm,Effect_list), % note the renaming of Attacker/Target to Rot_pkm/Player_pkm.
-  New_P is round(100*Cur/Max), % get new hp percent
-  hp_frame(Player_pkm, kp(_..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
-  Old_P is round(100*Cur_h/Max_h), % get old hp percent
-  Dmg_P is Old_P - New_P, % get damage percent
-  % get domains
-  Hp_max in Max_l..Max_h,
-  % set up damage domain
   (
-    % pokemon fainted
-    Cur is 0,
-    Dmg #>= Hp_max * Dmg_P / 100 % domain is at least this high (may be higher)
+    % if the player's pokemon fainted by our move, we don't care to evaluate it's stats any further
+    fainted(Player_pkm)
   ;
-    % pokemon not fainted
-    Cur > 0,
-    Dmg #= Hp_max * Dmg_P / 100 % domain should be pretty accurate
-  ),
-  rot_evaluate_damage(rot, Move, Dmg, Crit_flag, Rot_pkm, Player_pkm, New_rot_pkm, New_player_pkm), % evaluates defense / reduces Dmg domain even further
-  % calculate hit points
-  New_hp_max in Max_l..Max_h,
-  New_hp_max #= Dmg * 100 / Dmg_P, % new maximum
-  New_hp_cur #= New_P * New_hp_max / 100, % new current
-  fd_dom(New_hp_max, Hp_max_dom),
-  fd_dom(New_hp_cur, Hp_cur_dom),
-  % update pokemon
-  set_hp_frame(New_player_pkm, kp(Hp_cur_dom,Hp_max_dom), Damaged_player_pkm),
-  % evaluate hit point ev/dv
-  rot_evaluate_ev_dv(Damaged_player_pkm, Evaluated_player_pkm),
-  % evaluate effects
-  rot_evaluate_move_effects(rot, Effects, New_rot_pkm, Evaluated_player_pkm, Effect_list, Result_attacker, Result_target).
+    \+ fainted(Player_pkm),
+    New_P is round(100*Cur/Max), % get new hp percent
+    hp_frame(Player_pkm, kp(_..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
+    Old_P is round(100*Cur_h/Max_h), % get old hp percent
+    Dmg_P is Old_P - New_P, % get damage percent
+    % get domains
+    Hp_max in Max_l..Max_h,
+    % set up damage domain
+    Dmg #= Hp_max * Dmg_P / 100, % domain should be pretty accurate
+    rot_evaluate_damage(rot, Move, Dmg, Crit_flag, Rot_pkm, Player_pkm, New_rot_pkm, New_player_pkm), % evaluates defense / reduces Dmg domain even further
+    % calculate hit points
+    New_hp_max in Max_l..Max_h,
+    New_hp_max #= Dmg * 100 / Dmg_P, % new maximum
+    New_hp_cur #= New_P * New_hp_max / 100, % new current
+    fd_dom(New_hp_max, Hp_max_dom),
+    fd_dom(New_hp_cur, Hp_cur_dom),
+    % update pokemon
+    set_hp_frame(New_player_pkm, kp(Hp_cur_dom,Hp_max_dom), Damaged_player_pkm),
+    % evaluate hit point ev/dv
+    rot_evaluate_ev_dv(Damaged_player_pkm, Evaluated_player_pkm),
+    % evaluate effects
+    rot_evaluate_move_effects(rot, Effects, New_rot_pkm, Evaluated_player_pkm, Effect_list, Result_attacker, Result_target)
+  ).
 
 %! rot_evaluate_critical_move(+Player, +Move, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Evaluated_attacker, -Evaluated_defender, -Crit_flag, -Remaining_list).
 %

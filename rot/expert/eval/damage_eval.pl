@@ -93,3 +93,5 @@ rot_evaluate_damage(rot, Move, Dmg, critical(Crit), Attacker, Target, Attacker, 
   set_staged_def_stat_by_category(Target, New_def_dom, Move_category, New_target),
   % figure out ev/dv
   rot_evaluate_ev_dv(New_target, Result_target).
+rot_evaluate_damage(_,_,_,_, Attacker, Target, Attacker, Target).
+  % if somehow the damage could not be evaluated correctly, this case shall prevent unintended backtracking
