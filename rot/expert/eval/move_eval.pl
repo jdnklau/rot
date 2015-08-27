@@ -288,6 +288,10 @@ rot_evaluate_move_single_effect(_, ailment(A, _), User, Target, List, User, New_
   member(A, [burn,freeze,paralysis,poison]),
   member(target(ailment(A)),List),
   set_primary_status_condition(Target,A,New_target).
+rot_evaluate_move_single_effect(_, ailment(bad-poison, _), User, Target, List, User, New_target) :-
+  % possible ailment: bad poison
+  member(target(ailment(bad-poison)),List),
+  set_primary_status_condition(Target,poison(1),New_target).
 rot_evaluate_move_single_effect(_, ailment(sleep,_,_),User,Target,List,User,New_target) :-
   % possible sleep infliction
   member(target(ailment(sleep)),List),
