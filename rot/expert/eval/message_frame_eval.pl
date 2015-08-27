@@ -18,11 +18,18 @@ rot_evaluate_message_frames(Frame_first, Frame_second) :-
 %
 % @arg Message_frame The message frame to be evaluated
 rot_evaluate_message_frame(_) :-
+  % do nothing when in Rot's search algorithm
   rot(searching),!.
 rot_evaluate_message_frame(Frame) :-
+  % skip empty message frames
+  empty_message_frame(Frame),!.
+rot_evaluate_message_frame(Frame) :-
   % evaluate switches
-  message_frame_meta_data(Frame, Who, switch(In_name), Out_name, Opp_name), % get action
+  message_frame_meta_data(Frame, Who, Switch_action, Out_name, Opp_name), % get action
+  % test if it is an action involving only a switch
+  member(Switch_action, [switch(_),fainted_check]), % all viable actions leading to switches
   get_message_frame_list(Frame, List), % get list of messages
+  member(switch(In_name),List),
   % get pokemon data
   rot_get_pokemon_data(Who, In_name, In),
   rot_get_pokemon_data(Who, Out_name, Out),

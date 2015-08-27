@@ -28,7 +28,7 @@
     `[Primary_condition, Secondary_conditions, Additional_conditions]`
     + Primary_condition  
       may be one of the following: `nil`, `burn`, `freeze`, `paralysis`,
-      `poison`, `toxin(Toxin_value)`, `sleep`, and `fainted`
+      `poison`, `poison(Bad_poison_counter)`, `sleep`, and `fainted`
     + Secondary_conditions  
       a list of currently active secondary status conditions (may be empty)  
       possible conditions are:  
