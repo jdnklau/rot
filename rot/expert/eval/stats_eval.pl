@@ -69,7 +69,7 @@ rot_evaluate_ev_dv(Pokemon, New_pokemon) :-
 % @arg DV A constraint variable in the possible range of dv
 rot_evaluate_hp_stat(Base, Stat, EV, DV) :-
   % use formula
-  Stat #= (2*Base + DV + EV/4 + 100)/2 + 10.
+  Stat #= (2*Base + DV + EV//4 + 100)//2 + 10.
 
 %! rot_evaluate_stat(+Base_value,+Status_value,+EV,+DV).
 %
@@ -84,4 +84,4 @@ rot_evaluate_hp_stat(Base, Stat, EV, DV) :-
 % @arg DV A constraint variable in the possible range of dv
 rot_evaluate_stat(Base,Stat,EV,DV) :-
   % just set a another constraint
-  Stat #= (2*Base + DV + EV/4)/2 + 5.
+  Stat #= (2*Base + DV + EV//4)//2 + 5.

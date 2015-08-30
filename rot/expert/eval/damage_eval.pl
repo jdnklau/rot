@@ -47,8 +47,8 @@ rot_evaluate_damage(player, Move, Dmg, critical(Crit), Attacker, Target, Result_
   Atk in Atk_d,
   % rebuild damage calculation
   RA in 85..100, % randomization adjustment
-  Dmg #= (22 * Base_damage * Atk / (50 * Def) * F1_N/F1_D + 2)
-          * CM_N/CM_D * F2_N/F2_D * RA/100 * Stab_N/Stab_D * TE_N/TE_D * F3_N/F3_D,
+  Dmg #= (22 * Base_damage * Atk // (50 * Def) * F1_N//F1_D + 2)
+          * CM_N//CM_D * F2_N//F2_D * RA//100 * Stab_N//Stab_D * TE_N//TE_D * F3_N//F3_D,
     % ^ adjusts Atk domain
   fd_dom(Atk, New_dom), % get new dom
   set_staged_atk_stat_by_category(Attacker, New_dom, Move_category, New_attacker),
@@ -85,8 +85,8 @@ rot_evaluate_damage(rot, Move, Dmg, critical(Crit), Attacker, Target, Attacker, 
   Def in Def_d,
   % rebuild damage calculation
   RA in 85..100, % randomization adjustment
-  Dmg #= (22 * Base_damage * Atk / (50 * Def) * F1_N/F1_D + 2)
-          * CM_N/CM_D * F2_N/F2_D * RA/100 * Stab_N/Stab_D * TE_N/TE_D * F3_N/F3_D,
+  Dmg #= (22 * Base_damage * Atk // (50 * Def) * F1_N//F1_D + 2)
+          * CM_N//CM_D * F2_N//F2_D * RA//100 * Stab_N//Stab_D * TE_N//TE_D * F3_N//F3_D,
     % ^ adjusts Def and Dmg domain
   % assert new defense
   fd_dom(Def, New_def_dom),

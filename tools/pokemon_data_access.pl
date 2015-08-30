@@ -586,7 +586,7 @@ set_staged_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
     % handle domains
     Data = _.._, !,
     D in Data,
-    Stat #= D * FD / FN,
+    Stat #= D * FD // FN,
     fd_dom(Stat,Stat_data)
     ;
     integer(Data), % no domain
@@ -600,7 +600,7 @@ set_staged_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
     % handle domains
     Data = _.._, !,
     D in Data,
-    Stat #= D * FD / FN,
+    Stat #= D * FD // FN,
     fd_dom(Stat,Stat_data)
     ;
     integer(Data), % no domain
@@ -626,7 +626,7 @@ set_staged_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
     % handle domains
     Data = _.._, !,
     D in Data,
-    Stat #= D * FD / FN,
+    Stat #= D * FD // FN,
     fd_dom(Stat,Stat_data)
     ;
     integer(Data), % no domain
@@ -640,7 +640,7 @@ set_staged_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
     % handle domains
     Data = _.._, !,
     D in Data,
-    Stat #= D * FD / FN,
+    Stat #= D * FD // FN,
     fd_dom(Stat,Stat_data)
     ;
     integer(Data), % no domain
