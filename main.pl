@@ -27,6 +27,7 @@
     rot/ai,
     rot/search_tree].
 :- [rot/expert/init,
+    rot/expert/data_access,
     rot/expert/inference_engine,
     rot/expert/knowledge_base,
     rot/expert/eval/message_frame_eval,

@@ -23,13 +23,6 @@ read_rot_switch(State, Switch) :-
 rot_clear :-
   retractall(rot(_)).
 
-%! rot_clear_derived_pokemon(+Pokemon_name).
-% Clears the derived pokemon data of the given pokemon.
-% @arg Pokemon_name The name of the pokemon.
-rot_clear_derived_pokemon(Name) :-
-  % retract derived data if existent
-  retractall(rot(derived([Name|_]))).
-
 %! rot_initialize(+Player_team_list, +Rot_team_data).
 %
 % Initializes Rot's system.
@@ -55,54 +48,43 @@ rot_clear_derived_pokemon(Name) :-
 % @see rot_derive_pokemon/1
 rot_initialize(Team_player, Team_rot) :-
   rot_clear, % clear eventually remaining asserts
-  rot_init_team(Team_player), % initialize team
-  Team_player = [Active_player|_],
-  asserta(rot(opponent_active(Active_player))), % assert active pokemon of opponent
+  rot_init_opponent(Team_player), % initialize team
   rot_derive_team(_), % assert derived data of all pokemon
-  rot_init_self(Team_rot), % assert own team data
-  team_list(Team_rot,[Active_rot|_]),
-  asserta(rot(own_active(Active_rot))). % assert active pokemon of rot
+  rot_init_self(Team_rot). % assert own team data
 
 %! rot_get_game_state(-Game_state).
 % Returns Rot's assumed game state.
 % @arg Game_state The state of the game rot assumes.
 rot_get_game_state(state(Player,Rot,[[],[],[]])) :-
   % get player team
-  rot_derive_team(Player_intern),
-  % set active pokemon of the player
-  rot(opponent_active(Player_active)),
-  calculate_switch(Player_intern,Player_active,Player), % set active pokemon as lead (obviously)
+  rot_get_opponent_team(Player),
   % get rot team
-  rot(own_team(Ps)),
-  findall([P|Data], (member(P,Ps),rot(has([P|Data]))), Rot_intern),
-  % set active pokemon of rot
-  rot(own_active(Rot_active)),
-  calculate_switch(Rot_intern,Rot_active,Rot). % set active pokemon as lead (obviously)
+  rot_get_own_team(Rot).
+
 
 %! rot_known_pokemon_data(+Pokemon_name, -Known_pokemon_data).
 % Returns the to Rot known data of the given pokemon.
 % Fails if the pokemon is not known at all to Rot.
 % @arg Pokemon_name The name of the pokemon
 % @arg Known_pokemon_data The known pokemon data of the pokemon.
-rot_known_pokemon_data(Name, [Name|Data]) :-
-  rot(knows([Name|Data])).
+rot_known_pokemon_data(Name, Data) :-
+  rot_access_known_pokemon(Name, Data).
 
 %! rot_derived_pokemon_data(+Pokemon_name, -Derived_pokemon_data).
 % Returns the from Rot derived data of the given pokemon.
 % Fails if the pokemon is not derived currently.
 % @arg Pokemon_name The name of the pokemon
 % @arg Derived_pokemon_data The derived pokemon data of the pokemon.
-rot_derived_pokemon_data(Name, [Name|Data]) :-
-  rot_derive_pokemon(Name), % make sure the pokemon is derived
-  rot(derived([Name|Data])).
+rot_derived_pokemon_data(Name, Data) :-
+  rot_access_derived_pokemon(Name, Data).
 
 %! rot_has_pokemon_data(+Pokemon_name, -Pokemon_data).
 % Returns the pokemon data of Rot's given pokemon
 % Fails if the pokemon is not in Rot's team.
 % @arg Pokemon_name The name of the pokemon
 % @arg Pokemon_data The pokemon data of the pokemon.
-rot_has_pokemon_data(Name, [Name|Data]) :-
-  rot(has([Name|Data])).
+rot_has_pokemon_data(Name, Data) :-
+  rot_access_own_pokemon(Name, Data).
 
 %! rot_get_pokemon_data(+Player, +Pokemon_name, -Pokemon_data).
 % Returns the pokemon data of the given player's pokemon.

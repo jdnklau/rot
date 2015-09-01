@@ -1,11 +1,13 @@
-%! rot_init_team(+Team_list).
+%! rot_init_opponent(+Team_list).
 % Initializes the opponents team..
 % Asserts the given team as rot(opponent_team(Team_list)) for quick reference.
 % Constructed pokemon data are additionally asserted as rot(knows(Pokemon)).
 % @arg Team_list List of pokemon names building a team.
-rot_init_team(Team) :-
+rot_init_opponent(Team) :-
   maplist(rot_init_pokemon, Team), % map init over the team list
-  asserta(rot(opponent_team(Team))). % assert team
+  asserta(rot(opponent_team(Team))), % assert team
+  Team = [Active|_],
+  rot_set_opponent_active(Active).
 
 %! rot_init_self(+Team_data).
 %
@@ -18,7 +20,9 @@ rot_init_self(Team) :-
   retractall(rot(has(_))), % retract all information rot has about it's own team
   maplist(rot_init_own_pokemon, Team), % assert
   team_list(Team,Ps), % get team of only names
-  asserta(rot(own_team(Ps))). % assert team as quick reference
+  asserta(rot(own_team(Ps))), % assert team as quick reference
+  Ps = [Active|_],
+  rot_set_own_active(Active). % set active pokemon
 
 %! rot_init_own_pokemon(+Pokemon).
 % Asserts the given pokemon data.

@@ -24,10 +24,8 @@ rot_evaluate_switch(Who, Out, In, Opp, List, New_out, In, Opp) :-
 rot_set_active_pokemon(player, Pokemon) :-
   % set player's active pokemon
   pokemon_name(Pokemon,Name),
-  retractall(rot(opponent_active(_))),
-  asserta(rot(opponent_active(Name))).
+  rot_set_opponent_active(Name).
 rot_set_active_pokemon(rot, Pokemon) :-
   % set rot's active pokemon
   pokemon_name(Pokemon,Name),
-  retractall(rot(own_active(_))),
-  asserta(rot(own_active(Name))).
+  rot_set_own_active(Name).
