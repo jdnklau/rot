@@ -7,7 +7,7 @@
 rot_choose_action(State, Move) :-
   write('rot chooses action'),nl,
   asserta(rot(searching)), % rot(searching) allows usage of the game cpu as it allows different behaviour where it is needed
-  create_tree(State,2, Tree), % the integer is giving the depth of the search tree
+  create_tree(2, State, Tree), % the integer is giving the depth of the search tree
   search_tree(Tree, (Player_move,Move)),
   write('rot has choosen'),nl,
   write('rot\'s prediction: your choosen action is '), write(Player_move),nl,

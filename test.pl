@@ -40,7 +40,7 @@ test_tree :-
 test_tree(D) :-
   team_rot(T),
   asserta(rot(searching)),
-  create_tree(state(T,T,[[],[],[]]), D, Tree),
+  create_tree(D, state(T,T,[[],[],[]]), Tree),
   retract(rot(searching)),
   write('tree created'),nl.
 
@@ -49,7 +49,7 @@ test_tree_search :-
   write('tree depth: '),
   read(D),
   asserta(rot(searching)),
-  create_tree(state(T,T,[[],[],[]]), D, Tree),
+  create_tree(D, state(T,T,[[],[],[]]), Tree),
   retract(rot(searching)),
   write('tree created'),nl,
   write_tree(Tree, 0), nl,
