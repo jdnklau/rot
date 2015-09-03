@@ -86,7 +86,7 @@ rot_get_own_active(P) :-
 % @arg Pokemon_name The name of the pokemon
 rot_set_opponent_active(P) :-
   retractall(rot(opponent_active(_))), % clear old active pokemon
-  asserta(rot(opponent_active(Active))).
+  asserta(rot(opponent_active(P))).
 
 %! rot_get_opponent_active(-Active_pokemon_name).
 % Returns the active pokemon of Rot's opponent.
