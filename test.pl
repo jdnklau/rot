@@ -20,6 +20,11 @@ test_battle :-
   write(team_loaded),nl,
   start_battle(T,T).
 
+test_save_state :-
+  load_save_state(State),
+  run_battle(State),
+  rot_clear.
+
 test_turn :-
   team_rot(T),
   State = state(T,T,_),

@@ -1,7 +1,7 @@
 :- use_module(library(random)).
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
-:- [test, teams].
+:- [test, teams, save_states].
 :- [database/movedex,
     database/natures,
     database/pokedex/pokemon_forms,
@@ -48,6 +48,7 @@ start_battle(Team_player, Team_rot) :-
   rot_clear, !.
 
 run_battle(State) :-
+  save_save_state(State),
   ui_display(State),
   read_player_action(State, Action_player),
   (

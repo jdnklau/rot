@@ -1,6 +1,9 @@
 # The project documentation
 doc/**
 
+# Saved game states
+save
+
 # File for commit messages
 commit.txt
 

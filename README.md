@@ -23,9 +23,13 @@ As there currently is no API worth mentioning (see below: _State of implementati
       - Pikachu, Snorlax, Lapras, Venusaur, Charizard, Blastoise
       - this is Rot's team in *Pokemon Black 2 Edition* and *Pokemon White 2 Edition*
           - few moves (but no more than 3 of all 24) are not the same as in those games mentioned
+  - Each turn the game state will be saved to the file _save_ in the root directory of Rot
   - **this is currently the only way to actually test the AI in action**
   - `test_battle_small/0` does the same but with a team of only 3 pokemon on each side
       - Venusaur, Charizard, Blastoise
+- `test_save_state/0`
+  - loads the saved game state from the save file (see above at `test_battle/0`)
+  - runs the battle continuing this particular game state
 - `test_available_actions/0`
   - displays a list of available actions to a certain team
       - the team used is the small team mentioned above at `test_battle/0`-`test_battle_small`
