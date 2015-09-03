@@ -48,7 +48,6 @@ start_battle(Team_player, Team_rot) :-
   rot_clear, !.
 
 run_battle(State) :-
-  save_save_state(State),
   ui_display(State),
   read_player_action(State, Action_player),
   (
@@ -58,6 +57,7 @@ run_battle(State) :-
     !, % cut to eventually keep call stack clean
     (
       game_over(New_state) ;
+      set_save_state(New_state),
       run_battle(New_state)
     )
   ).

@@ -21,6 +21,7 @@ test_battle :-
   start_battle(T,T).
 
 test_save_state :-
+  rot_clear,
   load_save_state(State),
   run_battle(State),
   rot_clear.
