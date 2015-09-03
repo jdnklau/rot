@@ -186,7 +186,9 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
   rot_evaluate_fainting(rot,Attacker_crit,Target_crit,Damaged_list,Rot_pkm,Player_pkm,Effect_list), % note the renaming of Attacker/Target to Rot_pkm/Player_pkm.
   (
     % if the player's pokemon fainted by our move, we don't care to evaluate it's stats any further
-    fainted(Player_pkm)
+    fainted(Player_pkm),
+    Rot_pkm = Result_attacker,
+    Player_pkm = Result_target
   ;
     \+ fainted(Player_pkm),
     New_P is round(100*Cur/Max), % get new hp percent
