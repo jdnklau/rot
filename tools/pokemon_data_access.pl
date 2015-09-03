@@ -1,7 +1,7 @@
 %! fainted(+Pokemon).
 % True if the given pokemon has fainted
 % @arg Pokemon The pokemon data of the pokemon in question
-fainted([_,kp(0,_),_,_,_,[fainted|_]]).
+fainted([_,_,_,_,_,[fainted|_]]).
 
 %! pokemon_name(+Pokemon, -Name).
 % Reads and returns the pokemon's name from its pokemon data
