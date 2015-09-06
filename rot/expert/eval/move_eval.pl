@@ -191,12 +191,18 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     Player_pkm = Result_target
   ;
     \+ fainted(Player_pkm),
-    New_P is round(100*Cur/Max), % get new hp percent
-    hp_frame(Player_pkm, kp(_..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
-    Old_P is round(100*Cur_h/Max_h), % get old hp percent
-    Dmg_P is Old_P - New_P, % get damage percent
-    % get domains
+    P_variance in 0..1,
+    New_P #= 100*Cur//Max + P_variance, % get new hp percent
+    hp_frame(Player_pkm, kp(Cur_l..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
+    %Hp_cur in Cur_l..Cur_h,
+    % get old hp percent
     Hp_max in Max_l..Max_h,
+    Old_P_l is 100*Cur_l//Max_l,
+    Old_P_h is 100*Cur_h//Max_h,
+    Old_P in Old_P_l..Old_P_h,
+    %Old_P is round(100*Cur_h/Max_h), % get old hp percent
+    Dmg_P #= Old_P - New_P, % get damage percent
+    % get domains
     % set up damage domain
     Dmg #= Hp_max * Dmg_P // 100, % domain should be pretty accurate
     rot_evaluate_damage(rot, Move, Dmg, Crit_flag, Rot_pkm, Player_pkm, New_rot_pkm, New_player_pkm), % evaluates defense / reduces Dmg domain even further
