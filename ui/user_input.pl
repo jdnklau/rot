@@ -62,7 +62,6 @@ validate_player_action(_, known(Name)) :-
   write(Pokemon),nl,!,fail.
 validate_player_action(_, derived(Name)) :-
   % display what Rot derived about a certain pokemon form the player's team
-  rot_derive_pokemon(Name), % be sure the pokemon got derived
   rot_derived_pokemon_data(Name, Pokemon),
   write(Pokemon),nl,!,fail.
 validate_player_action(Team, info(Team_member)) :-

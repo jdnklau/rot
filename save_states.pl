@@ -21,6 +21,10 @@ set_save_state_rot(S) :-
   rot(X), % get rot/1 data
   write(S,rot(X)),write(S,'.'),nl(S), % write data to file
   fail. % failure driven loop
+set_save_state_rot(S) :-
+  rot(X,Y), % get rot/2 data
+  write(S,rot(X,Y)),write(S,'.'),nl(S), % write data to file
+  fail. % failure driven loop
 set_save_state_rot(_). % no more rot/1 data to write.
 
 %! load_save_state(-Game_state).
@@ -38,7 +42,12 @@ load_save_state(State) :-
   close(S).
 
 load_save_state_rot(S) :-
-  read(S,rot(X)), % read data
-  asserta(rot(X)), % assert data
-  load_save_state_rot(S). % read next data
+  read(S,Rot_data), % read rot data
+  assert_save_state_rot(Rot_data),
+  load_save_state_rot(S).
 load_save_state_rot(_). % no more rot/1 data to read
+
+assert_save_state_rot(rot(X)) :-
+  asserta(rot(X)). % assert data
+assert_save_state_rot(rot(X,Y)) :-
+  asserta(rot(X,Y)). % assert data

@@ -1,4 +1,5 @@
 :- dynamic rot/1.
+:- dynamic rot/2.
 
 %! read_rot_action(+State, -Action).
 % Let's Rot start his heuristics to choose an action for the next turn.
@@ -19,13 +20,22 @@ read_rot_switch(State, Switch) :-
   rot_choose_switch(State, Switch).
 
 %! rot_clear.
-% Clears all asserted rot/1 predicates
+% Clears all asserted rot/1 and rot/2 predicates
 rot_clear :-
-  retractall(rot(_)).
+  retractall(rot(_)),
+  retractall(rot(_,_)).
 
-%! rot_initialize(+Player_team_list, +Rot_team_data).
+%! rot_clear(+Instance).
+% Clears all asserted data corresponding to a specific instance of Rot.
+% @arg Instance The identifier for the instance of Rot to clear.
+rot_clear(I) :-
+  retractall(rot(instance(I))),
+  retractall(rot(I,_)).
+
+%! rot_create_instance(+Identifier, +Player_team_list, +Rot_team_data).
 %
-% Initializes Rot's system.
+% Initializes a new instance of Rot's system.
+% This instance will be set as new active instance.
 %
 % The pokemon names in the given player's team list serve to create a first idea of how this pokemon
 % could be played. See rot_init_pokemon/1 for more information.
@@ -41,25 +51,38 @@ rot_clear :-
 %   3. rot_has_pokemon_data/2 to access a specific pokemon of Rot
 %   4. rot_get_pokemon_data/3 to access dynamically a pokemon from either team
 %   5. *most important:* rot_get_game_state/1 to access the current state of the game as Rot thinks it is
+% @arg Identifier Identifies the created instance, allowing to access it easily
 % @arg Player_team_list List of the opponent's pokemon's names
 % @arg Rot_team_data The team data of Rot's team
 % @see rot_init_team/1
 % @see rot_init_pokemon/1
 % @see rot_derive_pokemon/1
-rot_initialize(Team_player, Team_rot) :-
-  rot_clear, % clear eventually remaining asserts
-  rot_init_opponent(Team_player), % initialize team
-  rot_derive_team(_), % assert derived data of all pokemon
-  rot_init_self(Team_rot). % assert own team data
+rot_create_instance(I, Team_player, Team_rot) :-
+  rot_clear(I), % clear eventually remaining asserts
+  asserta(rot(instance(I))), % assert given instance as one of the instances created
+  rot_set_active_instance(I), % set new instance as active one
+  rot_init_opponent(I,Team_player), % initialize team
+  rot_derive_team(I,_), % assert derived data of all pokemon
+  rot_init_self(I,Team_rot). % assert own team data
+
+%! rot_set_active_instance(+Instance).
+% Sets the active instance of Rot.
+%
+% The active instance ist the instance Rot works with.
+% @arg Instance The identifier of the instance to set as active one.
+rot_set_active_instance(I) :-
+  retractall(rot(active_instance(_))),
+  asserta(rot(active_instance(I))).
 
 %! rot_get_game_state(-Game_state).
 % Returns Rot's assumed game state.
 % @arg Game_state The state of the game rot assumes.
 rot_get_game_state(state(Player,Rot,[[],[],[]])) :-
+  rot(active_instance(I)), % get active instance of Rot
   % get player team
-  rot_get_opponent_team(Player),
+  rot_get_opponent_team(I,Player),
   % get rot team
-  rot_get_own_team(Rot).
+  rot_get_own_team(I,Rot).
 
 
 %! rot_known_pokemon_data(+Pokemon_name, -Known_pokemon_data).
@@ -68,15 +91,16 @@ rot_get_game_state(state(Player,Rot,[[],[],[]])) :-
 % @arg Pokemon_name The name of the pokemon
 % @arg Known_pokemon_data The known pokemon data of the pokemon.
 rot_known_pokemon_data(Name, Data) :-
-  rot_access_known_pokemon(Name, Data).
+  rot(active_instance(I)), % get active instance of Rot
+  rot_access_known_pokemon(I,Name, Data).
 
 %! rot_derived_pokemon_data(+Pokemon_name, -Derived_pokemon_data).
 % Returns the from Rot derived data of the given pokemon.
-% Fails if the pokemon is not derived currently.
 % @arg Pokemon_name The name of the pokemon
 % @arg Derived_pokemon_data The derived pokemon data of the pokemon.
 rot_derived_pokemon_data(Name, Data) :-
-  rot_access_derived_pokemon(Name, Data).
+  rot(active_instance(I)), % get active instance of Rot
+  rot_access_derived_pokemon(I,Name, Data).
 
 %! rot_has_pokemon_data(+Pokemon_name, -Pokemon_data).
 % Returns the pokemon data of Rot's given pokemon
@@ -84,7 +108,8 @@ rot_derived_pokemon_data(Name, Data) :-
 % @arg Pokemon_name The name of the pokemon
 % @arg Pokemon_data The pokemon data of the pokemon.
 rot_has_pokemon_data(Name, Data) :-
-  rot_access_own_pokemon(Name, Data).
+  rot(active_instance(I)), % get active instance of Rot
+  rot_access_own_pokemon(I,Name, Data).
 
 %! rot_get_pokemon_data(+Player, +Pokemon_name, -Pokemon_data).
 % Returns the pokemon data of the given player's pokemon.
@@ -107,9 +132,11 @@ rot_get_pokemon_data(player,Name,Data) :-
 % @arg Player The player owning the given pokemon, either `rot` or `player`
 % @arg Pokemon_data The pokemon data of the pokemon.
 rot_set_pokemon_data(rot,Data) :-
-  rot_update_own_pokemon(Data).
+  rot(active_instance(I)), % get active instance of Rot
+  rot_update_own_pokemon(I,Data).
 rot_set_pokemon_data(player,Data) :-
-  rot_update_known_pokemon(Data).
+  rot(active_instance(I)), % get active instance of Rot
+  rot_update_known_pokemon(I,Data).
 
 %! rot_transmit_message_frames(+First_frame, +Second_frame).
 % Transmits two message frames to Rot, so it can evaluate the outcomes of an action.

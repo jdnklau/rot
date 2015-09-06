@@ -1,37 +1,47 @@
-%! rot_init_opponent(+Team_list).
+%! rot_init_opponent(+Instance, +Team_list).
 % Initializes the opponents team..
 % Asserts the given team as rot(opponent_team(Team_list)) for quick reference.
 % Constructed pokemon data are additionally asserted as rot(knows(Pokemon)).
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Team_list List of pokemon names building a team.
-rot_init_opponent(Team) :-
-  maplist(rot_init_pokemon, Team), % map init over the team list
-  asserta(rot(opponent_team(Team))), % assert team
+rot_init_opponent(I,Team) :-
+  rot_init_opponent_(I,Team),
+  asserta(rot(I,opponent_team(Team))), % assert team
   Team = [Active|_],
-  rot_set_opponent_active(Active).
+  rot_set_opponent_active(I,Active).
+rot_init_opponent_(I,[P|Ps]) :-
+  rot_init_pokemon(I,P),
+  rot_init_opponent_(I,Ps).
+rot_init_opponent_(_,[]).
 
-%! rot_init_self(+Team_data).
+%! rot_init_self(+Instance, +Team_data).
 %
 % Rot asserts its own team to its knowledge base.
 %
 % The data of each pokemon are accessible by calling rot(has(Pokemon_data)).
 %
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Team_data The already setup team data of Rot's team
-rot_init_self(Team) :-
-  retractall(rot(has(_))), % retract all information rot has about it's own team
-  maplist(rot_init_own_pokemon, Team), % assert
+rot_init_self(I,Team) :-
+  rot_init_self_(I,Team),
   team_list(Team,Ps), % get team of only names
-  asserta(rot(own_team(Ps))), % assert team as quick reference
+  asserta(rot(I,own_team(Ps))), % assert team as quick reference
   Ps = [Active|_],
-  rot_set_own_active(Active). % set active pokemon
+  rot_set_own_active(I,Active). % set active pokemon
+rot_init_self_(I,[P|Ps]) :-
+  rot_init_own_pokemon(I,P),
+  rot_init_self_(I,Ps).
+rot_init_self_(_,[]).
 
-%! rot_init_own_pokemon(+Pokemon).
+%! rot_init_own_pokemon(+Instance, +Pokemon).
 % Asserts the given pokemon data.
 % Accessible by calling rot(has(Pokemon)).
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Pokemon The pokemon data to be asserted
-rot_init_own_pokemon(P) :-
-  asserta(rot(has(P))).
+rot_init_own_pokemon(I,P) :-
+  asserta(rot(I,has(P))).
 
-%! rot_init_pokemon(+Pokemon_name).
+%! rot_init_pokemon(+Instance, +Pokemon_name).
 %
 % Guesses the set of a given pokemon without further input
 % The assumed results are asserted as rot(knows(Pokemon_data)).
@@ -42,8 +52,9 @@ rot_init_own_pokemon(P) :-
 % The EV and DV also are saved as domains ranging from 0 to 252 or from 0 to 31 respectively.
 % The sum of all EV can not exceed 510.
 %
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Pokemon_name The name of the pokemon.
-rot_init_pokemon(Pokemon) :-
+rot_init_pokemon(I,Pokemon) :-
   % set up the pokemon data
   P = [Pokemon, kp(HP,HP), Moves,
         [Abilities, Stats, Types, stat_stages(0,0,0,0,0), EV_DV],
@@ -53,7 +64,7 @@ rot_init_pokemon(Pokemon) :-
   rot_init_pokemon_stats(Base_stats, HP, Stats, EV_DV), % stats/ev/dv
   rot_init_pokemon_moves(P, Moves),
   % assert the pokemon
-  rot_update_known_pokemon(P).
+  rot_update_known_pokemon(I,P).
 
 %! rot_init_pokemon_stats(+Base_stat_frame, -Hit_points, -Stat_frame, -EV_DV_data).
 % Returns domains of status values depending on the given base stats

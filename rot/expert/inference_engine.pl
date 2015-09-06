@@ -1,16 +1,21 @@
 % core of the system
 % derives recommendations/solutions from knowledge base
 
-%! rot_derive_team(-Team).
+%! rot_derive_team(+Instance, -Team).
 % Returns a from the observed pokemon data of the opponent's team derived team.
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Team The derived team from the known opponent's pokemon data
 % @see rot_derive_pokemon/1
-rot_derive_team(Team_derived) :-
-  rot(opponent_team(Team)), % get asserted team list
-  maplist(rot_derive_pokemon, Team), % derive all pokemon
-  findall(Pokemon, rot(derived(Pokemon)), Team_derived).
+rot_derive_team(I,Team_derived) :-
+  rot(I,opponent_team(Team)), % get asserted team list
+  rot_derive_team_(I,Team),
+  findall(Pokemon, rot(I,derived(Pokemon)), Team_derived).
+rot_derive_team_(I,[P|Ps]) :-
+  rot_derive_pokemon(I,P),
+  rot_derive_team_(I,Ps).
+rot_derive_team_(_,[]).
 
-%! rot_derive_pokemon(+Name).
+%! rot_derive_pokemon(+Instance, +Name).
 %
 % Derives pokemon data from the observed data of the given pokemon.
 %
@@ -27,11 +32,12 @@ rot_derive_team(Team_derived) :-
 % If a pokemon needs to be rederived one must retract the derived data before calling this predicate
 % as this predicate only derives data for not already derived pokemon to save some computing time.
 %
+% @arg Instance The identifier for the instance of Rot to work with
 % @arg Name The name of the pokemon
-rot_derive_pokemon(Name) :-
-  rot(derived([Name|_])),!. % if data already is derived we can skip this
-rot_derive_pokemon(Name) :-
-  rot(knows([Name|Data])), % get what's already known
+rot_derive_pokemon(I,Name) :-
+  rot(I,derived([Name|_])),!. % if data already is derived we can skip this
+rot_derive_pokemon(I,Name) :-
+  rot(I,knows([Name|Data])), % get what's already known
   % acces data
   Data = [kp(Hp_cur_dom,Hp_max_dom), Moves,
         [Abilities, _, Types, Stat_stages, EV_DV],
@@ -55,7 +61,7 @@ rot_derive_pokemon(Name) :-
   Data_derived = [kp(Hp_cur_derived, Hp_derived), Moves_derived,
                   [Ability_derived, Stats_derived, Types, Stat_stages, EV_DV_derived],
                   Item, Status_conditions],
-  asserta(rot(derived([Name|Data_derived]))), % assert as this does not to be recalculated in every single turn
+  asserta(rot(I,derived([Name|Data_derived]))), % assert as this does not to be recalculated in every single turn
   !. % red cut to prevent permanent backtracking to all the labeling possibilities of the ev and dv
 
 %! rot_derive_ev_dv(+EV_DV_domain_data, +Pokemon_usage, -Derived_EV_DV_data).
