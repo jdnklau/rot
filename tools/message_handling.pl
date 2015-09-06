@@ -144,6 +144,19 @@ messages_of_opposing_view([Msg|Msgs], [target(Msg)|Msgs_opposing]) :-
   Msg \= user(_),
   messages_of_opposing_view(Msgs, Msgs_opposing).
 
+%! message_frame_swap_owner(+Message_frame, -Result_message_frame).
+% Swaps the owner of the message frame.
+%
+% `rot` becomes `player`
+% `player` becomes `rot`
+% @arg Message_frame The frame to be swapped
+% @arg Result_message_frame The resulting frame
+message_frame_swap_owner(Frame, Opp_frame) :-
+  % get data from frame
+  Frame = msg(Who, Ac,A1,A2,Msg_col),
+  opponent(Who,Who_opp),
+  Opp_frame = msg(Who_opp,Ac,A1,A2,Msg_col).
+
 %! get_message_frame_list(+Message_frame, -List).
 % Returns a list of messages occured in the frame in chronological order
 % @arg Message_frame The message frame in question

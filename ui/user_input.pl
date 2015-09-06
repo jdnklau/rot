@@ -16,11 +16,19 @@ ui_display_switch_prompt(Team) :-
 % @arg Game_state The current state of the game
 % @arg Action A valid action the player entered.
 read_player_action(State, Action_player) :-
+  \+ rot(self_battle),!, % rot does not battle itself.
   ui_display_action_prompt, %prompt player
   repeat, % we need to loop as long as the validation fails
   read(Action_player),
   State = state(Team_player, _, _),
   validate_player_action(Team_player, Action_player).
+read_player_action(State, Action_player) :-
+  % case: rot(self_battle).
+  swap_attacker_state(State, Swap_state),
+  rot_set_active_instance(blau),
+  read_rot_action(Swap_state, Action_player),!,
+  rot_set_active_instance(rot).
+
 
 %! read_player_switch(+Game_state, -Switch).
 % Prompts the player to enter a switch, reads player input and validates it.

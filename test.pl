@@ -20,6 +20,14 @@ test_battle :-
   write(team_loaded),nl,
   start_battle(T,T).
 
+test_rot_battle :-
+  team_rot(T),
+  start_rot_battle(T,T).
+
+test_rot_battle_small :-
+  team_1(T),
+  start_rot_battle(T,T).
+
 test_save_state :-
   rot_clear,
   load_save_state(State),

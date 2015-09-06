@@ -36,6 +36,25 @@ process_by_priority(State, Action_player, Action_rot, _, Result_state) :-
   process_ends_of_turn(New_state, rot, End_of_turn_state),
   process_fainted_checks(End_of_turn_state, rot, Result_state).
 
+%! process_message_frame_transmission(+Message_frame_first, +Message_frame_second).
+%
+% Transmits the given message frames to Rot.
+%
+% If rot battles itself, the message frames will be transmitted to
+% Rot's instances `rot` and `blau`
+process_message_frame_transmission(Frame1,Frame2) :-
+  % base case: rot does not battle itself
+  \+ rot(self_battle),!,
+  rot_transmit_message_frames(Frame1,Frame2).
+process_message_frame_transmission(Frame1,Frame2) :-
+  % rot battles itself
+  rot_set_active_instance(blau),
+  message_frame_swap_owner(Frame1, Blau_frame1),
+  message_frame_swap_owner(Frame2, Blau_frame2),
+  rot_transmit_message_frames(Blau_frame1,Blau_frame2),!,
+  rot_set_active_instance(rot),
+  rot_transmit_message_frames(Frame1,Frame2),!.
+
 %! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
 %
 % Calls process_end_of_turn/4 for both players in order of their priorities.
@@ -53,7 +72,7 @@ process_ends_of_turn(State, Who_first, Result_state) :-
   process_end_of_turn(New_state, Who_second, Result_state, Message_collection_second), % end of turn for slower player
   create_message_frame(New_state,Who_second, end_of_turn,Message_collection_second, Message_frame_second), % create the message frame of the slower player
   ui_display_messages(Message_frame_second), % print message frame
-  rot_transmit_message_frames(Message_frame_first,Message_frame_second). % let rot evaluate the messages
+  process_message_frame_transmission(Message_frame_first,Message_frame_second). % let rot evaluate the messages
 
 %! process_end_of_turn(+Game_state, +Who, -Result_state, -Message_collection).
 %
@@ -152,7 +171,7 @@ process_fainted_checks(State, Who_first, Result_state) :-
   process_fainted_check(New_state, Who_second, Newer_state, Message_collection_second), % end of turn for slower player
   create_message_frame(New_state,Who_second, fainted_check,Message_collection_second, Message_frame_second), % create the message frame of the slower player
   ui_display_messages(Message_frame_second), % print message frame
-  rot_transmit_message_frames(Message_frame_first,Message_frame_second), % let rot evaluate the messages
+  process_message_frame_transmission(Message_frame_first,Message_frame_second), % let rot evaluate the messages
   process_fainted_checks_loop(Newer_state, Who_first, Result_state).
 
 process_fainted_checks_loop(State, Who_first, Result_state) :-
@@ -206,7 +225,7 @@ process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
   process_action(New_state, Action_second, Who_second, Result_state, Message_collection_second),
   create_message_frame(New_state,Who_second,Action_second, Message_collection_second, Message_frame_second),
   ui_display_messages(Message_frame_second), % print message s of slower player
-  rot_transmit_message_frames(Message_frame_first, Message_frame_second). % rot evaluates the messages
+  process_message_frame_transmission(Message_frame_first, Message_frame_second). % rot evaluates the messages
 
 %! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_collection).
 %
@@ -378,6 +397,7 @@ process_switch(state([Attacker|Team_attacker], Team_target, Field), Team_mate, s
 process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
   % forced to switch: player
   \+ rot(searching), % predicate was not called by rot's heuristic, so the player gets prompted
+  \+ rot(self_battle), % rot des not battle itself, so prompt the player
   read_player_switch(State_attacker, Switch),
   Switch = switch(Team_member),
   process_switch(State_attacker, Team_member, Result_state_attacker, Messages).
@@ -388,6 +408,14 @@ process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :
   % put rot's team in 2nd place in so read_rot_switch/2 thinks it is rot's team.
   swap_attacker_state(State_attacker, State), % swap player team to 2nd place in state
   read_rot_switch(State, switch(Switch)), % call heuristic
+  process_switch(State_attacker, Switch, Result_state_attacker, Messages). % switch
+process_forced_switch(State_attacker, player, Result_state_attacker, Messages) :-
+  % forced to switch: player, also played by rot
+  rot(self_battle),
+  translate_attacker_state(State_attacker, rot, State), % swap attacker and target teams as `read_rot_switch` expects player to be the first team
+  rot_set_active_instance(blau), % set active instance
+  read_rot_switch(State, switch(Switch)), %read rot's switch choice
+  rot_set_active_instance(rot), % reset active instance
   process_switch(State_attacker, Switch, Result_state_attacker, Messages). % switch
 process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
   % forced to switch: rot
@@ -412,7 +440,7 @@ process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
 % @tbd Stop if one side has fainted
 process_hits(State, Damage, Flags, Effects, 1, Result_state, Messages) :-
   % one hit left
-  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages).
+  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages),!.
 process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
   % more than one hit left
   process_single_hit(State, Damage, Flags, Effects, New_state, Messages1), % process a hit
