@@ -1,3 +1,11 @@
+test_alot(0,_) :-
+  write(n=0),nl.
+test_alot(N,Goal) :-
+  write(n=N),nl,
+  call(Goal),
+  NN is N-1,
+  test_alot(NN,Goal).
+
 test_ui_rot :-
   team_1(T),
   ui_display_rot(T).
