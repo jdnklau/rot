@@ -185,7 +185,7 @@ increased_stat(Raw, Stage, Stat) :-
 % @arg Move The move in question
 % @arg Flag The flag in question
 move_has_flag(Move,Flag) :-
-  move(Move,_,_,_,_,_,Flags,_,_),
+  move(Move,_,_,_,_,_,Flags,_,_),!,
   member(Flag, Flags).
 
 %! attacking_pokemon(+Attacker_state, -Attacking_pokemon).

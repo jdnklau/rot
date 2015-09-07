@@ -87,6 +87,17 @@ process_end_of_turn_damage(State, New_state, Messages) :-
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Result_state The resulting state of the game after executing the end turn damage for the given player
 % @arg Message_collection Collection of messages occured whilst processing
+process_end_of_turn_primary_status_damage(State, State, []) :-
+  % base case
+  attacking_pokemon(State, Pokemon),
+  primary_status_condition(Pokemon, Cond),
+  (
+    Cond = nil
+  ;
+    Cond = fainted % a fainted pokemon can not suffer more damage
+  ;
+    member(Cond,[paralysis,sleep(_,_)])
+  ).
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon burns or is poisoned
   attacking_pokemon(State, Pokemon),
@@ -125,11 +136,6 @@ process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % set up messages
   add_messages([poisoned],[],Msg_poi),
   add_messages(Msg_dmg, Msg_poi, Messages).
-process_end_of_turn_primary_status_damage(State, State, []) :-
-  % base case
-  attacking_pokemon(State, Pokemon),
-  primary_status_condition_category(Pokemon, Cond),
-  \+ member(Cond,[burn,poison]).
 
 %! process_fainted_checks(+Game_state, +Who_first, -Result_state).
 %
@@ -246,6 +252,29 @@ process_action(State, Move, Who, Result_state, Messages) :-
 % @arg Move The move to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
+process_move_routine(State, Move, Result_state, Messages) :-
+  % base case
+  attacking_pokemon(State, Pokemon),
+  % make sure the primary status condition is none of those with the capacity to prevent the move
+  (
+    primary_status_condition(Pokemon, nil)
+  ;
+    primary_status_condition(Pokemon, burn)
+  ;
+    primary_status_condition(Pokemon, poison)
+  ;
+    primary_status_condition(Pokemon, poison(_))
+  ),!,
+  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
+  add_messages([move(Move)],[],Msg_uses), % message that this move is used
+  ( % test whether the move hits or not
+    move_hits(Accuracy),
+    process_move(State, Move, Result_state, Msg_move),
+    add_messages(Msg_move, Msg_uses, Messages)
+    ; % case the move does not hit
+    add_messages([user(move_missed)], Msg_uses, Messages),
+    State = Result_state % the state does not change
+  ).
 process_move_routine(State, _, State, Messages) :-
   % case: pokemon suffers paralysis
   attacking_pokemon(State,Pokemon),
@@ -290,18 +319,6 @@ process_move_routine(State, Move, Result_state, Messages) :-
     Result_state = State,
     add_messages([frozen],[],Messages)
   ).
-process_move_routine(State, Move, Result_state, Messages) :-
-  % base case
-  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
-  add_messages([move(Move)],[],Msg_uses), % message that this move is used
-  ( % test whether the move hits or not
-    move_hits(Accuracy),
-    process_move(State, Move, Result_state, Msg_move),
-    add_messages(Msg_move, Msg_uses, Messages)
-    ; % case the move does not hit
-    add_messages([user(move_missed)], Msg_uses, Messages),
-    State = Result_state % the state does not change
-  ).
 
 %! process_move(+Attacker_state, +Move, -Result_state, -Message_collection).
 %
@@ -311,10 +328,6 @@ process_move_routine(State, Move, Result_state, Messages) :-
 % @arg Move The move to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
-process_move(State, Move, Result_state, Messages) :-
-  % status move
-  move(Move, _, status, _, _,_,Flags,_,Effects),
-  process_move_effects(State,Flags,Effects,0,Result_state,Messages).
 process_move(State, Move, Result_state, Messages) :-
   % base case: damaging move
   move(Move, _, Category, _, _,_,Flags,Possible_hits,Effects),
@@ -340,6 +353,10 @@ process_move(State, Move, Result_state, Messages) :-
     % normal effective
     Msg_c2 = Messages
   ).
+process_move(State, Move, Result_state, Messages) :-
+  % status move
+  move(Move, _, status, _, _,_,Flags,_,Effects),
+  process_move_effects(State,Flags,Effects,0,Result_state,Messages).
 
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_collection).
 %
@@ -408,6 +425,7 @@ process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
 % @tbd Stop if one side has fainted
 process_hits(State, Damage, Flags, Effects, 1, Result_state, Messages) :-
   % one hit left
+  !, % do not ever backtrack to the second clause, as this will result in an infinite loop
   process_single_hit(State, Damage, Flags, Effects, Result_state, Messages).
 process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
   % more than one hit left
