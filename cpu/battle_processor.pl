@@ -96,7 +96,7 @@ process_end_of_turn_primary_status_damage(State, State, []) :-
   ;
     Cond = fainted % a fainted pokemon can not suffer more damage
   ;
-    member(Cond,[paralysis,sleep(_,_)])
+    member(Cond,[paralysis,sleep(_,_),freeze])
   ).
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon burns or is poisoned
