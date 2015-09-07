@@ -65,7 +65,7 @@ message_frame_meta_data(msg(Who,Ac,A1,A2,_), Who, Ac, A1, A2).
 % @arg Messages A message collection or a list of messages in chronological order to be added
 % @arg Collection The message collection the new messages shall be added to
 % @arg Resulting_message_collection The resulting collection containing the new messages
-add_messages([], msgcol(Stack), msgcol(Stack)). % add nothing to a collection
+add_messages([], msgcol(Stack), msgcol(Stack)) :-!. % add nothing to a collection
 %add_messages([], List, Messages) :-
 %  % add nothing to a list that is not a collection.
 %  List \= msgcol(_),
@@ -76,8 +76,7 @@ add_messages(Pushs, [], Result) :-
   add_messages(Pushs, msgcol([]), Result), !.
 add_messages([Push|Pushs], msgcol(Stack), Result_stack) :-
   % add a list of messages to a collection
-  add_messages([Push], msgcol(Stack), New_stack),
-  add_messages(Pushs, New_stack, Result_stack).
+  add_messages(Pushs, msgcol([Push|Stack]), Result_stack).
 add_messages(msgcol(Pushs), msgcol(Stack), msgcol(Result)) :-
   % add two message collections together
   append(Pushs, Stack, Result).

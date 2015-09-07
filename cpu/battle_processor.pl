@@ -54,6 +54,11 @@ process_message_frame_transmission(Frame1,Frame2) :-
   rot_transmit_message_frames(Blau_frame1,Blau_frame2),!,
   rot_set_active_instance(rot),
   rot_transmit_message_frames(Frame1,Frame2),!.
+process_message_frame_transmission(F1,F2) :-
+  % NOTE: This is only for debugging purposes
+  write(F1),nl,
+  write(F2),nl,
+  abort.
 
 %! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
 %
@@ -107,6 +112,17 @@ process_end_of_turn_damage(State, New_state, Messages) :-
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Result_state The resulting state of the game after executing the end turn damage for the given player
 % @arg Message_collection Collection of messages occured whilst processing
+process_end_of_turn_primary_status_damage(State, State, []) :-
+  % base case
+  attacking_pokemon(State, Pokemon),
+  primary_status_condition(Pokemon, Cond),
+  (
+    Cond = nil
+  ;
+    Cond = fainted % a fainted pokemon can not suffer more damage
+  ;
+    member(Cond,[paralysis,sleep(_,_),freeze])
+  ).
 process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % pokemon burns or is poisoned
   attacking_pokemon(State, Pokemon),
@@ -145,11 +161,6 @@ process_end_of_turn_primary_status_damage(State, Result_state, Messages) :-
   % set up messages
   add_messages([poisoned],[],Msg_poi),
   add_messages(Msg_dmg, Msg_poi, Messages).
-process_end_of_turn_primary_status_damage(State, State, []) :-
-  % base case
-  attacking_pokemon(State, Pokemon),
-  primary_status_condition_category(Pokemon, Cond),
-  \+ member(Cond,[burn,poison]).
 
 %! process_fainted_checks(+Game_state, +Who_first, -Result_state).
 %
@@ -262,18 +273,34 @@ process_action(State, Move, Who, Result_state, Messages) :-
 %
 % The routine checks firstly for events preventing the move useage, like freeze or paralysis.
 % If the move can be executed without the occurrence of such an event disrupting it,
-% process_move/4 will be called.
+% process_move_useage/4 will be called.
 %
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Move The move to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
-process_move_routine(State, _, State, Messages) :-
+process_move_routine(State, Move, Result_state, Messages) :-
+  % base case
+  attacking_pokemon(State, Pokemon),
+  % make sure the primary status condition is none of those with the capacity to prevent the move
+  primary_status_condition(Pokemon, Cond),
+  (
+    Cond = nil
+  ;
+    \+ member(Cond, [paralysis,sleep(_,_),freeze])
+  ),!,
+  process_move_useage(State, Move, Result_state, Messages).
+process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers paralysis
   attacking_pokemon(State,Pokemon),
   primary_status_condition(Pokemon, paralysis),
-  rng_succeeds(25),  % 25 percent chance the pokemon can not attack this turn
-  add_messages([paralyzed],[],Messages).
+  (
+    rng_succeeds(25),  % 25 percent chance the pokemon can not attack this turn
+    add_messages([paralyzed],[],Messages),
+    State = Result_state
+  ;
+    process_move_useage(State,Move,Result_state,Messages)
+  ).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
   State = state([Pokemon|Team],Target,Field),
@@ -298,11 +325,10 @@ process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers freeze
   State = state([Pokemon|Team],Target,Field),
   primary_status_condition(Pokemon, freeze),
-  pokemon_name(Pokemon, Name),
   (
     % frozen pokemon have a 20% chance per turn to defrost
     rng_succeeds(20), % pokemon defrosts
-    add_messages([defrosted(Name)], [], Msg_defrost),
+    add_messages([defrosted], [], Msg_defrost),
     % clear freeze state of pokemon
     set_primary_status_condition(Pokemon, nil, New_pokemon),
     % process move
@@ -313,8 +339,20 @@ process_move_routine(State, Move, Result_state, Messages) :-
     Result_state = State,
     add_messages([frozen],[],Messages)
   ).
-process_move_routine(State, Move, Result_state, Messages) :-
-  % base case
+
+%! process_move_useage(+Attacker_state, +Move, -Result_state, -Message_collection)
+%
+% Processes the useage of a move.
+%
+% Decides whether the move hits or not and returns the appropiate messages.
+%
+% If the move hits process_move/4 is called
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Move The move to be executed
+% @arg Result_state The resulting state of the game after executing the given action
+% @arg Message_collection Collection of messages occured whilst processing
+process_move_useage(State, Move, Result_state, Messages) :-
   move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
   add_messages([move(Move)],[],Msg_uses), % message that this move is used
   ( % test whether the move hits or not
@@ -334,10 +372,6 @@ process_move_routine(State, Move, Result_state, Messages) :-
 % @arg Move The move to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
-process_move(State, Move, Result_state, Messages) :-
-  % status move
-  move(Move, _, status, _, _,_,Flags,_,Effects),
-  process_move_effects(State,Flags,Effects,0,Result_state,Messages).
 process_move(State, Move, Result_state, Messages) :-
   % base case: damaging move
   move(Move, _, Category, _, _,_,Flags,Possible_hits,Effects),
@@ -363,6 +397,10 @@ process_move(State, Move, Result_state, Messages) :-
     % normal effective
     Msg_c2 = Messages
   ).
+process_move(State, Move, Result_state, Messages) :-
+  % status move
+  move(Move, _, status, _, _,_,Flags,_,Effects),
+  process_move_effects(State,Flags,Effects,0,Result_state,Messages).
 
 %! process_switch(+Attacker_state, +Team_mate, +Result_state, -Message_collection).
 %
@@ -440,7 +478,8 @@ process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
 % @tbd Stop if one side has fainted
 process_hits(State, Damage, Flags, Effects, 1, Result_state, Messages) :-
   % one hit left
-  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages),!.
+  !, % do not ever backtrack to the second clause, as this will result in an infinite loop
+  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages).
 process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
   % more than one hit left
   process_single_hit(State, Damage, Flags, Effects, New_state, Messages1), % process a hit

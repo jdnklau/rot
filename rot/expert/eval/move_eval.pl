@@ -198,8 +198,10 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     hp_frame(Player_pkm, kp(Cur_l..Cur_h,Max_l..Max_h)), % get old hp value's domain maximum
     % get old hp percent
     Hp_max in Max_l..Max_h,
-    Old_P_l is 100*Cur_l//Max_l,
-    Old_P_h is 100*Cur_h//Max_h,
+    Old_P_1 is 100*Cur_l//Max_l,
+    Old_P_2 is 100*Cur_h//Max_h,
+    Old_P_l is min(Old_P_1,Old_P_2),
+    Old_P_h is max(Old_P_1,Old_P_2),
     Old_P in 0..100,
     Old_P in Old_P_l..Old_P_h,
     %Old_P is round(100*Cur_h/Max_h), % get old hp percent
@@ -207,7 +209,7 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     Dmg_P #>= 0, % no negative damage
     % get domains
     % set up damage domain
-    Dmg #= Hp_max * Dmg_P // 100, % domain should be pretty accurate
+    Dmg #= Hp_max * Dmg_P // 100 + P_variance, % domain should be pretty accurate
     rot_evaluate_damage(rot, Move, Dmg, Crit_flag, Rot_pkm, Player_pkm, New_rot_pkm, New_player_pkm), % evaluates defense / reduces Dmg domain even further
     % calculate hit points
     New_hp_max in Max_l..Max_h,
