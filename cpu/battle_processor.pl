@@ -246,7 +246,7 @@ process_action(State, Move, Who, Result_state, Messages) :-
 %
 % The routine checks firstly for events preventing the move useage, like freeze or paralysis.
 % If the move can be executed without the occurrence of such an event disrupting it,
-% process_move/4 will be called.
+% process_move_useage/4 will be called.
 %
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Move The move to be executed
@@ -256,31 +256,23 @@ process_move_routine(State, Move, Result_state, Messages) :-
   % base case
   attacking_pokemon(State, Pokemon),
   % make sure the primary status condition is none of those with the capacity to prevent the move
+  primary_status_condition(Pokemon, Cond),
   (
-    primary_status_condition(Pokemon, nil)
+    Cond = nil
   ;
-    primary_status_condition(Pokemon, burn)
-  ;
-    primary_status_condition(Pokemon, poison)
-  ;
-    primary_status_condition(Pokemon, poison(_))
+    \+ member(Cond, [paralysis,sleep(_,_),freeze])
   ),!,
-  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
-  add_messages([move(Move)],[],Msg_uses), % message that this move is used
-  ( % test whether the move hits or not
-    move_hits(Accuracy),
-    process_move(State, Move, Result_state, Msg_move),
-    add_messages(Msg_move, Msg_uses, Messages)
-    ; % case the move does not hit
-    add_messages([user(move_missed)], Msg_uses, Messages),
-    State = Result_state % the state does not change
-  ).
-process_move_routine(State, _, State, Messages) :-
+  process_move_useage(State, Move, Result_state, Messages).
+process_move_routine(State, Move, State, Messages) :-
   % case: pokemon suffers paralysis
   attacking_pokemon(State,Pokemon),
   primary_status_condition(Pokemon, paralysis),
-  rng_succeeds(25),  % 25 percent chance the pokemon can not attack this turn
-  add_messages([paralyzed],[],Messages).
+  (
+    rng_succeeds(25),  % 25 percent chance the pokemon can not attack this turn
+    add_messages([paralyzed],[],Messages)
+  ;
+    process_move_useage(State,Move,Result_state,Messages)
+  ).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
   State = state([Pokemon|Team],Target,Field),
@@ -318,6 +310,30 @@ process_move_routine(State, Move, Result_state, Messages) :-
     % pokemon does not wake up yet
     Result_state = State,
     add_messages([frozen],[],Messages)
+  ).
+
+%! process_move_useage(+Attacker_state, +Move, -Result_state, -Message_collection)
+%
+% Processes the useage of a move.
+%
+% Decides whether the move hits or not and returns the appropiate messages.
+%
+% If the move hits process_move/4 is called
+%
+% @arg Attacker_state The current state of the game from the attacker's point of view
+% @arg Move The move to be executed
+% @arg Result_state The resulting state of the game after executing the given action
+% @arg Message_collection Collection of messages occured whilst processing
+process_move_useage(State, Move, Result_state, Messages) :-
+  move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
+  add_messages([move(Move)],[],Msg_uses), % message that this move is used
+  ( % test whether the move hits or not
+    move_hits(Accuracy),
+    process_move(State, Move, Result_state, Msg_move),
+    add_messages(Msg_move, Msg_uses, Messages)
+    ; % case the move does not hit
+    add_messages([user(move_missed)], Msg_uses, Messages),
+    State = Result_state % the state does not change
   ).
 
 %! process_move(+Attacker_state, +Move, -Result_state, -Message_collection).
