@@ -276,11 +276,10 @@ process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers freeze
   State = state([Pokemon|Team],Target,Field),
   primary_status_condition(Pokemon, freeze),
-  pokemon_name(Pokemon, Name),
   (
     % frozen pokemon have a 20% chance per turn to defrost
     rng_succeeds(20), % pokemon defrosts
-    add_messages([defrosted(Name)], [], Msg_defrost),
+    add_messages([defrosted], [], Msg_defrost),
     % clear freeze state of pokemon
     set_primary_status_condition(Pokemon, nil, New_pokemon),
     % process move
