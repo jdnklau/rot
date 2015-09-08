@@ -214,10 +214,9 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     % calculate hit points
     New_hp_max in Max_l..Max_h,
     (
-      Dmg_P #= 0,!, % no damage done
-      New_hp_max = Hp_max
+      Dmg_P #= 0,! % no damage done
     ;
-      New_hp_max #= Dmg * 100 // Dmg_P % new maximum
+      Dmg #= New_hp_max * Dmg_P //100 % new maximum
     ),
     New_hp_cur #= New_P * New_hp_max // 100, % new current
     fd_dom(New_hp_max, Hp_max_dom),
