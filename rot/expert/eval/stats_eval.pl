@@ -85,3 +85,74 @@ rot_evaluate_hp_stat(Base, Stat, EV, DV) :-
 rot_evaluate_stat(Base,Stat,EV,DV) :-
   % just set a another constraint
   Stat #= (2*Base + DV + EV//4)//2 + 5.
+
+%! rot_evaluate_speed_by_message_frames(+Message_frame_first, +Message_frame_second).
+%
+% If the message frames' corresponding actions relate to moves with same priority
+% the speed stat of Rot's opponent's active pokemon will be evaluated.
+%
+% @arg Message_frame_first The message frame caused by the faster player.
+% @arg Message_frame_first The message frame caused by the slower player.
+rot_evaluate_speed_by_message_frames(F1,F2) :-
+  % get data from frames
+  message_frame_meta_data(F1,Who_first,Ac_first,P_first,P_second),
+  message_frame_meta_data(F2,Who_second,Ac_second,_,_),
+  % get pokemon data
+  rot_get_pokemon_data(Who_first,P_first,Pokemon_first),
+  rot_get_pokemon_data(Who_second,P_second,Pokemon_second),
+  % evaluate
+  rot_evaluate_speed(Who_first, Pokemon_first, Pokemon_second, Ac_first, Ac_second, New_first, New_second),
+  % set new data
+  rot_set_pokemon_data(Who_first, New_first),
+  rot_set_pokemon_data(Who_second, New_second).
+rot_evaluate_speed_by_message_frames(_,_). % case if no comparisson is possible
+
+%! rot_evaluate_speed(+Faster_player, +Faster_pokemon, +Slower_pokemon, +Faster_action, +Slower_action, -Result_faster_pokemon, -Result_slower_pokemon).
+%
+% Evaluates the speed stat of Rot's opponent's pokemon.
+%
+% The speed stat's domain of the opponent's pokemon will be reduced to be greater or equal than
+% Rot's pokemon's speed stat if the opponent is faster, or to be less or equal respectively.
+%
+% This works only for moves with the same base priority.
+% If at least on action is not a move or the given actions do not have the same base priority
+% the evaluation will be skipped.
+%
+% @arg Faster_player The player acting first; either `rot` or `player`
+% @arg Faster_pokemon The pokemon data of the faster pokemon
+% @arg Slower_pokemon The pokemon data of the slower pokemon
+% @arg Faster_action The action executed first
+% @arg slower_action The action executed last
+% @arg Result_faster_pokemon The resulting pokemon data of the faster pokemon.
+% @arg Result_slower_pokemon The resulting pokemon data of the slower pokemon.
+rot_evaluate_speed(player, First, Second, Ac1, Ac2, Result_first, Second) :-
+  % only evaluate for moves with same priority
+  move(Ac1,_,_,_,_,Prio,_,_,_),
+  move(Ac2,_,_,_,_,Prio,_,_,_),
+  !,
+  % get speed domains
+  stats(First,_,_,_,_,Spe_1_d),
+  stats(Second,_,_,_,_,Spe_2),
+  Spe_1 in Spe_1_d,
+  % compare speed stats
+  Spe_1 #>= Spe_2,
+  % set new domain
+  fd_dom(Spe_1, New_dom),
+  set_staged_stat(First, New_dom, speed, New_first),
+  rot_evaluate_ev_dv(New_first, Result_first).
+rot_evaluate_speed(rot, First, Second, Ac1, Ac2, First, Result_second) :-
+  % only evaluate for moves with same priority
+  move(Ac1,_,_,_,_,Prio,_,_,_),
+  move(Ac2,_,_,_,_,Prio,_,_,_),
+  !,
+  % get speed domains
+  stats(First,_,_,_,_,Spe_1),
+  stats(Second,_,_,_,_,Spe_2_d),
+  Spe_2 in Spe_2_d,
+  % compare speed stats
+  Spe_1 #>= Spe_2,
+  % set new domain
+  fd_dom(Spe_2, New_dom),
+  set_staged_stat(Second, New_dom, speed, New_second),
+  rot_evaluate_ev_dv(New_second, Result_second).
+rot_evaluate_speed(_,First,Second,_,_,First,Second). % backup case if no comparisson can be done.

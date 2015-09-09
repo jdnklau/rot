@@ -8,6 +8,7 @@
 % @arg Message_frame_first The first message frame to be evaluated
 % @arg Message_frame_second The second message frame to be evaluated
 rot_evaluate_message_frames(Frame_first, Frame_second) :-
+  rot_evaluate_speed_by_message_frames(Frame_first, Frame_second),
   rot_evaluate_message_frame(Frame_first),
   rot_evaluate_message_frame(Frame_second).
 
