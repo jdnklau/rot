@@ -542,6 +542,50 @@ set_stat(Pokemon, Value, speed, New_pokemon) :-
   raw_stats(Pokemon, Atk, Def, Spa, Spd, _),
   set_stats(Pokemon, Atk, Def, Spa, Spd, Value, New_pokemon).
 
+%! set_staged_stat(+Pokemon, +Status_value, +Status_value_name, -Resulting_pokemon).
+% Replaces the given status value in the pokemon data, taking stat stage increases into account.
+%
+% The possible status values are:
+%   1. ``attack``
+%   2. ``defense``
+%   3. ``special-attack``
+%   4. ``special-defense``
+%   5. ``speed``
+%
+% It is assumed, that the stat to be set is influenced by the stat stage increases of the pokemon,
+% which will be calculated off first.
+% @arg Pokemon The pokemon data to be altered
+% @arg Status_value The new value to be set
+% @arg Status_value_name One of the 5 status values (see description)
+% @arg Resulting_pokemon The pokemon with the given status value.
+set_staged_stat(Pokemon, Staged, Stat, Result_pokemon) :-
+  unstage_stat_value(Pokemon, Staged, Stat, Value),
+  set_stat(Pokemon, Value, Stat, Result_pokemon).
+
+%! unstage_stat_value(+Pokemon, +Staged_stat, +Status_value_name, -Unstaged_value).
+% Takes a status value, assumes it is influenced by the pokemon's status value increases
+% and calculates the corresponding status stages of.
+%
+% Note that this predicate takes an extern staged status value and not the stats located
+% in the pokemon data.
+% @arg Pokemon The pokemon data referencing the status value increases
+% @arg Staged_stat The numeric status value to be unstaged.
+% @arg Status_value_name An atom identifying the corresponding status value.
+% @arg Unstaged_value The given status value with stat stages calculated of.
+unstage_stat_value(Pokemon, Staged, Stat, Value) :-
+  stat_stage(Pokemon, Stat, Stage), % get stage
+  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
+  (
+    % handle domains
+    Staged = _.._, !,
+    D in Staged,
+    S #= D * FD // FN,
+    fd_dom(S,Value)
+    ;
+    integer(Staged), % no domain
+    Value = ceil(Staged * FD / FN)
+  ).
+
 %! set_atk_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
 % Replaces the attack status value of the given pokemon by damage category.
 % @arg Pokemon The pokemon data to be altered
@@ -580,33 +624,9 @@ set_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
 % @see set_stats/7
 % @see set_stat/4
 set_staged_atk_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
-  stat_stage(Pokemon, attack, Stage), % get stage
-  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
-  (
-    % handle domains
-    Data = _.._, !,
-    D in Data,
-    Stat #= D * FD // FN,
-    fd_dom(Stat,Stat_data)
-    ;
-    integer(Data), % no domain
-    Stat_data = ceil(Data * FD / FN)
-  ),
-  set_stat(Pokemon, Stat_data, attack, New_pokemon).
+  set_staged_stat(Pokemon, Data, attack, New_pokemon).
 set_staged_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
-  stat_stage(Pokemon, special-attack, Stage), % get stage
-  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
-  (
-    % handle domains
-    Data = _.._, !,
-    D in Data,
-    Stat #= D * FD // FN,
-    fd_dom(Stat,Stat_data)
-    ;
-    integer(Data), % no domain
-    Stat_data = ceil(Data * FD / FN)
-  ),
-  set_stat(Pokemon, Stat_data, special-attack, New_pokemon).
+  set_staged_stat(Pokemon, Data, special-attack, New_pokemon).
 
 %! set_staged_def_stat_by_category(+Pokemon, +Stat_value, +Category, -Resulting_pokemon).
 % Replaces the defense status value of the given pokemon by damage category, taking stat stage increases into account
@@ -620,30 +640,6 @@ set_staged_atk_stat_by_category(Pokemon, Data, special, New_pokemon) :-
 % @see set_stats/7
 % @see set_stat/4
 set_staged_def_stat_by_category(Pokemon, Data, physical, New_pokemon) :-
-  stat_stage(Pokemon, defense, Stage), % get stage
-  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
-  (
-    % handle domains
-    Data = _.._, !,
-    D in Data,
-    Stat #= D * FD // FN,
-    fd_dom(Stat,Stat_data)
-    ;
-    integer(Data), % no domain
-    Stat_data = ceil(Data * FD / FN)
-  ),
-  set_stat(Pokemon, Stat_data, defense, New_pokemon).
+  set_staged_stat(Pokemon, Data, defense, New_pokemon).
 set_staged_def_stat_by_category(Pokemon, Data, special, New_pokemon) :-
-  stat_stage(Pokemon, special-defense, Stage), % get stage
-  stat_stage_factor(Stage,FN/FD), % get corresponding stat stage factor
-  (
-    % handle domains
-    Data = _.._, !,
-    D in Data,
-    Stat #= D * FD // FN,
-    fd_dom(Stat,Stat_data)
-    ;
-    integer(Data), % no domain
-    Stat_data = ceil(Data * FD / FN)
-  ),
-  set_stat(Pokemon, Stat_data, special-defense, New_pokemon).
+  set_staged_stat(Pokemon, Data, special-defense, New_pokemon).
