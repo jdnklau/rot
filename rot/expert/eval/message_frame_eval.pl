@@ -17,9 +17,6 @@ rot_evaluate_message_frames(Frame_first, Frame_second) :-
 % constructing/updating the known pokemon data of the player's team pokemon.
 %
 % @arg Message_frame The message frame to be evaluated
-rot_evaluate_message_frame(_) :-
-  % do nothing when in Rot's search algorithm
-  rot(searching),!.
 rot_evaluate_message_frame(Frame) :-
   % skip empty message frames
   empty_message_frame(Frame),!.

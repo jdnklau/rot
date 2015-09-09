@@ -147,6 +147,9 @@ rot_set_pokemon_data(player,Data) :-
 % If you only got one message frame and have no second to pair it up with, use rot_transmit_message_frame/1
 % @arg First_frame The first frame occurring
 % @arg Second_frame The second frame occurring
+rot_transmit_message_frames(_,_) :-
+  % do nothing when in Rot's search algorithm
+  rot(searching),!.
 rot_transmit_message_frames(F1,F2) :-
   % only refering to the evaluating predicate to keep the api file clean and easier to maintain
   rot_evaluate_message_frames(F1,F2),
@@ -159,6 +162,9 @@ rot_transmit_message_frames(F1,F2) :-
 % If you got two frames that semantically fit together, use rot_transmit_message_frames/2 instead.
 %
 % @arg Frame The message frame to be transmitted
+rot_transmit_message_frame(_) :-
+  % do nothing when in Rot's search algorithm
+  rot(searching),!.
 rot_transmit_message_frame(F1) :-
   % only refering to the evaluating predicate to keep the api file clean and easier to maintain
   rot_evaluate_message_frame(F1),
