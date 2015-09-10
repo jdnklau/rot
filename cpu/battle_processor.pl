@@ -356,11 +356,19 @@ process_move_useage(State, Move, Result_state, Messages) :-
   move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
   add_messages([move(Move)],[],Msg_uses), % message that this move is used
   ( % test whether the move hits or not
-    move_hits(Accuracy),
-    process_move(State, Move, Result_state, Msg_move),
-    add_messages(Msg_move, Msg_uses, Messages)
-    ; % case the move does not hit
-    add_messages([user(move_missed)], Msg_uses, Messages),
+    move_hits(Accuracy),!,
+    ( % test if the move has any effect
+      defending_pokemon(State,Target),
+      move_has_effect(Move,Target),!, % has effect
+      process_move(State, Move, Result_state, Msg_move),
+      add_messages(Msg_move, Msg_uses, Messages)
+    ;
+      % case: move has no effect
+      add_messages([effectiveness(none)], Msg_uses, Messages),
+      State = Result_state
+    )
+  ; % case the move does not hit
+    add_messages([move_missed], Msg_uses, Messages),
     State = Result_state % the state does not change
   ).
 

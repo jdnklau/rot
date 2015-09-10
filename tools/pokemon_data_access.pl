@@ -72,7 +72,7 @@ inflict_primary_status_condition(State, _, Probability, State, []) :-
   % this predicate is designed to fail if the rng succeeds as the clauses below
   % are ment to handle a situation the rng already has passed.
   % (this design choice is due to how the code was designed before)
-  \+ rng_succeeds(Probability).
+  \+ rng_succeeds(Probability),!.
 inflict_primary_status_condition(State, _, _, State, []) :-
   % already has a primary status condition
   State = state(_,[Pokemon|_],_),

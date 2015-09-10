@@ -105,6 +105,7 @@ rot_evaluate_move(Who, Move, Attacker, Target, List, Res_attacker, Res_target) :
 rot_evaluate_move_execution(Who, Move, Attacker, Target, List, New_attacker, New_target) :-
   rot_ask_message(move,[Move],List,Move_list), % pop move useage data
   \+ rot_ask_message(move_missed,_,Move_list,_),% move may not have missed from here on
+  \+ rot_ask_message(effectiveness,[none],Move_list,_),% move may not have any effect on the target
   !,
   rot_evaluate_move_set(Who, Move, Attacker, UAttacker), % update attacker moveset
   move(Move,_,Catpow,_,_,_,_,_,_),

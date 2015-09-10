@@ -134,6 +134,19 @@ stab(Pokemon, Type) :-
   types(Pokemon, Types),
   member(Type,Types).
 
+%! move_has_effect(+Move, +Target_pokemon).
+% True if the given move has effect on the target pokemon.
+% @arg Move The move in question
+% @arg Target_pokemon The pokemon data of the pokemon being targeted by the move.
+move_has_effect(Move, Target) :-
+  % move is effective by type
+  move(Move,T,_,_,_,_,_,_,_), % get type
+  calculate_type_effectiveness(T,Target,TE),
+  TE > 0.
+% TODO: implement more clauses
+% Missing is for example a check if a move only inflicty a primary status condition
+% and if so, this condition is inflictable.
+
 %! translate_attacker_state(+Game_state, +Attacker, -Attacker_state).
 %! translate_attacker_state(+Attacker_state, +Attacker, -Game_state).
 %! translate_attacker_state(-Game_state, +Attacker, +Attacker_state).
