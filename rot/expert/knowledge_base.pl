@@ -138,13 +138,13 @@ trained_stat(Domain) :-
 % @arg Special_attack A variable in the domain of possible special attack effort values
 % @arg Special_defense A variable in the domain of possible special defense effort values
 % @arg Speed A variable in the domain of possible speed effort values
-labeling_ev(special-sweeper,Hp,_,_,Spa,_,Spe) :-
-  labeling([down],[Spa,Spe,Hp]).
-labeling_ev(physical-sweeper,Hp,Atk,_,_,_,Spe) :-
-  labeling([down],[Atk,Spe,Hp]).
-labeling_ev(special-wall,Hp,_,Def,_,Spd,_) :-
-  labeling([down],[Spd,Hp,Def]).
-labeling_ev(physical-wall,Hp,_,Def,_,Spd,_) :-
-  labeling([down],[Def,Hp,Spd]).
+labeling_ev(special-sweeper,Hp,Atk,Def,Spa,Spd,Spe) :-
+  labeling([down],[Spa,Spe,Hp,Spd,Def,Atk]).
+labeling_ev(physical-sweeper,Hp,Atk,Def,Spa,Spd,Spe) :-
+  labeling([down],[Atk,Spe,Hp,Def,Spd,Spa]).
+labeling_ev(special-wall,Hp,Atk,Def,Spa,Spd,Spe) :-
+  labeling([down],[Spd,Hp,Def,Spe,Spa,Atk]).
+labeling_ev(physical-wall,Hp,Atk,Def,Spa,Spd,Spe) :-
+  labeling([down],[Def,Hp,Spd,Spe,Atk,Spd]).
 labeling_ev(unique,Hp,Atk,Def,Spa,Spd,Spe) :-
   labeling([down],[Spe,Atk,Spa,Def,Spd,Hp]).
