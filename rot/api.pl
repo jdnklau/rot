@@ -2,7 +2,7 @@
 :- dynamic rot/2.
 
 %! read_rot_action(+State, -Action).
-% Let's Rot start his heuristics to choose an action for the next turn.
+% Lets Rot start his heuristics to choose an action for the next turn.
 %
 % As of current implementation Rot uses it's own derives game state instead of
 % using the given one
@@ -13,7 +13,7 @@ read_rot_action(_, Action) :-
   rot_choose_action(State, Action).
 
 %! rot_choose_switch(+State, -Switch).
-% Let's Rot start his heuristics to choose a switch for the next turn.
+% Lets Rot start his heuristics to choose a switch for the next turn.
 % @arg Game_state The current state of the game
 % @arg Action The action rot has choosen
 read_rot_switch(State, Switch) :-
@@ -29,13 +29,40 @@ rot_clear :-
 % Clears all asserted data corresponding to a specific instance of Rot.
 % @arg Instance The identifier for the instance of Rot to clear.
 rot_clear(I) :-
-  retractall(rot(instance(I))),
+  retractall(rot(instance(I, _))),
   retractall(rot(I,_)).
 
 %! rot_create_instance(+Identifier, +Player_team_list, +Rot_team_data).
 %
 % Initializes a new instance of Rot's system.
 % This instance will be set as new active instance.
+%
+% This predicate just calls rot_create_instance/4 with a default search algorithm.
+% At this point the default algorithm is `minmax`.
+%
+% Please see rot_create_instance/4 for full information.
+%
+% @arg Identifier Identifies the created instance, allowing to access it easily
+% @arg Player_team_list List of the opponent's pokemon's names
+% @arg Rot_team_data The team data of Rot's team
+% @see rot_init_team/1
+% @see rot_init_pokemon/1
+% @see rot_derive_pokemon/1
+% @see rot_create_instance/4
+rot_create_instance(I, Team_player, Team_rot) :-
+  % NOTE: if the default algorithm gets changed, please note it in the PlDoc comment
+  rot_create_instance(I, minmax, Team_player, Team_rot).
+
+%! rot_create_instance(+Identifier, +Search_algorithm, +Player_team_list, +Rot_team_data).
+%
+% Initializes a new instance of Rot's system.
+% This instance will be set as new active instance.
+%
+% The given search algorithm is used by read_rot_action/2 to search the action
+% with the best possible outcome calculated.
+% It may be one of the following:
+%   * `minmax`: A basic minmax algorithm
+%   * more to be added
 %
 % The pokemon names in the given player's team list serve to create a first idea of how this pokemon
 % could be played. See rot_init_pokemon/1 for more information.
@@ -52,14 +79,15 @@ rot_clear(I) :-
 %   4. rot_get_pokemon_data/3 to access dynamically a pokemon from either team
 %   5. *most important:* rot_get_game_state/1 to access the current state of the game as Rot thinks it is
 % @arg Identifier Identifies the created instance, allowing to access it easily
+% @arg Search_algorithm Atom to specify what algorithm should be used for Rot's tree search
 % @arg Player_team_list List of the opponent's pokemon's names
 % @arg Rot_team_data The team data of Rot's team
 % @see rot_init_team/1
 % @see rot_init_pokemon/1
 % @see rot_derive_pokemon/1
-rot_create_instance(I, Team_player, Team_rot) :-
+rot_create_instance(I, Algo, Team_player, Team_rot) :-
   rot_clear(I), % clear eventually remaining asserts
-  asserta(rot(instance(I))), % assert given instance as one of the instances created
+  asserta(rot(instance(I, [Algo]))), % assert given instance as one of the instances created
   rot_set_active_instance(I), % set new instance as active one
   rot_init_opponent(I,Team_player), % initialize team
   rot_derive_team(I,_), % assert derived data of all pokemon

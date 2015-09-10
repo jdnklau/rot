@@ -36,6 +36,8 @@
     rot/expert/eval/end_of_turn_eval,
     rot/expert/eval/damage_eval,
     rot/expert/eval/switch_eval].
+:- [rot/search/minmax].
+:- [rot/rate/simple].
 
 %%%
 

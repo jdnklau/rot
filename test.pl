@@ -1,4 +1,5 @@
 test_alot(0,_) :-
+  !, % never backtrack
   write(n=0),nl.
 test_alot(N,Goal) :-
   write(n=N),nl,
