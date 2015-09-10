@@ -27,10 +27,12 @@ team_list([P|Ps], [N|Ns]) :-
 % @arg Game_state The current state of the game
 game_over(state(Player, _, _)) :-
   team_completely_fainted(Player),
-  ui_display_win(rot).
+  ui_display_win(rot),
+  log_win(rot).
 game_over(state(_, Rot, _)) :-
   team_completely_fainted(Rot),
-  ui_display_win(player).
+  ui_display_win(player),
+  log_win(player).
 
 %! attacker_fainted(Attacker_state)
 %

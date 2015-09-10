@@ -1,7 +1,7 @@
 :- use_module(library(random)).
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
-:- [test, teams, save_states].
+:- [test, teams, save_states, logs].
 :- [database/movedex,
     database/natures,
     database/pokedex/pokemon_forms,

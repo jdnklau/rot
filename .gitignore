@@ -4,6 +4,9 @@ doc/**
 # Saved game states
 save
 
+# Log files
+logs/**
+
 # File for commit messages
 commit.txt
 
