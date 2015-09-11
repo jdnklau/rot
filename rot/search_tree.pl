@@ -59,9 +59,9 @@ create_nodes_by_rot_action([Mp|Mps], Mr, Depth, State, [Mp:Tree|Nodes]) :-
 % in the first turn.
 % @arg Tree The tree to search.
 % @arg Actions The found actions.
-search_tree(In_tree, Actions) :-
+search_tree(Tree, Actions) :-
   rot(active_instance(I)), % get active instance
   rot(instance(I, [Algo|_])), % get search algorithm
-  search_tree(Tree, Algo, Action).
-search_tree(Tree, minmax, Action) :-
-  minmax_search(Tree, Action).
+  search_tree(Tree, Algo, Actions).
+search_tree(Tree, minmax, Actions) :-
+  minmax_search(Tree, Actions).
