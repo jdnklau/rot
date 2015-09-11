@@ -63,7 +63,7 @@ test_tree :-
 test_tree(D) :-
   team_rot(T),
   asserta(rot(searching)),
-  create_tree(D, state(T,T,[[],[],[]]), Tree),
+  create_tree(D, state(T,T,[[],[],[]]), _Tree),
   retract(rot(searching)),
   write('tree created'),nl.
 
@@ -71,12 +71,15 @@ test_tree_search :-
   team_rot(T),
   write('tree depth: '),
   read(D),
+  team_list(T,Tlist),
   asserta(rot(searching)),
   create_tree(D, state(T,T,[[],[],[]]), Tree),
   retract(rot(searching)),
   write('tree created'),nl,
-  write_tree(Tree, 0), nl,
+  %write_tree(Tree, 0), nl,
+  rot_create_instance(rot,Tlist,T),
   search_tree(Tree, Moves),
+  rot_clear,
   write(expected:Moves), nl.
 
 write_tree(tree(State, Nodes), I) :-

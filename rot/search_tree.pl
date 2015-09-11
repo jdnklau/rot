@@ -62,6 +62,42 @@ create_nodes_by_rot_action([Mp|Mps], Mr, Depth, State, [Mp:Tree|Nodes]) :-
 search_tree(Tree, Actions) :-
   rot(active_instance(I)), % get active instance
   rot(instance(I, [Algo|_])), % get search algorithm
-  search_tree(Tree, Algo, Actions).
+  % cut tree
+  Actions=(A1,A2),
+  cut_tree(Tree,A1,A2,Cut_tree),
+  % search
+  search_tree(Cut_tree, Algo, Actions).
 search_tree(Tree, minmax, Actions) :-
   minmax_search(Tree, Actions).
+
+%! cut_tree(+Tree, +Cut_player, +Cut_rot, -Cut_tree).
+% Cuts the given tree.
+%
+% The cut affects edges originating from the root, and thus subtrees.
+%
+% As each edge represents a tuple (Action_player, Action_rot) we exclude edges
+% not unifying with (Cut_player, Cut_rot) from the tree's first layer.
+%
+% NOTE: This has only impact upto a depth of 1. Only the first layer will be affected,
+% but not any subtrees of its nodes.
+% @arg Tree The tree to cut
+% @arg Cut_player A term the player's action has to unify with
+% @arg Cut_rot A term Rot's action has to unify with
+% @arg Cut_tree The resulting, cut tree
+cut_tree(T,Cut1,Cut2,T) :-
+  % base case: do not cut
+  var(Cut1),
+  var(Cut2),!.
+cut_tree(tree(S,Ns),C1,C2,tree(S,Ms)) :-
+  exclude(\=(C2:_),Ns,NNs),
+  cut_tree_(NNs,C1,Ms).
+% cut the second part
+cut_tree_([_:N|Ns],C,NNs) :-
+  % excluded stuff made tree empty, so throw it away
+  exclude(\=(C:_),N,[]),!,
+  cut_tree_(Ns,C,NNs).
+cut_tree_([X:N|Ns],C,[X:NN|NNs]) :-
+  % exclude stuff
+  exclude(\=(C:_),N,NN),
+  cut_tree_(Ns,C,NNs).
+cut_tree_([],_,[]).
