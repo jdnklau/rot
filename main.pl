@@ -36,7 +36,8 @@
     rot/expert/eval/end_of_turn_eval,
     rot/expert/eval/damage_eval,
     rot/expert/eval/switch_eval].
-:- [rot/search/minmax].
+:- [rot/search/minmax,
+    rot/search/minmax_prediction].
 :- [rot/rate/simple].
 
 %%%
@@ -55,7 +56,7 @@ start_rot_battle(Team_blau, Team_rot) :-
   team_list(Team_rot, List_rot),
   rot_clear, % clear all data of rot eventually still asserted
   asserta(rot(self_battle)), % assert flag to indicate that rot battles itself
-  rot_create_instance(blau, List_rot, Team_blau),
+  rot_create_instance(blau, minmax_prediction, List_rot, Team_blau),
   rot_create_instance(rot, List_blau, Team_rot),
   State = state(Team_blau, Team_rot, [[],[],[]]),
   ui_display_battle_start(Team_blau, Team_rot),
