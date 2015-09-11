@@ -1,4 +1,12 @@
-
+%! minmax_search(+Search_tree, -Actions).
+% Searches the given tree for the best actions of both players.
+%
+% This utilizes the minmax search algorithm.
+%
+% The Actions-tuple has the form (Best_player_action, Best_rot_action)
+%
+% @arg Search_tree A search tree created with create_tree/3
+% @arg Actions A tuple containing the best options for both players
 minmax_search(tree(_, Nodes), Actions) :-
   minmax_search_nodes(Nodes, Actions, _).
 
