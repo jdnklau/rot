@@ -12,4 +12,5 @@
 % @arg Actions A tuple containing the best options for both players
 minmax_prediction_search(Tree, (Prediction,Action)) :-
   minmax_search(Tree, (Prediction,_)), % use minmax to predict player
-  minmax_search(Tree, (Prediction,Action)). % use prediction to select counter move
+  cut_tree(Tree,Prediction,_,Cut_tree),
+  minmax_search(Cut_tree, (Prediction,Action)). % use prediction to select counter move

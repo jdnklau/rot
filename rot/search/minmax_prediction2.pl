@@ -29,4 +29,5 @@ minmax_prediction2_search(Tree, (Prediction,Action)) :-
   Tree = tree(State,_),
   swap_attacker_state(State,Swap),
   create_tree(2,Swap,New_tree),
-  minmax_search(New_tree, (Action,Prediction)). % use prediction to select counter move
+  cut_tree(New_tree,_,Prediction,Cut_tree),
+  minmax_search(Cut_tree, (Action,Prediction)). % use prediction to select counter move
