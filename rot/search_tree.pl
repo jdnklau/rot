@@ -71,6 +71,8 @@ search_tree(Tree, minmax, Actions) :-
   minmax_search(Tree, Actions).
 search_tree(Tree, minmax_prediction, Actions) :-
   minmax_prediction_search(Tree, Actions).
+search_tree(Tree, minmax_prediction2, Actions) :-
+  minmax_prediction2_search(Tree, Actions).
 
 %! cut_tree(+Tree, +Cut_player, +Cut_rot, -Cut_tree).
 % Cuts the given tree.

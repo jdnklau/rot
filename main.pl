@@ -37,7 +37,8 @@
     rot/expert/eval/damage_eval,
     rot/expert/eval/switch_eval].
 :- [rot/search/minmax,
-    rot/search/minmax_prediction].
+    rot/search/minmax_prediction
+    rot/search/minmax_prediction2].
 :- [rot/rate/simple].
 
 %%%
