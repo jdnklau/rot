@@ -42,8 +42,15 @@ process_by_priority(State, Action_player, Action_rot, _, Result_state) :-
 %
 % If rot battles itself, the message frames will be transmitted to
 % Rot's instances `rot` and `blau`
+process_message_frame_transmission(_,_) :-
+  % base case: rot is searching in its algorithm, so don't do anything.
+  % NOTE that this semantically should not be the base case,
+    % but the case of a real battle between the user and rot instead.
+    % However, as this predicate gets called more times while in the search algorithm
+    % this is clause is the clear winner
+  rot(searching),!.
 process_message_frame_transmission(Frame1,Frame2) :-
-  % base case: rot does not battle itself
+  %  rot does not battle itself
   \+ rot(self_battle),!,
   rot_transmit_message_frames(Frame1,Frame2).
 process_message_frame_transmission(Frame1,Frame2) :-
