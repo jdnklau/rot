@@ -53,12 +53,14 @@ start_battle(Team_player, Team_rot) :-
   rot_clear, !.
 
 start_rot_battle(Team_blau, Team_rot) :-
+  start_rot_battle(Team_blau, minmax, Team_rot, minmax).
+start_rot_battle(Team_blau, Algo_blau, Team_rot, Algo_rot) :-
   team_list(Team_blau, List_blau),
   team_list(Team_rot, List_rot),
   rot_clear, % clear all data of rot eventually still asserted
   asserta(rot(self_battle)), % assert flag to indicate that rot battles itself
-  rot_create_instance(blau, minmax_prediction, List_rot, Team_blau),
-  rot_create_instance(rot, List_blau, Team_rot),
+  rot_create_instance(blau, Algo_blau, List_rot, Team_blau),
+  rot_create_instance(rot, Algo_rot, Team_rot),
   State = state(Team_blau, Team_rot, [[],[],[]]),
   ui_display_battle_start(Team_blau, Team_rot),
   run_battle(State),

@@ -31,6 +31,8 @@ As there currently is no API worth mentioning (see below: _State of implementati
   - the same as `test_battle/0` but - instead of having the user as one of the players and prompting him for actions - Rot battles itself completely
   - there is a `test_rot_battle_small/0`
       - it is to `test_battle_small/0` as `test_rot_battle/0` is to `test_battle/0`
+  - `test_rot_battle/2`
+      - takes two algorithm names as arguments and lets the two Rot instances each use one of them.
 - `test_save_state/0`
   - loads the saved game state from the save file (see above at `test_battle/0`)
   - runs the battle continuing this particular game state
