@@ -194,11 +194,11 @@ ui_display_win(Who) :-
 % The dialog lists all possible commands
 ui_display_help :-
   nl,
-  write('> for a specific move type the move name between a pair of \' (apostrophe)'), nl,
-  tab(2), write('example: \'tackle\'.'),nl,
+  write('> for a specific move type the move name'), nl,
+  tab(2), write('example: volt-tackle.'),nl,
   ui_display_help_switch,
-  write('> for information about a specific team partner type info(\'partner name here\')'), nl,
-  tab(2), write('example: info(\'poliwrath\')'), nl,
+  write('> for information about a specific team partner type info(partner-name)'), nl,
+  tab(2), write('example: info(poliwrath)'), nl,
   write('> for displaying this help again type: help.'), nl,
   write('> you can always end the battle by typing: run.'), nl, nl,
   write('>>> as shown in the examples all choices have to end with a . (full stop)'), nl, nl.
@@ -207,8 +207,8 @@ ui_display_help :-
 % Display a help dialog specifically ment for switching a pokemon out.
 % @see ui_display_help/0
 ui_display_help_switch :-
-  write('> for switching to a partner type switch(\'partner name here\')'), nl,
-  tab(2), write('example: switch(\'pikachu\').'),nl.
+  write('> for switching to a partner type switch(partner-name)'), nl,
+  tab(2), write('example: switch(pikachu).'),nl.
 
 %! ui_display_run.
 % Display a messages taht the player has run from the battle.
