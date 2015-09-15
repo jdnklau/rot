@@ -5,7 +5,9 @@ doc/**
 save
 
 # Log files
-logs/**
+#logs/**
+# the logs/ directory has its own .girignore now
+# This is primarily to assure the existence of the folder
 
 # File for commit messages
 commit.txt
