@@ -144,3 +144,17 @@ rot_get_opponent_team(I,Team) :-
   % set active pokemon of the opponent
   rot_get_opponent_active(I,Active),
   calculate_switch(Team_intern,Active,Team). % set active pokemon as lead (obviously)
+
+%! rot_set_last_actions(+Player, +Action, +Action_opponent).
+% Asserts the last actions the battling players executed.
+%
+% To access uses rot_last_actions/2.
+% @arg Player Either `player` or `rot`
+% @arg Action The action executed by the given player
+% @arg Action_opponent The action executed by the given player's opponent
+rot_set_last_actions(rot,A1,A2) :-
+  rot_set_last_actions(player,A2,A1).
+rot_set_last_actions(player,A1,A2) :-
+  rot(active_instance(I)),
+  retractall(rot(I, last_actions(_,_))),
+  asserta(rot(I, last_actions(A1,A2))).

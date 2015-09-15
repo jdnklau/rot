@@ -10,7 +10,24 @@
 rot_evaluate_message_frames(Frame_first, Frame_second) :-
   rot_evaluate_speed_by_message_frames(Frame_first, Frame_second),
   rot_evaluate_message_frame(Frame_first),
-  rot_evaluate_message_frame(Frame_second).
+  rot_evaluate_message_frame(Frame_second),
+  rot_evaluate_last_actions(Frame_first, Frame_second). % keep this last, so it won't update the data if the evaluation fails
+
+%! rot_evaluate_last_actions(+Message_frame_first,+Message_frame_second).
+% If the message frames correspond to switches or moves as actions they will be saved as last actions used.
+%
+% The message frame order is not of importance, but the frames should semantically fit toghether.
+% @arg Message_frame_first A message frame to extract the action from
+% @arg Message_frame_first A message frame to extract the action from
+rot_evaluate_last_actions(F1,F2) :-
+  message_frame_meta_data(F1,Who,A1,_,_),
+  % make sure this is a move or a switch
+  (A1 = switch(_) ; move(A1,_,_,_,_,_,_,_,_)),
+  !,
+  message_frame_meta_data(F2,_,A2,_,_),
+  rot_set_last_actions(Who,A1,A2).
+rot_evaluate_last_actions(_,_). % if the message frames did not correspond to actions we do nothing
+
 
 %! rot_evaluate_message_frame(+Message_frame).
 %

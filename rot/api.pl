@@ -197,3 +197,12 @@ rot_transmit_message_frame(F1) :-
   % only refering to the evaluating predicate to keep the api file clean and easier to maintain
   rot_evaluate_message_frame(F1),
   !. % cut to eventually keep call stack clean
+
+%! rot_last_actions(-Action_player, -Action_rot).
+% Returns the last actions of both players Rot tracked.
+%
+% @arg Action_player The last action Rot's opponent executed
+% @arg Action_rot The last action Rot executed
+rot_last_actions(A1,A2) :-
+  rot(active_instance(I)),
+  rot(I, last_actions(A1,A2)).
