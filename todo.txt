@@ -2,11 +2,12 @@
 
 ## Game Engine
 - add choice of lead
-- add predicate to extract a moves offensive and defensive categories and it's base power
+- add predicate to extract a moves offensive and defensive categories and its base power
 - complete damage calculation (calculation of certain factors)
 - implement missing move effects
 - shift primary ailment infliction from pokemon_data_access to battle_processor
 - in move data base: drain value to fractions
+- add PP useage
 
 ## Code
 - tidy up source code organization
@@ -16,3 +17,11 @@
 - add basic pruning (no moves without effect)
 - add better move guessing
 - add a better way to scrap an uncertain move from the move set as "using the first one"
+- Make it impossible for the self battle to get stuck in this battle sequence:
+    1. (switch(A), switch(X))
+    2. (switch(B), switch(Y))
+    3. (switch(A), switch(X))
+    4. (switch(B), switch(Y))
+    5. (switch(A), switch(X))
+    6. (switch(B), switch(Y))
+    7. ...
