@@ -165,6 +165,24 @@ hp_frame([_,HP|_], HP).
 % @arg Resulting_pokemon The pokemon data containing the given hp frame
 set_hp_frame([Name,_|Data], kp(C,M), [Name,kp(C,M)|Data]).
 
+%! reduce_pp(+Pokemon,+Used_move,-Resulting_pokemon).
+% Reduces the remaining PP of a pokemon's move.
+% @arg Pokemon The pokemon data of the pokemon in question
+% @arg Used_move The move that will its PP have reduced
+% @arg Resulting_pokemon The resulting pokemon with reduced PP
+reduce_pp(P,struggle,P). % No evaluation if we struggle
+reduce_pp([Name,HP,Moves|Rest],Move,[Name,HP,New_moves|Rest]) :-
+  reduce_pp_(Moves,Move,New_moves).
+% operate on move list
+reduce_pp_([],_,[]).
+reduce_pp_([[Move,PP]|Ms],Move,[[Move,PP_new]|Ms]) :-
+  % case: right move found; reduce PP
+  !,
+  PP_new is PP-1.
+reduce_pp_([M|Ms],Move,[M|MMs]) :-
+  % search through move list to find right move
+  reduce_pp_(Ms,Move,MMs).
+
 %! available_actions(+Team, -Available_actions).
 %
 % Gives a list of available actions (moves switches) the owner of the team can use.
@@ -202,9 +220,18 @@ available_switches_acc([], Available, Available).
 % @tbd Check for remaining power points
 % @tbd Check for blocked moves
 % @tbd Check for moves the active pokemon could be locked to
-available_moves([Lead|_], [M1, M2, M3, M4]) :-
+available_moves([Lead|_], Available):-
   Lead = [_, _, Moves|_],
-  Moves = [[M1,_], [M2,_], [M3,_], [M4,_]].
+  findall(M,
+          (member([M,PP],Moves),PP>0),
+          As),
+  % check if any such move exists
+  (
+    As = [],!,
+    Available = [struggle]
+  ;
+    As = Available
+  ).
 
 %! item(+Pokemon, +Item).
 %! item(+Pokemon, -Item).

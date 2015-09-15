@@ -132,6 +132,9 @@ ui_display_single_message(Who, Name, poisoned) :-
 ui_display_single_message(Who, Name, drain) :-
   % pokemon drains life from the target
   tab(2), ui_display_pokemon_with_owner(Name, Who), write('drained some life').
+ui_display_single_message(Who, Name, heal) :-
+  % pokemon heals life
+  tab(2), ui_display_pokemon_with_owner(Name, Who), write('has healed').
 ui_display_single_message(Who, Name, recoil) :-
   % pokemon suffers recoil damage
   tab(2), ui_display_pokemon_with_owner(Name, Who), write('suffers recoil damage').

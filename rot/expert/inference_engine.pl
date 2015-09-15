@@ -93,13 +93,17 @@ rot_derive_moves([Move|Rest],[Move|Rest_derived]) :-
 
 %! rot_update_moves(+Pokemon, +Move, -Result_pokemon).
 % Updates the move set of the given pokemon in its known pokemon data.
+%
+% Also reduces PP on used moves
 % @arg Pokemon_name The pokemon data of the pokemon using the move
 % @arg Move The move the pokemon used.
 % @arg Result_pokemon The pokemon data with updated moves
+rot_update_moves(P,struggle,P) :- !. % do nothing if pokemon struggles
 rot_update_moves(Pokemon, Move, Result) :-
   Pokemon =[Name,Hp,Move_data|Rest],
   rot_update_move_data(Move, Move_data, New_move_data),
-  Result =[Name,Hp,New_move_data|Rest].
+  New_pokemon =[Name,Hp,New_move_data|Rest],
+  reduce_pp(New_pokemon,Move,Result).
 
 %! rot_update_move_data(+Move, +Move_data, -Updated_move_data).
 % Updates the given move data to reflect the usage of the given move.

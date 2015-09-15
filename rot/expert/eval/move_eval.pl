@@ -321,15 +321,22 @@ rot_evaluate_move_single_effect(Who, stats(target,_,Data),User,Target,List,User,
   % target's status value increases (probably)
   opponent(Who,Not_who),
   rot_evaluate_move_status_increases(Not_who, Data, Target, List, New_target).
-rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target) :-
+rot_evaluate_move_single_effect(Who, Recoil,User,Target,List,New_user,Target) :-
   % recoil damage
+  member(Recoil,[heal(_),drain(_)]),
+  Recoil =.. [_,Value],
   Value < 0, % negative drain is recoil damage
   append(_,[recoil,damaged(Hp_frame)|_],List), % damage was dealt
   rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
 rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target) :-
   % drained life
-  Value >= 0, % negative drain is recoil damage
+  Value >= 0,
   append(_,[drain,damaged(Hp_frame)|_],List), % damage was dealt
+  rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
+rot_evaluate_move_single_effect(Who, heal(Value),User,Target,List,New_user,Target) :-
+  % healed life
+  Value >= 0,
+  append(_,[heal,damaged(Hp_frame)|_],List), % damage was dealt
   rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
 % ignored/not evaluated effect clause:
 rot_evaluate_move_single_effect(_,_,User,Target,_,User,Target).

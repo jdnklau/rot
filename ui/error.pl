@@ -24,3 +24,5 @@ ui_display_input_error(wrong_command, _, Command) :-
   tab(2), write(Command), write(' is not a valid command here'), nl.
 ui_display_input_error(wrong_move, Pokemon, Move) :-
   tab(2), write(Pokemon), write(' does not know how to '), write(Move), nl.
+ui_display_input_error(not_enough_pp, _, Move) :-
+  tab(2), write(Move), write(' has not enough PP left'), nl.

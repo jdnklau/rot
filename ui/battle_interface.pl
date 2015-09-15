@@ -142,7 +142,13 @@ ui_display_info(Pokemon, Who) :-
   Pokemon = [_, kp(Curr, Max), Moves|_],
   tab(2), write('at '), ui_display_fraction(Curr, Max), write('hp'), nl,
   write('moves:'),nl,
-  ui_display_moves(Moves).
+  % display struggle if it is the only move to use
+  (
+    available_moves([Pokemon],[struggle]),!,
+    ui_display_moves([[struggle,1]])
+  ;
+    ui_display_moves(Moves)
+  ).
 
 %! ui_display_moves(+Move_data_list).
 % Displays information about the given moves.

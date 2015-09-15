@@ -19,6 +19,22 @@ test_ui :-
   team_1(T),
   ui_display(state(T, T, _)).
 
+test_pp :-
+  team_1(T),
+  T = [P1|Ps],
+  P1 = [Name,HP,[[M1,_]|Rest_moves]|Rest],
+  P2 = [Name,HP,[[M1,0]|Rest_moves]|Rest],
+  T2 = [P2|Ps],
+  start_battle(T2,T).
+
+test_struggle :-
+  team_1(T),
+  T = [P1|Ps],
+  P1 = [Name,HP,[[M1,_],[M2,_],[M3,_],[M4,_]]|Rest],
+  P2 = [Name,HP,[[M1,0],[M2,0],[M3,0],[M4,0]]|Rest],
+  T2 = [P2|Ps],
+  start_battle(T2,T).
+
 test_battle_small :-
   team_1(T),
   write(team_loaded),nl,

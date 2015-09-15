@@ -40,6 +40,14 @@ create_nodes_acc([Mr|Mrs], Mps, Depth, State, Nodes, Curr_nodes) :-
 create_nodes_acc([],_,_,_,Nodes,Nodes).
 
 create_nodes_by_rot_action([],_,_,_,[]).
+create_nodes_by_rot_action([switch(A)|Mps], switch(X), Depth, State, Nodes) :-
+  % clause to prevent looping
+  rot_last_actions([(switch(B),switch(Y)),(switch(A),switch(X)),(switch(B),switch(Y))|_]),!,
+    % ^ if the last actions were just switching forth and back  the search tree should not encourage
+    % to continue this switching
+    % NOTE that this is not a neccessary check for move useage, as their decaying PP
+    % prevent infinite looping
+  create_nodes_by_rot_action(Mps, Mr, Depth, State, Nodes).
 create_nodes_by_rot_action([Mp|Mps], Mr, Depth, State, [Mp:Tree|Nodes]) :-
   process_turn(State, Mp, Mr, New_state),
   create_tree(Depth, New_state, Tree),

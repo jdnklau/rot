@@ -83,9 +83,16 @@ validate_player_action(_Team, info(Team_member)) :- !, % red cut
 validate_player_action(Team, switch(Team_mate)) :- !,
   % switch team mate (has it's own predicate)
   validate_player_switch(Team, switch(Team_mate)).
-validate_player_action([[_,_,Moves|_]|_], Move_choosen) :-
+validate_player_action([[Name,_,Moves|_]|_], Move_choosen) :-
   % pokemon move
-  member([Move_choosen,_], Moves), !.
+  member([Move_choosen,PP], Moves), !,
+  (% check PP
+    PP=<0,!,
+    ui_display_input_error(not_enough_pp,Name,Move_choosen), fail
+  ; true).
+validate_player_action(Team, struggle) :-
+  % struggle
+  available_moves(Team,[struggle]).
 validate_player_action([[Active_pokemon,_,_Moves|_]|_], Move_choosen) :-
   % a to the active pokemon unknown move
   %\+ member([Move_choosen,_], Moves), % member/2 check already in the clause above

@@ -7,7 +7,7 @@
 - implement missing move effects
 - shift primary ailment infliction from pokemon_data_access to battle_processor
 - in move data base: drain value to fractions
-- add PP useage
+- set struggles max PP to 1
 
 ## Code
 - tidy up source code organization

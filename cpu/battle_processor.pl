@@ -362,21 +362,25 @@ process_move_routine(State, Move, Result_state, Messages) :-
 process_move_useage(State, Move, Result_state, Messages) :-
   move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
   add_messages([move(Move)],[],Msg_uses), % message that this move is used
+  % reduce pp
+  attacking_pokemon(State, Attacker),
+  reduce_pp(Attacker,Move,New_attacker),
+  set_attacking_pokemon(State,New_attacker,PP_state),
   ( % test whether the move hits or not
     move_hits(Accuracy),!,
     ( % test if the move has any effect
-      defending_pokemon(State,Target),
+      defending_pokemon(PP_state,Target),
       move_has_effect(Move,Target),!, % has effect
-      process_move(State, Move, Result_state, Msg_move),
+      process_move(PP_state, Move, Result_state, Msg_move),
       add_messages(Msg_move, Msg_uses, Messages)
     ;
       % case: move has no effect
       add_messages([effectiveness(none)], Msg_uses, Messages),
-      State = Result_state
+      PP_state = Result_state
     )
   ; % case the move does not hit
     add_messages([move_missed], Msg_uses, Messages),
-    State = Result_state % the state does not change
+    PP_state = Result_state % the state does not change
   ).
 
 %! process_move(+Attacker_state, +Move, -Result_state, -Message_collection).
@@ -648,6 +652,25 @@ process_single_move_effect(State, drain(Percent), DD, Result_state, Messages) :-
   (
     Reversed_heal =< 0, % Heal >= 0
     add_messages([drain],[],Msg_drain)
+    ;
+    % Heal < 0, so actually it did damage
+    add_messages([recoil],[],Msg_drain) % recoil is negative drain
+  ),
+  add_messages(Msg_heal, Msg_drain, Messages).
+process_single_move_effect(State, heal(Percent), _, Result_state, Messages) :-
+  % heals for a percentage of the maximal hit points
+  attacking_pokemon(State,A),
+  hp_frame(A,kp(_,Max_hp)),
+  Reversed_heal is 0 - floor(Max_hp * (Percent/100)), % heal is expressed as negative damage
+  swap_attacker_state(State, Swapped_state), % swap attacker/target to use process_damage/5 properly
+  process_damage(Swapped_state, Reversed_heal, _, New_swapped_state, Msg_heal_opp), % negative damage is healing
+  swap_attacker_state(New_swapped_state, Result_state), % swap back
+  messages_of_opposing_view(Msg_heal_opp, Msg_heal), % also swap messages
+  % decide on drain message
+  attacking_pokemon(Result_state, _, Name),
+  (
+    Reversed_heal =< 0, % Heal >= 0
+    add_messages([heal],[],Msg_drain)
     ;
     % Heal < 0, so actually it did damage
     add_messages([recoil],[],Msg_drain) % recoil is negative drain
