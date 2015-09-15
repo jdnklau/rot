@@ -1,5 +1,4 @@
 :- use_module(library(doc_files)).
-:- [main].
 
 doc :-
   doc_save(., [recursive(true)]).

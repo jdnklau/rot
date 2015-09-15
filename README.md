@@ -4,7 +4,13 @@
 2. query the goal `test_battle`
   - this starts a test run with a preset team used by both players
 
-Keep in mind that this could change, as it is still in early development
+## To create the documentation
+1. load main.pl in your Prolog environment
+2. query the goal `[pldoc]`
+3. after pldoc.pl is loaded query `doc`
+4. The documentation should be in your doc/ directory
+
+Keep in mind that this could change, as it is still in development
 
 # Test Queries
 As there currently is no API worth mentioning (see below: _State of implementation - API_) everything is run by certain test calls.
