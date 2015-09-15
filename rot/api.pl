@@ -214,6 +214,6 @@ rot_last_actions(A1,A2) :-
 %
 % The list is ordered anti-chronological, so the youngest actions come first in the list.
 % @arg -List_of_last_actions An anti-chronological list containing the last turns actions as pairs.
-rot_last_actions([(A1,A2),(A3,A4),(A5,A6)]).
+rot_last_actions([(A1,A2),(A3,A4),(A5,A6)]) :-
   rot(active_instance(I)),
   rot(I, last_actions(A1,A2,A3,A4,A5,A6)).
