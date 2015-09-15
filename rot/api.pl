@@ -205,4 +205,15 @@ rot_transmit_message_frame(F1) :-
 % @arg Action_rot The last action Rot executed
 rot_last_actions(A1,A2) :-
   rot(active_instance(I)),
-  rot(I, last_actions(A1,A2)).
+  rot(I, last_actions(A1,A2,_,_,_,_)).
+
+%! rot_last_actions(-List_of_last_actions).
+% Returns a list of actions pairs occurred in the last 3 turns.
+%
+% Each pair is a tuple of the form `(Player_action, Rot_action)`.
+%
+% The list is ordered anti-chronological, so the youngest actions come first in the list.
+% @arg -List_of_last_actions An anti-chronological list containing the last turns actions as pairs.
+rot_last_actions([(A1,A2),(A3,A4),(A5,A6)]).
+  rot(active_instance(I)),
+  rot(I, last_actions(A1,A2,A3,A4,A5,A6)).

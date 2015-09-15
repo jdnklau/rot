@@ -156,5 +156,5 @@ rot_set_last_actions(rot,A1,A2) :-
   rot_set_last_actions(player,A2,A1).
 rot_set_last_actions(player,A1,A2) :-
   rot(active_instance(I)),
-  retractall(rot(I, last_actions(_,_))),
-  asserta(rot(I, last_actions(A1,A2))).
+  ignore(retract(rot(I, last_actions(L1,L2,L3,L4,_,_)))),
+  asserta(rot(I, last_actions(A1,A2,L1,L2,L3,L4))).
