@@ -77,29 +77,30 @@ process_message_frame_transmission(F1,F2) :-
 % @arg Result_state The resulting state of the game after executing the end of this turn for both players
 % @see process_end_of_turn/4
 process_ends_of_turn(State, Who_first, Result_state) :-
-  process_end_of_turn(State, Who_first, New_state, Message_collection_first), % end of turn for faster player
+  translate_attacker_state(State, Who_first, State_1),
+  process_end_of_turn(State_1,New_state_1,Message_collection_first), % end of turn for faster player
   create_message_frame(State, Who_first, end_of_turn, Message_collection_first, Message_frame_first), % create the message frame of the faster player
   ui_display_messages(Message_frame_first), % print message frame
-  opponent(Who_first, Who_second), % get the slower player by name
-  process_end_of_turn(New_state, Who_second, Result_state, Message_collection_second), % end of turn for slower player
+  swap_attacker_state(New_state_1,State_2), % swap to slower player's PoV
+  process_end_of_turn(State_2,New_state_2,Message_collection_second), % end of turn for slower player
+  translate_attacker_state(New_state_1,Who_first,New_state), % translate state for message frame
+  opponent(Who_first,Who_second),
   create_message_frame(New_state,Who_second, end_of_turn,Message_collection_second, Message_frame_second), % create the message frame of the slower player
   ui_display_messages(Message_frame_second), % print message frame
+  translate_attacker_state(New_state_2, Who_second, Result_state),
   process_message_frame_transmission(Message_frame_first,Message_frame_second). % let rot evaluate the messages
 
-%! process_end_of_turn(+Game_state, +Who, -Result_state, -Message_collection).
+%! process_end_of_turn(+Game_state, -Result_state, -Message_collection).
 %
 % Processes the end of the current turn for the given player and calculates regular
 % damage and healing from hold items and status conditions
 %
-% @arg Game_state The current state of the game
-% @arg Who Either `player` or `rot`
+% @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Result_state The resulting state of the game after executing the end of this turn for the given player
 % @arg Message_collection Collection of messages occured whilst processing
-process_end_of_turn(State, Who, Result_state, Messages) :-
-  translate_attacker_state(State, Who, State_attacker), % translate state
-  process_end_of_turn_damage(State_attacker, New_state_attacker, Msg_dmg), % do damage to be dealt at the end of every turn
-  add_messages(Msg_dmg, [], Messages), % create message collection
-  translate_attacker_state(New_state_attacker, Who, Result_state). % translate back
+process_end_of_turn(State, Result_state, Messages) :-
+  process_end_of_turn_damage(State, Result_state, Msg_dmg), % do damage to be dealt at the end of every turn
+  add_messages(Msg_dmg, [], Messages). % create message collection
 
 %! process_end_of_turn_damage(+Attacker_state, -Result_state, -Message_collection).
 %
@@ -249,13 +250,12 @@ process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
   translate_attacker_state(New_state_2,Who_second,Result_state),
   process_message_frame_transmission(Message_frame_first, Message_frame_second). % rot evaluates the messages
 
-%! process_action(+Attacker_state, +Action, +Attacking_player, -Result_state, -Message_collection).
+%! process_action(+Attacker_state, +Action, -Result_state, -Message_collection).
 %
 % Processes a given action depending on the given attacking player
 %
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Action The action to be executed
-% @arg Attacking_player The player who executes the given action; either `player` or `rot`.
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
 process_action(State, switch(Team_member), Result_state, Messages) :-
@@ -271,6 +271,7 @@ process_action(State, Move, Result_state, Messages) :-
   % (base case) action chosen: a move
   move(Move, _,_,_,_,_,_,_,_),
   process_move_routine(State, Move, Result_state, Messages).
+
 %! process_move_routine(+Attacker_state, +Move, -Result_state, -Message_collection)
 %
 % Processes a routine before move useage and then calle eventually the move procession.
