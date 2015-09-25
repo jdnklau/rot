@@ -236,44 +236,41 @@ process_fainted_check(State, _, State, []). % Lead has not fainted, so the game 
 % @arg Result_state The resulting state of the game after executing the end of this turn for both players
 % @see process_action/5
 process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
-  process_action(State, Action_first, Who_first, New_state, Message_collection_first),
-  create_message_frame(State,Who_first,Action_first,Message_collection_first, Message_frame_first),
+  translate_attacker_state(State, Who_first, State_1), % translate state for action processing
+  process_action(State_1, Action_first, New_state_1, Message_collection_first),
+  create_message_frame(State,Who_first,Action_first,Message_collection_first,Message_frame_first),
   ui_display_messages(Message_frame_first), % print messages of faster player
+  swap_attacker_state(New_state_1, State_2), % state from slower player's PoV
+  process_action(State_2, Action_second, New_state_2, Message_collection_second),
+  translate_attacker_state(New_state_1,Who_first,New_state), % translate state back to normal for message frame creation
   opponent(Who_first, Who_second), % get the slower player by name
-  process_action(New_state, Action_second, Who_second, Result_state, Message_collection_second),
   create_message_frame(New_state,Who_second,Action_second, Message_collection_second, Message_frame_second),
   ui_display_messages(Message_frame_second), % print message s of slower player
+  translate_attacker_state(New_state_2,Who_second,Result_state),
   process_message_frame_transmission(Message_frame_first, Message_frame_second). % rot evaluates the messages
 
-%! process_action(+Game_state, +Action, +Attacking_player, -Result_state, -Message_collection).
+%! process_action(+Attacker_state, +Action, +Attacking_player, -Result_state, -Message_collection).
 %
 % Processes a given action depending on the given attacking player
 %
-% @arg Game_state The current state of the game
+% @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Action The action to be executed
 % @arg Attacking_player The player who executes the given action; either `player` or `rot`.
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
-process_action(State, switch(Team_member), Who, Result_state, Messages) :-
+process_action(State, switch(Team_member), Result_state, Messages) :-
   % action chosen: a switch
-  translate_attacker_state(State, Who, State_attacker), % translate state to attacker state
-  process_switch(State_attacker, Team_member, New_state_attacker, Messages), % process the switch
-  translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-process_action(State, _, Who, State, []) :-
+  process_switch(State, Team_member, Result_state, Messages). % process the switch
+process_action(State, _, State, []) :-
   % attacking pokemon has fainted before it could attack
-  translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  attacker_fainted(State_attacker). % active pokemon of attacker has fainted
-process_action(State, _, Who, State, []) :-
+  attacker_fainted(State). % active pokemon of attacker has fainted
+process_action(State, _, State, []) :-
   % target pokemon has fainted before it could be attacked
-  translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  target_fainted(State_attacker).
-process_action(State, Move, Who, Result_state, Messages) :-
+  target_fainted(State).
+process_action(State, Move, Result_state, Messages) :-
   % (base case) action chosen: a move
   move(Move, _,_,_,_,_,_,_,_),
-  translate_attacker_state(State, Who, State_attacker), % translate to attacker state
-  process_move_routine(State_attacker, Move, New_state_attacker, Messages),
-  translate_attacker_state(New_state_attacker, Who, Result_state). % translate result back
-
+  process_move_routine(State, Move, Result_state, Messages).
 %! process_move_routine(+Attacker_state, +Move, -Result_state, -Message_collection)
 %
 % Processes a routine before move useage and then calle eventually the move procession.
