@@ -26,7 +26,7 @@ process_turn(Game_state, Action_player, Action_rot, Result_state) :-
 % @see calculate_priorities/4
 process_by_priority(State, Action_player, Action_rot, priorities(Prio_player, Prio_rot), Result_state) :-
   faster(Prio_player, Prio_rot), % succeds if player is faster
-  !, % red cut to suppress useage of 2nd clause where Rot would be faster
+  !, % red cut to suppress usage of 2nd clause where Rot would be faster
   process_actions(State, Action_player, Action_rot, player, New_state),
   process_ends_of_turn(New_state, player, End_of_turn_state),
   process_fainted_checks(End_of_turn_state, player, Result_state).
@@ -69,8 +69,8 @@ process_message_frame_transmission(F1,F2) :-
 
 %! process_ends_of_turn(+Game_state, +Who_first, -Result_state).
 %
-% Calls process_end_of_turn/4 for both players in order of their priorities.
-% Also prints out the corresponding message frames.
+% Calls process_end_of_turn/3 for both players in order of their
+% priorities. Also prints out the corresponding message frames.
 %
 % @arg Game_state The current state of the game
 % @arg Who_first Either `player` or `rot` to show who has higher priority this turn
@@ -227,7 +227,7 @@ process_fainted_check(State, _, State, []). % Lead has not fainted, so the game 
 
 %! process_actions(+Game_state, +Action_first, +Action_second, +Who_first, -Result_state).
 %
-% Calls process_action/5 for both players in order of their priorities.
+% Calls process_action/4 for both players in order of their priorities.
 % Also prints out the corresponding message frames.
 %
 % @arg Game_state The current state of the game
@@ -264,9 +264,11 @@ process_action(State, switch(Team_member), Result_state, Messages) :-
 process_action(State, _, State, []) :-
   % attacking pokemon has fainted before it could attack
   attacker_fainted(State). % active pokemon of attacker has fainted
-process_action(State, _, State, []) :-
-  % target pokemon has fainted before it could be attacked
-  target_fainted(State).
+%process_action(State, _, State, []) :-
+% NOTE: unnecessary clause as process_single_hit/6 already does nothing
+%       if there is no (unfainted) target
+%  % target pokemon has fainted before it could be attacked
+%  target_fainted(State).
 process_action(State, Move, Result_state, Messages) :-
   % (base case) action chosen: a move
   move(Move, _,_,_,_,_,_,_,_),
@@ -274,11 +276,11 @@ process_action(State, Move, Result_state, Messages) :-
 
 %! process_move_routine(+Attacker_state, +Move, -Result_state, -Message_collection)
 %
-% Processes a routine before move useage and then calle eventually the move procession.
+% Processes a routine before move usage and then calle eventually the move procession.
 %
-% The routine checks firstly for events preventing the move useage, like freeze or paralysis.
+% The routine checks firstly for events preventing the move usage, like freeze or paralysis.
 % If the move can be executed without the occurrence of such an event disrupting it,
-% process_move_useage/4 will be called.
+% process_move_usage/4 will be called.
 %
 % @arg Attacker_state The current state of the game from the attacker's point of view
 % @arg Move The move to be executed
@@ -294,7 +296,7 @@ process_move_routine(State, Move, Result_state, Messages) :-
   ;
     \+ member(Cond, [paralysis,sleep(_,_),freeze])
   ),!,
-  process_move_useage(State, Move, Result_state, Messages).
+  process_move_usage(State, Move, Result_state, Messages).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers paralysis
   attacking_pokemon(State,Pokemon),
@@ -304,7 +306,7 @@ process_move_routine(State, Move, Result_state, Messages) :-
     add_messages([paralyzed],[],Messages),
     State = Result_state
   ;
-    process_move_useage(State,Move,Result_state,Messages)
+    process_move_usage(State,Move,Result_state,Messages)
   ).
 process_move_routine(State, Move, Result_state, Messages) :-
   % case: pokemon suffers sleep
@@ -345,9 +347,9 @@ process_move_routine(State, Move, Result_state, Messages) :-
     add_messages([frozen],[],Messages)
   ).
 
-%! process_move_useage(+Attacker_state, +Move, -Result_state, -Message_collection)
+%! process_move_usage(+Attacker_state, +Move, -Result_state, -Message_collection)
 %
-% Processes the useage of a move.
+% Processes the usage of a move.
 %
 % Decides whether the move hits or not and returns the appropiate messages.
 %
@@ -357,7 +359,7 @@ process_move_routine(State, Move, Result_state, Messages) :-
 % @arg Move The move to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
-process_move_useage(State, Move, Result_state, Messages) :-
+process_move_usage(State, Move, Result_state, Messages) :-
   move(Move, _,_,acc(Accuracy),_,_,_,_,_), % get accuracy
   add_messages([move(Move)],[],Msg_uses), % message that this move is used
   % reduce pp

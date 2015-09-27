@@ -8,6 +8,8 @@
 - shift primary ailment infliction from pokemon_data_access to battle_processor
 - in move data base: drain value to fractions
 - set struggles max PP to 1
+- alter behavior of action procession if the target has fainted
+    - NOTE: This also has to be altered in the thesis
 
 ## Code
 - tidy up source code organization

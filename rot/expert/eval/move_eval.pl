@@ -90,7 +90,7 @@ rot_evaluate_move(Who, Move, Attacker, Target, List, Res_attacker, Res_target) :
 % Distinguishes between status moves and offensive moves, calling
 % rot_evaluate_status_move/7 or rot_evaluate_offensive_move/7 respectively.
 %
-% Also handles any events after the move useage that could lead to it failing its proper
+% Also handles any events after the move usage that could lead to it failing its proper
 % execution, like when the move misses or the target is protected.
 %
 % Furthermore the known move list of the player's pokemon will be adjusted using rot_evaluate_move_set/4
@@ -103,7 +103,7 @@ rot_evaluate_move(Who, Move, Attacker, Target, List, Res_attacker, Res_target) :
 % @arg Evaluated_attacker The evaluated data of the attacking pokemon
 % @arg Evaluated_defender The evaluated data of the defending pokemon
 rot_evaluate_move_execution(Who, Move, Attacker, Target, List, New_attacker, New_target) :-
-  rot_ask_message(move,[Move],List,Move_list), % pop move useage data
+  rot_ask_message(move,[Move],List,Move_list), % pop move usage data
   \+ rot_ask_message(move_missed,_,Move_list,_),% move may not have missed from here on
   \+ rot_ask_message(effectiveness,[none],Move_list,_),% move may not have any effect on the target
   !,

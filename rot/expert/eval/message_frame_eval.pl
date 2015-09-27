@@ -2,7 +2,7 @@
 %
 % Evaluates two message frames in respective order.
 %
-% If the frames are move useage frames the player's pokemon's speed stat get's
+% If the frames are move usage frames the player's pokemon's speed stat get's
 % properly adjusted.
 %
 % @arg Message_frame_first The first message frame to be evaluated
