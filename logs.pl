@@ -10,10 +10,10 @@
 % @arg Winner Either `rot` or `player`
 log_win(Who) :-
   rot(self_battle), % always log if Rot battles itself
-  rot(instance(rot,[Rot|_])), % algorithm instance #1
-  rot(instance(blau,[Blau|_])), % algorithm instance #2
+  rot(instance(rot,[Rot,Rot_rate|_])), % algorithm instance #1
+  rot(instance(blau,[Blau,Blau_rate|_])), % algorithm instance #2
   % create log file name
-  atomics_to_string(['logs/log',win,Blau,vs,Rot],'_',Logfile),
+  atomics_to_string(['logs/log',win,Blau,Blau_rate,vs,Rot,Rot_rate],'_',Logfile),
   % make sure logfile exists
   log_win_assure_existance(Logfile),
   log_win_write(Logfile,Who).

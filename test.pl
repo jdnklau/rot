@@ -46,16 +46,16 @@ test_battle :-
   start_battle(T,T).
 
 test_rot_battle :-
-  test_rot_battle(minmax_prediction, minmax).
-test_rot_battle(A1,A2) :-
+  test_rot_battle(minmax, simple, minmax, advanced).
+test_rot_battle(A1,R1,A2,R2) :-
   team_rot(T),
-  start_rot_battle(T,A1,T,A2).
+  start_rot_battle(T,A1,R1,T,A2,R2).
 
 test_rot_battle_small :-
-  test_rot_battle_small(minmax_prediction, minmax).
-test_rot_battle_small(A1,A2) :-
-  team_rot(T),
-  start_rot_battle(T,A1,T,A2).
+  test_rot_battle_small(minmax_prediction, simple, minmax, simple).
+test_rot_battle_small(A1,R1,A2,R2) :-
+  team_1(T),
+  start_rot_battle(T,A1,R1,T,A2,R2).
 
 test_save_state :-
   rot_clear,

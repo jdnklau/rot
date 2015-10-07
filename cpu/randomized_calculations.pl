@@ -7,11 +7,10 @@ rng_succeeds(always).
 rng_succeeds(100).
 rng_succeeds(P) :-
   % in rot's heuristic - probabilities above a certain threshold shall always succeed
-  rot(searching),
+  rot(searching),!,
   P > 50.
 rng_succeeds(P) :-
   % base case: normal battle probability check
-  \+ rot(searching),
   random(0, 101, R),
   R =< P.
 

@@ -51,9 +51,9 @@ rot_clear(I) :-
 % @see rot_create_instance/4
 rot_create_instance(I, Team_player, Team_rot) :-
   % NOTE: if the default algorithm gets changed, please note it in the PlDoc comment
-  rot_create_instance(I, minmax, Team_player, Team_rot).
+  rot_create_instance(I, minmax, simple, Team_player, Team_rot).
 
-%! rot_create_instance(+Identifier, +Search_algorithm, +Player_team_list, +Rot_team_data).
+%! rot_create_instance(+Identifier, +Search_algorithm, +Rating_algorithm, +Player_team_list, +Rot_team_data).
 %
 % Initializes a new instance of Rot's system.
 % This instance will be set as new active instance.
@@ -80,14 +80,15 @@ rot_create_instance(I, Team_player, Team_rot) :-
 %   5. *most important:* rot_get_game_state/1 to access the current state of the game as Rot thinks it is
 % @arg Identifier Identifies the created instance, allowing to access it easily
 % @arg Search_algorithm Atom to specify what algorithm should be used for Rot's tree search
+% @arg Rating_algorithm The rating algorithm to be used
 % @arg Player_team_list List of the opponent's pokemon's names
 % @arg Rot_team_data The team data of Rot's team
 % @see rot_init_team/1
 % @see rot_init_pokemon/1
 % @see rot_derive_pokemon/1
-rot_create_instance(I, Algo, Team_player, Team_rot) :-
+rot_create_instance(I, Algo, Rate, Team_player, Team_rot) :-
   rot_clear(I), % clear eventually remaining asserts
-  asserta(rot(instance(I, [Algo]))), % assert given instance as one of the instances created
+  asserta(rot(instance(I, [Algo,Rate]))), % assert given instance as one of the instances created
   rot_set_active_instance(I), % set new instance as active one
   rot_init_opponent(I,Team_player), % initialize team
   rot_derive_team(I,_), % assert derived data of all pokemon
