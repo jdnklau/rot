@@ -304,10 +304,10 @@ rot_flag_fainted_hp(player,Pokemon,Result) :-
 rot_evaluate_move_effects(_,[],A,T,_,A,T). % base case: no effects
 rot_evaluate_move_effects(Who, [E|Es], Attacker, Target, List, Result_attacker, Result_target) :-
   % evaluate effects one after another
-  rot_evaluate_move_single_effect(Who, E, Attacker, Target, List, New_attacker, New_target),
-  rot_evaluate_move_effects(Who, Es, New_attacker, New_target, List, Result_attacker, Result_target).
+  rot_evaluate_move_single_effect(Who, E, Attacker, Target, List, New_attacker, New_target, Rest_list),
+  rot_evaluate_move_effects(Who, Es, New_attacker, New_target, Rest_list, Result_attacker, Result_target).
 
-%! rot_evaluate_move_single_effect(+Player, +Effect, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Evaluated_attacker, -Evaluated_defender).
+%! rot_evaluate_move_single_effect(+Player, +Effect, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Evaluated_attacker, -Evaluated_defender, -Rest_list).
 %
 % Evaluates a specific move effect
 %
@@ -318,46 +318,50 @@ rot_evaluate_move_effects(Who, [E|Es], Attacker, Target, List, Result_attacker, 
 % @arg Message_list A list of messages, retrieved from the move corresponding message frame
 % @arg Evaluated_attacker The evaluated data of the attacking pokemon
 % @arg Evaluated_defender The evaluated data of the defending pokemon
-rot_evaluate_move_single_effect(_, ailment(A, _), User, Target, List, User, New_target) :-
+% @arg Rest_list The message list without the effect's messages
+rot_evaluate_move_single_effect(_, ailment(A, _), User, Target, List, User, New_target, Rest_list) :-
   % possible primary status condition
   member(A, [burn,freeze,paralysis,poison]),
-  member(target(ailment(A)),List),
+  rot_ask_message(target(ailment), [A], List, Rest_list),
   set_primary_status_condition(Target,A,New_target).
-rot_evaluate_move_single_effect(_, ailment(bad-poison, _), User, Target, List, User, New_target) :-
+rot_evaluate_move_single_effect(_, ailment(bad-poison, _), User, Target, List, User, New_target, Rest_list) :-
   % possible ailment: bad poison
-  member(target(ailment(bad-poison)),List),
+  rot_ask_message(target(ailment),[bad-poison],List,Rest_list),
   set_primary_status_condition(Target,poison(1),New_target).
-rot_evaluate_move_single_effect(_, ailment(sleep,_,_),User,Target,List,User,New_target) :-
+rot_evaluate_move_single_effect(_, ailment(sleep,_,_),User,Target,List,User,New_target, Rest_list) :-
   % possible sleep infliction
-  member(target(ailment(sleep)),List),
+  rot_ask_message(target(ailment), [sleep],List,Rest_list),
   set_primary_status_condition(Target,sleep(2,2),New_target). % TODO find good initial value
-rot_evaluate_move_single_effect(Who, stats(user,_,Data),User,Target,List,New_user,Target) :-
+rot_evaluate_move_single_effect(Who, stats(user,_,Data),User,Target,List,New_user,Target, Rest_list) :-
   % user's status value increases (probably)
-  rot_evaluate_move_status_increases(Who, Data, User, List, New_user).
-rot_evaluate_move_single_effect(Who, stats(target,_,Data),User,Target,List,User,New_target) :-
+  rot_evaluate_move_status_increases(Who, Data, User, List, New_user, Rest_list).
+rot_evaluate_move_single_effect(Who, stats(target,_,Data),User,Target,List,User,New_target, Rest_list) :-
   % target's status value increases (probably)
   opponent(Who,Not_who),
-  rot_evaluate_move_status_increases(Not_who, Data, Target, List, New_target).
-rot_evaluate_move_single_effect(Who, Recoil,User,Target,List,New_user,Target_fc) :-
+  rot_evaluate_move_status_increases(Not_who, Data, Target, List, New_target, Rest_list).
+rot_evaluate_move_single_effect(Who, Recoil,User,Target,List,User_fc,Target_fc, Rest_list) :-
   % recoil damage
   member(Recoil,[heal(_),drain(_)]),
   Recoil =.. [_,Value],
   Value < 0, % negative drain is recoil damage
-  append(_,[recoil,damaged(Hp_frame)|Fc_list],List), % damage was dealt
-  rot_evaluate_fainting(Who,User,Target,Fc_list,User_fc,Target_fc,_),
-  rot_evaluate_new_hp_frame(Who,Hp_frame,User_fc,New_user).
-rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target) :-
+  rot_ask_message(recoil, _, List, Recoiled_list),
+  rot_ask_message(damaged, [Hp_frame], Recoiled_list, F_list),
+  rot_evaluate_new_hp_frame(Who,Hp_frame,User,User_eval),
+  rot_evaluate_fainting(Who,User_eval,Target,F_list,User_fc,Target_fc, Rest_list).
+rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target, Rest_list) :-
   % drained life
   Value >= 0,
-  append(_,[drain,damaged(Hp_frame)|_],List), % damage was dealt
+  rot_ask_message(drain, _, List, Drained_list),
+  rot_ask_message(damaged, [Hp_frame], Drained_list, Rest_list),
   rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
-rot_evaluate_move_single_effect(Who, heal(Value),User,Target,List,New_user,Target) :-
+rot_evaluate_move_single_effect(Who, heal(Value),User,Target,List,New_user,Target, Rest_list) :-
   % healed life
   Value >= 0,
-  append(_,[heal,damaged(Hp_frame)|_],List), % damage was dealt
+  rot_ask_message(heal, _, List, Healed_list),
+  rot_ask_message(damaged, [Hp_frame], Healed_list, Rest_list),
   rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
 % ignored/not evaluated effect clause:
-rot_evaluate_move_single_effect(_,_,User,Target,_,User,Target).
+rot_evaluate_move_single_effect(_,_,User,Target,L,User,Target,L).
 
 %! rot_evaluate_new_hp_frame(+Player, +Hp_frame, +Pokemon, -Resulting_pokemon).
 %
@@ -385,7 +389,7 @@ rot_evaluate_new_hp_frame(player,kp(C,M),Pokemon,Res_pokemon) :-
   fd_dom(Hp_c,Cur_dom), % new current domain
   set_hp_frame(Pokemon,kp(Cur_dom,Max_dom),Res_pokemon).
 
-%! rot_evaluate_status_increases(+Player, +Increases, +Pokemon, +Message_list, -Result_pokemon).
+%! rot_evaluate_status_increases(+Player, +Increases, +Pokemon, +Message_list, -Result_pokemon, -Rest_list).
 %
 % Evaluates status value stage increases or decreases.
 %
@@ -403,24 +407,26 @@ rot_evaluate_new_hp_frame(player,kp(C,M),Pokemon,Res_pokemon) :-
 % @arg Pokemon The pokemon data to be altered
 % @arg Message_list A list of messages, retrieved from the move corresponding message frame
 % @arg Result_pokemon The altered pokemon data
-rot_evaluate_move_status_increases(_,[],P,_,P). % base case: nothing to iterate
-rot_evaluate_move_status_increases(Who, [(Stat,Value)|Is], P, List, Result_p) :-
+% @arg Rest_lost The message list without the status increases' messages
+rot_evaluate_move_status_increases(_,[],P,L,P,L). % base case: nothing to iterate
+rot_evaluate_move_status_increases(Who, [(Stat,Value)|Is], P, List, Result_p, Rest_list) :-
   % increase the given stat
   (
     % stat was altered
     (
       % no target frame
-      member(stat_stage(stat(Stat),value(Value)),List)
+      rot_ask_message(stat_stage, [stat(Stat),value(Value)],List, New_list)
     ;
       % target frame
-      member(target(stat_stage(stat(Stat),value(Value))),List)
+      rot_ask_message(target(stat_stage), [stat(Stat),value(Value)],List, New_list)
     ),
     increase_stat_stage(P, Stat, Value, New_p)
   ;
     % stat not altered
-    New_p = P
+    New_p = P,
+    New_list = List
   ),
-  rot_evaluate_move_status_increases(Who,Is,New_p,List,Result_p).
+  rot_evaluate_move_status_increases(Who,Is,New_p,New_list,Result_p,Rest_list).
 
 %! rot_evaluate_status_move(+Player, +Move, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Evaluated_attacker, -Evaluated_defender).
 %
