@@ -1,6 +1,6 @@
 rate_advanced(state(Player,Rot,_), (R_player, R_rot)) :-
   rate_adv(Player, Rot, R_player),
-  rate_adv(Rot, Player, R_rot).
+  rate_adv(Rot, Player, R_rot),!.
 
 rate_adv([Act|Team], [Act_opp|_], R) :-
   rate_adv_speed(Act,Act_opp, R_spe),

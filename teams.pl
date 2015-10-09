@@ -1,30 +1,30 @@
 team_1([P1,P2,P3]) :-
   set_up_pokemon(venusaur, _, chlorophyll,
     [earthquake, sludge-wave, energy-ball, toxic],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), noitem, P1),
+    ((0,31),(0,31),(0,31),(0,31),(0,31),(0,31)), noitem, P1),
   set_up_pokemon(charizard, _, solar-power,
     [flamethrower, air-slash, brave-bird, roost],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), noitem, P2),
+    ((0,31),(0,31),(0,31),(0,31),(0,31),(0,31)), noitem, P2),
   set_up_pokemon(blastoise, _, rain-dish,
     [scald, rapid-spin, aura-sphere, flash-cannon],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), noitem, P3).
+    ((0,31),(0,31),(0,31),(0,31),(0,31),(0,31)), noitem, P3).
 
 team_rot([P1, P2, P3, P4, P5, P6]) :-
   set_up_pokemon(pikachu, _, static,
     [volt-tackle, iron-tail, brick-break, fake-out],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), light-ball, P1),
+    ((6,31),(252,31),(0,31),(0,31),(0,31),(252,31)), light-ball, P1),
   set_up_pokemon(lapras, _, water-absorb,
     [hydro-pump, ice-beam, thunderbolt, ice-shard],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), sitrus-berry, P2),
+    ((252,31),(0,0),(6,31),(252,31),(0,31),(0,31)), sitrus-berry, P2),
   set_up_pokemon(snorlax, _, thick-fat,
     [body-slam, crunch, earthquake, seed-bomb],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), quick-claw, P3),
+    ((6,31),(252,31),(252,31),(0,31),(0,31),(0,31)), quick-claw, P3),
   set_up_pokemon(venusaur, _, overgrow,
     [leaf-storm, sleep-powder, sludge-bomb, earthquake],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), white-herb, P4),
+    ((6,31),(0,0),(0,31),(252,31),(252,31),(0,31)), white-herb, P4),
   set_up_pokemon(charizard, _, blaze,
     [fire-blast, air-slash, focus-blast, dragon-pulse],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), focus-sash, P5),
+    ((6,31),(0,0),(0,31),(252,31),(0,31),(252,31)), focus-sash, P5),
   set_up_pokemon(blastoise, _, torrent,
     [ice-beam, hydro-pump, blizzard, focus-blast],
-    ((0,0),(0,0),(0,0),(0,0),(0,0),(0,0)), choice-scarf, P6).
+    ((6,31),(0,0),(0,31),(252,31),(0,31),(252,31)), choice-scarf, P6).
