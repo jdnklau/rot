@@ -39,6 +39,11 @@ rot_ask_message(Ask, Value, [Message|Rest], Rest) :-
 % @arg Message_list A list of messages, retrieved from the move corresponding message frame
 % @arg Evaluated_attacker The evaluated data of the attacking pokemon
 % @arg Evaluated_defender The evaluated data of the defending pokemon
+rot_evaluate_move(Who, Move, Attacker, Target, List, UAttacker, Target) :-
+  % using moves against fainted pokemon has not to be evaluated, as they
+  % are not executed
+  fainted(Target),!,
+  rot_evaluate_move_set(Who, Move, Attacker, UAttacker).
 rot_evaluate_move(Who, Move, Attacker, Target, List, Res_attacker, Res_target) :-
   % check if the user sleeps
   primary_status_condition_category(Attacker, sleep),
@@ -333,13 +338,13 @@ rot_evaluate_move_single_effect(Who, stats(target,_,Data),User,Target,List,User,
   % target's status value increases (probably)
   opponent(Who,Not_who),
   rot_evaluate_move_status_increases(Not_who, Data, Target, List, New_target).
-rot_evaluate_move_single_effect(Who, Recoil,User,Target,Fc_list,New_user,Target_fc) :-
+rot_evaluate_move_single_effect(Who, Recoil,User,Target,List,New_user,Target_fc) :-
   % recoil damage
   member(Recoil,[heal(_),drain(_)]),
   Recoil =.. [_,Value],
   Value < 0, % negative drain is recoil damage
-  append(_,[recoil,damaged(Hp_frame)|_],List), % damage was dealt
-  rot_evaluate_fainting(Who,User,Target,List,User_fc,Target_fc,Fc_list),
+  append(_,[recoil,damaged(Hp_frame)|Fc_list],List), % damage was dealt
+  rot_evaluate_fainting(Who,User,Target,Fc_list,User_fc,Target_fc,_),
   rot_evaluate_new_hp_frame(Who,Hp_frame,User_fc,New_user).
 rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target) :-
   % drained life
