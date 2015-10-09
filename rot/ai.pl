@@ -19,8 +19,17 @@ rot_choose_action(State, Move) :-
 % @arg Game_state The current state of the game
 % @arg Action The action rot has choosen
 % @see read_rot_search/2
-rot_choose_switch(state(_, Team, _), Switch) :-
-  available_switches(Team, Available),
+%rot_choose_switch(state(Player, Rot, Field), Switch) :-
+%  \+ rot(switching),
+%  asserta(rot(switching)),
+%  available_switches(Rot, Available),
+%  create_tree(1,state(Player,Rot,Field),[],Available,Tree),
+%  search_tree(Tree, (_,Switch)),
+%  retractall(rot(switching)).
+rot_choose_switch(state(_, Rot, _), Switch) :-
+  % mitigate infinite looping
+%  rot(switching),
+  available_switches(Rot, Available),
   rot_choose_random(Available, Switch).
 
 %! rot_choose_random(+List, -Choice).

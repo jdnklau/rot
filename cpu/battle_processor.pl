@@ -63,6 +63,10 @@ process_message_frame_transmission(Frame1,Frame2) :-
   rot_transmit_message_frames(Frame1,Frame2),!.
 process_message_frame_transmission(F1,F2) :-
   % NOTE: This is only for debugging purposes
+  write('Oops. Something went horribly wrong :('),nl,
+  write('Please try to recover with the last save state.'),nl,
+  write('Otherwise, send the save-file to the developer of your choice,'),nl,
+  write('as he most certainly LOVES to help you out with that :)'),nl,
   write(F1),nl,
   write(F2),nl,
   abort.
@@ -258,6 +262,7 @@ process_actions(State, Action_first, Action_second, Who_first, Result_state) :-
 % @arg Action The action to be executed
 % @arg Result_state The resulting state of the game after executing the given action
 % @arg Message_collection Collection of messages occured whilst processing
+process_action(State, skip_turn, State, []). % turn gets skipped.
 process_action(State, switch(Team_member), Result_state, Messages) :-
   % action chosen: a switch
   process_switch(State, Team_member, Result_state, Messages). % process the switch

@@ -28,6 +28,30 @@ create_tree(Depth, State, tree(State, Nodes)) :-
   New_depth is Depth-1,
   create_nodes(New_depth, State, Nodes).
 
+%! create_tree(+Depth, +Initial_game_state, +Actions_player, +Actions_rot, -Tree).
+% Creates a search tree of given depth;
+% only allows the given actions in the first turn.
+%
+% Works exactly like create_tree/3,
+% but, instead of checking possible actions,
+% in the first turn only the given actions are allowed for
+% the corresponding player.
+%
+% @arg Depth Indicates how deep the tree should be build.
+% @arg Initial_game_state The current state of the game.
+% @arg Actions_player A list of actions the player may execute.
+% @arg Actions_rot A list of actions Rot may execute.
+% @arg Tree The resulting search tree.
+create_tree(Depth,State,[], [], tree(State,Nodes)) :-
+  create_nodes_acc([skip_turn], [skip_turn], Depth, State, Nodes, []).
+create_tree(Depth,State,[], Actions_rot, tree(State,Nodes)) :-
+  create_nodes_acc(Actions_rot, [skip_turn], Depth, State, Nodes, []).
+create_tree(Depth,State,Actions_player, [], tree(State,Nodes)) :-
+  create_nodes_acc([skip_turn], Actions_player, Depth, State, Nodes, []).
+create_tree(Depth,State,Actions_player, Actions_rot, tree(State,Nodes)) :-
+  create_nodes_acc(Actions_rot, Actions_player, Depth, State, Nodes, []).
+
+
 create_nodes(Depth, State, Nodes) :-
   State = state(Player, Rot, _),
   available_actions(Player, Actions_player),

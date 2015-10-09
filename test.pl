@@ -87,6 +87,14 @@ test_tree(D) :-
   retract(rot(searching)),
   write('tree created'),nl.
 
+test_skipped_tree :-
+  team_rot(T),
+  asserta(rot(searching)),
+  create_tree(2, state(T,T,[[],[],[]]), [], [switch(lapras), switch(snorlax)], _Tree),
+  retract(rot(searching)),
+  write('tree created'),nl.
+
+
 test_tree_search :-
   team_rot(T),
   write('tree depth: '),

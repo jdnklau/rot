@@ -19,6 +19,7 @@ calculate_priorities(state(Team_player, Team_rot, _), Action_player, Action_rot,
 % @arg Team The team of the player using the given action
 % @arg Action Either the action used by the active pokemon of the given team or a switch
 % @arg Priority_tuple A tuple containing information about the action priority and the user's speed
+calculate_priority(_,skip_turn,(-8,0)) :-!.
 calculate_priority([Lead|_], switch(_), (6,Speed)) :-
   % a switch ha a fixed priority of 6
   attacking_speed_stat(Lead, Speed).
