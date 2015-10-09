@@ -264,12 +264,24 @@ rot_evaluate_critical_move(Who,Move,Attacker,Target,List,Attacker,Target,critica
 rot_evaluate_fainting(Who,Attacker,Target,List,Attacker,Res_target,Res_list) :-
   % target fainted
   rot_ask_message(target(fainted),_,List,Res_list),!,
-  set_primary_status_condition(Target,fainted,Res_target).
+  opponent(Who,Not_who),
+  rot_flag_fainted(Not_who,Target,Res_target).
 rot_evaluate_fainting(Who,Attacker,Target,List,Res_attacker,Target,Res_list) :-
   % user fainted
   rot_ask_message(fainted,_,List,Res_list),!,
-  set_primary_status_condition(Attacker,fainted,Res_attacker).
+  rot_flag_fainted(Who,Attacker,Res_attacker).
 rot_evaluate_fainting(Who,Attacker,Target,List,Attacker,Target,List). % nobody fainted
+
+rot_flag_fainted(Who, Pokemon, Fainted_pkm) :-
+  rot_flag_fainted_hp(Who,Pokemon,Zero_hp_pkm),
+  set_primary_status_condition(Zero_hp_pkm, fainted, Fainted_pkm).
+
+rot_flag_fainted_hp(rot,Pokemon,Result) :-
+  hp_frame(Pokemon, kp(_,Max)),
+  set_hp_frame(Pokemon, kp(0,Max),Result).
+rot_flag_fainted_hp(player,Pokemon,Result) :-
+  hp_frame(Pokemon, kp(_,Max)),
+  set_hp_frame(Pokemon, kp(0..0,Max),Result).
 
 %! rot_evaluate_move_effects(+Player, +Effects, +Attacking_pokemon, +Defending_pokemon, +Message_list, -Evaluated_attacker, -Evaluated_defender).
 %
@@ -321,13 +333,14 @@ rot_evaluate_move_single_effect(Who, stats(target,_,Data),User,Target,List,User,
   % target's status value increases (probably)
   opponent(Who,Not_who),
   rot_evaluate_move_status_increases(Not_who, Data, Target, List, New_target).
-rot_evaluate_move_single_effect(Who, Recoil,User,Target,List,New_user,Target) :-
+rot_evaluate_move_single_effect(Who, Recoil,User,Target,Fc_list,New_user,Target_fc) :-
   % recoil damage
   member(Recoil,[heal(_),drain(_)]),
   Recoil =.. [_,Value],
   Value < 0, % negative drain is recoil damage
   append(_,[recoil,damaged(Hp_frame)|_],List), % damage was dealt
-  rot_evaluate_new_hp_frame(Who,Hp_frame,User,New_user).
+  rot_evaluate_fainting(Who,User,Target,List,User_fc,Target_fc,Fc_list),
+  rot_evaluate_new_hp_frame(Who,Hp_frame,User_fc,New_user).
 rot_evaluate_move_single_effect(Who, drain(Value),User,Target,List,New_user,Target) :-
   % drained life
   Value >= 0,
