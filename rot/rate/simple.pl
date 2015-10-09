@@ -6,6 +6,8 @@ rate(State,simple,R) :-
   rate_simple(State,R).
 rate(State,advanced,R) :-
   rate_advanced(State, R).
+rate(State,advanced2,R) :-
+  rate_advanced2(State, R).
 
 rate_simple(state(Player, Rot, _), (Rating_p, Rating_r)) :-
   rate_simple_team(Player, Rating_p),
