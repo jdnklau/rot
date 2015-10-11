@@ -41,8 +41,7 @@
     rot/search/minmax_prediction,
     rot/search/minmax_prediction2].
 :- [rot/rate/simple,
-    rot/rate/advanced,
-    rot/rate/advanced2].
+    rot/rate/advanced].
 
 %%%
 
