@@ -48,7 +48,7 @@
 start_battle(Team_player, Team_rot) :-
   team_list(Team_player, List_player),
   rot_clear, % clear all data of rot eventually still asserted
-  rot_create_instance(rot, List_player, Team_rot),
+  rot_create_instance(rot, minmax, advanced, List_player, Team_rot),
   State = state(Team_player, Team_rot, [[],[],[]]),
   ui_display_battle_start(Team_player, Team_rot),
   run_battle(State),
