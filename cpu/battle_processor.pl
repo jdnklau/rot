@@ -398,29 +398,11 @@ process_move_usage(State, Move, Result_state, Messages) :-
 % @arg Message_collection Collection of messages occured whilst processing
 process_move(State, Move, Result_state, Messages) :-
   % base case: damaging move
-  move(Move, _, Category, _, _,_,Flags,Possible_hits,Effects),
+  move(Move, _, Category, _, _,_,_,Possible_hits,_),
   Category =.. [_,_],
   State = state([Attacker|_],_,_),
   successful_hits(Attacker, Possible_hits, Hits),
-  calculate_damage(State, Move, Damage, E_tag, C_tag),
-  process_hits(State, Damage, Flags, Effects, Hits, Result_state, Msg_hits),
-  % set up messages
-  (
-    % crit
-    C_tag = critical(yes),
-    add_messages([C_tag],[],Msg_c1)
-    ;
-    Msg_c1 = [] % no crit, empty collection
-  ),
-  add_messages(Msg_hits, Msg_c1, Msg_c2),
-  (
-    % effectiveness
-    E_tag \= effectiveness(normal),
-    add_messages([E_tag], Msg_c2, Messages)
-    ;
-    % normal effective
-    Msg_c2 = Messages
-  ).
+  process_hits(State, Move, Hits, Result_state, Messages).
 process_move(State, Move, Result_state, Messages) :-
   % status move
   move(Move, _, status, _, _,_,Flags,_,Effects),
@@ -492,44 +474,59 @@ process_forced_switch(State_attacker, rot, Result_state_attacker, Messages) :-
 % For each consecutive hit process_single_hit/6 is called.
 %
 % @arg Attacker_state The current state of the game from attacker point of view
-% @arg Damage The damage to be done by each consecutive hit
-% @arg Flags Flags set for the move
-% @arg Effects Additional effects caused by the move, e.g. status conditions
+% @arg Move The move to be executed
 % @arg Quantity Number of hits to be done
 % @arg Result_state The resulting attacker state of the game after the hits
 % @arg Message_collection Collection of messages occured whilst processing
 % @see process_single_hit/6
 % @tbd Stop if one side has fainted
-process_hits(State, Damage, Flags, Effects, 1, Result_state, Messages) :-
+process_hits(State, Move, 1, Result_state, Messages) :-
   % one hit left
-  !, % do not ever backtrack to the second clause, as this will result in an infinite loop
-  process_single_hit(State, Damage, Flags, Effects, Result_state, Messages).
+  process_single_hit(State, Move, Result_state, Messages).
 process_hits(State, Damage, Flags, Effects, Hits, Result_state, Messages) :-
   % more than one hit left
-  process_single_hit(State, Damage, Flags, Effects, New_state, Messages1), % process a hit
+  Hits > 0,
+  process_single_hit(State,Move, New_state, Messages1), % process a hit
   Remaining_hits is Hits - 1,
-  process_hits(New_state, Damage, Flags, Effects, Remaining_hits, Result_state, Messages2), % process remaining hits
+  process_hits(New_state, Move, Remaining_hits, Result_state, Messages2), % process remaining hits
   add_messages(Messages1, Messages2, Messages). % add messages
 
-%! process_single_hit(+Attacker_state, +Damage, +Flags, +Effects, -Result_state, -Message_collection).
+%! process_single_hit(+Attacker_state, +Move, -Result_state, -Message_collection).
 %
 % Processes the given damage to the target of the attacker state and call routines
 % to handle possible effects caused by contact or the move itself
 %
 % @arg Attacker_state The current state of the game from attacker point of view
-% @arg Damage The damage to be done
-% @arg Flags Flags set for the move, e.g. contact
-% @arg Effects Additional effects caused by the move, e.g. status conditions
+% @arg Move The move to be executed
 % @arg Result_state The resulting attacker state of the game after the hit
 % @arg Message_collection Collection of messages occured whilst processing
-process_single_hit(State, Damage, Flags, Effects, Result_state, Messages) :-
+process_single_hit(State, Move, Result_state, Messages) :-
   \+ target_fainted(State), % there is a target to be damaged
+  calculate_damage(State, Move, Damage, E_tag, C_tag),
   process_damage(State, Damage, Damage_done, Damaged_state, Msg_damage),
+  % set up messages
+  (
+    % crit
+    C_tag = critical(yes),
+    add_messages([C_tag],[],Msg_c1)
+    ;
+    Msg_c1 = [] % no crit, empty collection
+  ),
+  add_messages(Msg_damage, Msg_c1, Msg_c2),
+  (
+    % effectiveness
+    E_tag \= effectiveness(normal),
+    add_messages([E_tag], Msg_c2, Msg_c3)
+    ;
+    % normal effective
+    Msg_c2 = Msg_c3
+  ),
+  move(Move,_,_,_,_,_,Flags,_,Effects),
   process_contact(Damaged_state, Flags, Contact_state, Msg_contact),
-  add_messages(Msg_contact, Msg_damage, Messages1), % add messages
+  add_messages(Msg_contact, Msg_c3, Messages1), % add messages
   process_move_effects(Contact_state, Flags, Effects, Damage_done, Result_state, Msg_effects),
   add_messages(Msg_effects, Messages1, Messages). % add messages
-process_single_hit(State, _, _, _, State, []) :- % no damage if targed has fainted
+process_single_hit(State, _, State, []) :- % no damage if targed has fainted
   target_fainted(State).
 
 %! process_damage(+Attacker_state, +Damage, -Damage_done, -Result_state, -Message_collection).
