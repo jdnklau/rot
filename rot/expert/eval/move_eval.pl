@@ -166,7 +166,7 @@ rot_evaluate_offensive_move(player, Move, Attacker, Target, List, Result_attacke
   % get damage done
   rot_ask_message(target(damaged),[kp(Cur,Max)],Dmg_list,Damaged_list), % new hp frame contained in message
   rot_evaluate_fainting(player,Attacker_crit,Target_crit,Damaged_list,Player_pkm,Rot_pkm,Effective_list), % note the renaming of Attacker/Target to Player_pkm/Rot_pkm.
-  (rot_ask_message(effectivenes,_,Effective_list,Effect_list);Effect_list=Effective_list),
+  (rot_ask_message(effectiveness,_,Effective_list,Effect_list);Effect_list=Effective_list),
   hp_frame(Rot_pkm, kp(Old_cur,_)), % get old hp value
   % set up damage domain
   (
@@ -191,7 +191,7 @@ rot_evaluate_offensive_move(rot, Move, Attacker, Target, List, Result_attacker, 
     % and do not use the real values contained in the message.
   rot_ask_message(target(damaged),[kp(Cur,Max)],Dmg_list,Damaged_list), % new hp frame contained in message
   rot_evaluate_fainting(rot,Attacker_crit,Target_crit,Damaged_list,Rot_pkm,Player_pkm,Effective_list), % note the renaming of Attacker/Target to Rot_pkm/Player_pkm.
-  (rot_ask_message(effectivenes,_,Effective_list,Effect_list);Effect_list=Effective_list),
+  (rot_ask_message(effectiveness,_,Effective_list,Effect_list);Effect_list=Effective_list),
   (
     % if the player's pokemon fainted by our move, we don't care to evaluate it's stats any further
     fainted(Player_pkm),
