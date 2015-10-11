@@ -92,7 +92,8 @@ rot_create_instance(I, Algo, Rate, Team_player, Team_rot) :-
   rot_set_active_instance(I), % set new instance as active one
   rot_init_opponent(I,Team_player), % initialize team
   rot_derive_team(I,_), % assert derived data of all pokemon
-  rot_init_self(I,Team_rot). % assert own team data
+  rot_init_self(I,Team_rot), % assert own team data
+  asserta(rot(I, last_actions(skip_turn, skip_turn, skip_turn, skip_turn, skip_turn, skip_turn))).
 
 %! rot_set_active_instance(+Instance).
 % Sets the active instance of Rot.
