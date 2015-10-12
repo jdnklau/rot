@@ -1,8 +1,20 @@
 # To run the program
 1. load main.pl in your prolog environment
   - the code is only tested in SWI-Prolog 7.2.2
-2. query the goal `test_battle`
-  - this starts a test run with a preset team used by both players
+2. to start a battle query
+  - `battle` to start a battle with a pre-set team against Rot
+      - Rot uses Minimax and the first heuristic
+      - `battle(Algorithm, Heuristic)` does the same with a search algorithm
+        and a Heuristic of your choice
+          - `minmax` is the basic Minimax
+          - `minmax_prediction` is Prediction Minimax
+          - the heuristics are `simple` (first heuristic),
+            `advanced` (second), and `advantage` (third)
+  - `rot_battle` to let Rot battle itself
+      - both instances use Minimax and the first heuristic by default
+      - `battle(Algorithm_1, Heuristic_1, Algorithm_2, Heuristic_2)`
+        allows to pick the algorithm and heuristic for each instance
+        individually
 
 ## To create the documentation
 1. load main.pl in your Prolog environment
@@ -10,86 +22,19 @@
 3. after pldoc.pl is loaded query `doc`
 4. The documentation should be in your doc/ directory
 
-Keep in mind that this could change, as it is still in development
-
-# Test Queries
-As there currently is no API worth mentioning (see below: _State of implementation - API_) everything is run by certain test calls.
-
-- `test_ui/0`
-  - displays the user interface and displays Rot's and the player's teams with their active pokemon
-  - this tests:
-      - interface display in general
-      - setup predicates for pokemon data
-  - there are individual tests for either Rot's or the player's team on their own:
-      - `test_ui_rot/0`
-      - `test_ui_player/0`
-- `test_battle/0`
-  - sets up a battle between Rot and the player
-  - uses a generic team of 6 pokemon used by both sides
-      - Pikachu, Snorlax, Lapras, Venusaur, Charizard, Blastoise
-      - this is Rot's team in *Pokemon Black 2 Edition* and *Pokemon White 2 Edition*
-          - few moves (but no more than 3 of all 24) are not the same as in those games mentioned
-  - Each turn the game state will be saved to the file _save_ in the root directory of Rot
-  - **this is currently the only way to actually test the AI in action**
-  - `test_battle_small/0` does the same but with a team of only 3 pokemon on each side
-      - Venusaur, Charizard, Blastoise
-- `test_rot_battle/0`
-  - the same as `test_battle/0` but - instead of having the user as one of the players and prompting him for actions - Rot battles itself completely
-  - there is a `test_rot_battle_small/0`
-      - it is to `test_battle_small/0` as `test_rot_battle/0` is to `test_battle/0`
-  - `test_rot_battle/2`
-      - takes two algorithm names as arguments and lets the two Rot instances each use one of them.
-- `test_save_state/0`
-  - loads the saved game state from the save file (see above at `test_battle/0`)
-  - runs the battle continuing this particular game state
-- `test_available_actions/0`
-  - displays a list of available actions to a certain team
-      - the team used is the small team mentioned above at `test_battle/0`-`test_battle_small`
-      - actions are switches to other pokemon in the team (not the active one, not fainted ones) or moves usable by the active pokemon
-  - implementation may change in the future as PP usage, trapping pokemon, and various other not yet implemented factors could alter the available actions and need to be tested then
-- `test_tree/0`
-  - tests the creation of the search tree
-  - prompts for a tree depth to create
-      - tree depth is how many turns are planned ahead in the search tree
-      - calling `test_tree/1` does the same, but the 1st argument already is the tree depth
-  - **known problems**
-      - (SWI) Prolog can not handle a fully created (means no pruned options) search tree of depth 3 or higher
-- `test_tree_search/0`
-  - prompts for a tree depth `D`
-  - creates a search tree of the given depth `D`
-  - searches the tree for the best moves by the player and Rot
-      - output is `expected:(Player_action,Rot_action)`
-- `test_evolutions/0`
-  - tests if all pokemon mentioned in `database/evolutions.pl` by the `evolves_to/2` predicate actually are pokemon in the database
-- `test_pokemon_name/1`
-  - tests if a given pokemon name (1st argument) can be matched with a pokemon from the database
-  - writes to console if a name is unknown
-
-
 
 # About Rot
 *Rot* is a portmanteau of *red* and *bot*.
 
-Red stands for the main protagonist of the first generation of core game series of pokemon, namely Pokemon Red Edition and Pokemon Blue Edition. In those games the player plays Red, a 10 year old boy travelling through all the land to become the leading pokemon champion.
+Red stands for the main protagonist of the first Generation of core game series of Pokemon, namely Pokemon Red Edition and Pokemon Blue Edition. In those games the player plays Red, a 10 year old boy travelling through all the land to become the leading Pokemon champion.
 
 Bot is a commonly used short for (software) robot, indicating that the AI of Rot indeed chooses its actions by itself and without external input but the current game state.
 
-Additionally is *rot* the German word for *red*, thus further implying that Rot is indeed meant to be a software version of Red from the core game series.
 
 # State of implementation
 
-## API
-Currently there is no user API despite the `test_battle` predicate. In the future this is about to change as the following things are planned:
-- a team creator
-  - create, save and edit your own teams to play with
-  - team testing (maybe)  
-      - Rot battles himself with a given team of yours repeatedly and gives you a quick rating of your team
-- choose a team to battle Rot with
-  - there shall be a predicate to challenge Rot other as `test_battle`
-  - before the battle begins the user may choose one of his saved teams to play with
-
 ## Battle Engine
-- available actions are either the active pokemon's moves or switches to its team mates
+- available actions are either the active Pokemon's moves or switches to its team mates
 - the following move effects are fully implemented:
   - physical and special move damage
   - moves inflicting primary status conditions
@@ -103,6 +48,7 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
       - recoil effects inflict damage to the user based on a percentage of the damage done
 - not implemented (yet):
     - unique move effects
+    - multi-strike moves
     - charging or recharging of moves
     - _flinch_, _charm_, _confusion_ and other secondary status conditions
     - abilities
@@ -112,10 +58,10 @@ Currently there is no user API despite the `test_battle` predicate. In the futur
 
 ## Rot's AI
 - uses a search tree of depth 2, thus planing two turns ahead
-- if forced to switch out a pokemon, Rot currently chooses randomly - to be changed
+- if forced to switch out a Pokemon, Rot currently chooses randomly
 - Rot continuously learns about your team
-    - first it sets up very generic data that could unify with every possible set for each pokemon
+    - first it sets up very generic data that could unify with every possible set for each Pokemon
     - the data gets updated whilst battling
-        - damage done by moves is used to get more information  about the ev/dv split of the pokemon
+        - damage done by moves is used to get more information  about the ev/dv split of the Pokemon
     - instead of the real game state Rot creates its own, assumed game state
         - this game state is used for Rots search tree
