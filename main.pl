@@ -46,14 +46,33 @@
 
 %%%
 
+battle :-
+  battle(minmax, simple).
+
+battle(Algo, Heuristic) :-
+  team_rot(T),
+  start_battle(T,T,Algo,Heuristic),!.
+
+
 start_battle(Team_player, Team_rot) :-
+  start_battle(Team_player, Team_rot, minmax, simple).
+
+start_battle(Team_player, Team_rot, Algorithm, Heuristic) :-
   team_list(Team_player, List_player),
   rot_clear, % clear all data of rot eventually still asserted
-  rot_create_instance(rot, minmax, advanced, List_player, Team_rot),
+  rot_create_instance(rot, Algorithm, Heuristic, List_player, Team_rot),
   State = state(Team_player, Team_rot, [[],[],[]]),
   ui_display_battle_start(Team_player, Team_rot),
   run_battle(State),
   rot_clear, !.
+
+
+rot_battle :-
+  rot_battle(minmax,simple,minmax,simple).
+rot_battle(A1,H1,A2,H2) :-
+  team_rot(T),
+  start_rot_battle(T,A1,H1,T,A2,H2).
+
 
 start_rot_battle(Team_blau, Team_rot) :-
   start_rot_battle(Team_blau, minmax, simple, Team_rot, minmax, simple).

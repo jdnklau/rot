@@ -19,13 +19,13 @@ rate_adv_ailment_factor(P, F) :-
     Atk > Spa,!,
     F is 0.4
   ;
-    F is 0.7
+    F is 0.8
   ).
 rate_adv_ailment_factor(P, 0.1) :-
   primary_status_condition_category(P, freeze).
 rate_adv_ailment_factor(P, 0.2) :-
   primary_status_condition_category(P, sleep).
-rate_adv_ailment_factor(_, 1). % emergency case
+rate_adv_ailment_factor(_, 0.8). % other
 
 rate_adv_team(Team, R) :-
   rate_adv_team_acc(Team,0,R).
